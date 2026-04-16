@@ -1,0 +1,28 @@
+# Environnement
+.env
+.env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Fichiers temporaires Office
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Fichiers exemple et préparation des données exportées et scripts python de préparation
+cave_clean.csv
+cave.xlsx
+stock.csv
+historique.csv
+clean_stock_archive.py
+
+# Apprentissage / preparation du projet
+discussion_prealable.docx
