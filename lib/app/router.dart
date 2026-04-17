@@ -4,9 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/config_service.dart';
-import '../features/home/home_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
 import '../features/setup/setup_screen.dart';
+import '../features/stock/stock_screen.dart';
+import '../shared/adaptive_layout.dart';
 
 GoRouter buildRouter(VoidCallback onSetupComplete) {
   return GoRouter(
@@ -25,13 +26,22 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
           onComplete: (_) => onSetupComplete(),
         ),
       ),
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const HomeScreen(),
-      ),
-      GoRoute(
-        path: '/import-csv',
-        builder: (context, state) => const ImportCsvScreen(),
+      ShellRoute(
+        builder: (context, state, child) {
+          final location = state.matchedLocation;
+          final index = location == '/import-csv' ? 1 : 0;
+          return AppShell(selectedIndex: index, child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const StockScreen(),
+          ),
+          GoRoute(
+            path: '/import-csv',
+            builder: (context, state) => const ImportCsvScreen(),
+          ),
+        ],
       ),
     ],
   );

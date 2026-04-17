@@ -3,7 +3,6 @@
 
 import 'package:drift/drift.dart';
 import '../database.dart';
-import '../tables/bouteilles.dart';
 
 class BouteilleDao {
   final AppDatabase _db;
@@ -18,6 +17,93 @@ class BouteilleDao {
             (b) => OrderingTerm.asc(b.millesime),
           ]))
         .watch();
+  }
+
+  Stream<List<Bouteille>> watchStockFiltered({
+    String? couleur,
+    String? appellation,
+    int? millesime,
+    String? texte,
+  }) {
+    return (_db.select(_db.bouteilles)
+          ..where((b) {
+            var cond = b.dateSortie.isNull() | b.dateSortie.equals('');
+            if (couleur != null) cond = cond & b.couleur.equals(couleur);
+            if (appellation != null) {
+              cond = cond & b.appellation.equals(appellation);
+            }
+            if (millesime != null) cond = cond & b.millesime.equals(millesime);
+            if (texte != null && texte.isNotEmpty) {
+              final t = texte.toLowerCase();
+              cond = cond &
+                  (b.domaine.lower().like('%$t%') |
+                      b.appellation.lower().like('%$t%') |
+                      b.millesime.cast<String>().like('%$t%'));
+            }
+            return cond;
+          })
+          ..orderBy([
+            (b) => OrderingTerm.asc(b.domaine),
+            (b) => OrderingTerm.asc(b.millesime),
+          ]))
+        .watch();
+  }
+
+  Future<List<String>> getDistinctCouleurs() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.couleur])
+      ..where(
+        _db.bouteilles.dateSortie.isNull() |
+            _db.bouteilles.dateSortie.equals(''),
+      )
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.couleur)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.couleur) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getDistinctAppellations({String? couleur}) async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.appellation])
+      ..where(
+        _db.bouteilles.dateSortie.isNull() |
+            _db.bouteilles.dateSortie.equals(''),
+      );
+    if (couleur != null) {
+      query.where(_db.bouteilles.couleur.equals(couleur));
+    }
+    query.orderBy([OrderingTerm.asc(_db.bouteilles.appellation)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.appellation) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<int>> getDistinctMillesimes({
+    String? couleur,
+    String? appellation,
+  }) async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.millesime])
+      ..where(
+        _db.bouteilles.dateSortie.isNull() |
+            _db.bouteilles.dateSortie.equals(''),
+      );
+    if (couleur != null) {
+      query.where(_db.bouteilles.couleur.equals(couleur));
+    }
+    if (appellation != null) {
+      query.where(_db.bouteilles.appellation.equals(appellation));
+    }
+    query.orderBy([OrderingTerm.desc(_db.bouteilles.millesime)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.millesime) ?? 0)
+        .where((v) => v > 0)
+        .toList();
   }
 
   Future<void> insertBouteille(BouteillesCompanion bouteille) {

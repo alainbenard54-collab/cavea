@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
+import '../stock/stock_controller.dart';
 import 'csv_parser.dart';
 import 'import_service.dart';
 
@@ -63,6 +64,12 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
         _result = result;
         _importing = false;
       });
+      if (result.inserted > 0 || result.updated > 0) {
+        ref.invalidate(couleursProvider);
+        ref.invalidate(appellationsProvider);
+        ref.invalidate(millesimesProvider);
+        ref.read(stockFilterProvider.notifier).reset();
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Erreur lors de la lecture du fichier : $e';
