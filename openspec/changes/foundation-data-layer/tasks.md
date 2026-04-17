@@ -31,7 +31,7 @@
 - [x] 6.1 Créer `lib/app/router.dart` : go_router avec routes `/setup` et `/` (écran principal placeholder), redirection initiale selon `ConfigService.isConfigured` — PC + Android
 - [x] 6.2 Créer `lib/app/theme.dart` : Material 3 theme minimal (couleurs neutres, pas de personnalisation avancée) — PC + Android
 - [x] 6.3 Mettre à jour `lib/main.dart` : `ProviderScope`, chargement `ConfigService` avant `runApp`, `CaveApp` avec `MaterialApp.router` — PC + Android
-- [ ] 6.4 Lancer `flutter run -d windows` et vérifier que le wizard s'affiche au premier lancement, que la config est persistée, et que les relances suivantes vont directement à l'écran principal — PC uniquement
+- [x] 6.4 Lancer `flutter run -d windows` et vérifier que le wizard s'affiche au premier lancement, que la config est persistée, et que les relances suivantes vont directement à l'écran principal — PC uniquement
 
 ## 7. Feature import CSV
 
@@ -39,4 +39,4 @@
 - [x] 7.2 Créer `lib/features/import_csv/import_service.dart` : `ImportService.run(List<BouteilleCompanion>, {bool overwrite}) → ImportResult` — logique insert/update/skip selon UUID + flag overwrite, retourne compteurs — PC + Android
 - [x] 7.3 Créer `lib/features/import_csv/import_csv_screen.dart` : bouton "Choisir un fichier CSV" (file_picker filtré `.csv`), case à cocher "Écraser les existants", bouton "Importer", affichage du rapport (X insérées · Y mises à jour · Z ignorées · W erreurs) — PC + Android
 - [x] 7.4 Ajouter la route `/import-csv` dans `router.dart` et un bouton d'accès depuis l'écran principal placeholder — PC + Android
-- [ ] 7.5 Tester l'import de `cave_clean.csv` (828 lignes) : vérifier le rapport et l'absence de doublon sur un second import avec case "écraser" décochée — PC uniquement
+- [x] 7.5 Tester l'import de `cave_clean.csv` (828 lignes) : vérifier le rapport et l'absence de doublon sur un second import avec case "écraser" décochée — PC uniquement

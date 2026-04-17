@@ -2,19 +2,21 @@
 // Copyright 2026 Alain Benard
 
 import '../../data/daos/bouteille_dao.dart';
-import '../../data/tables/bouteilles.dart';
+import '../../data/database.dart';
 
 class ImportResult {
   final int inserted;
   final int updated;
   final int skipped;
   final int errors;
+  final List<String> errorDetails;
 
   const ImportResult({
     required this.inserted,
     required this.updated,
     required this.skipped,
     required this.errors,
+    this.errorDetails = const [],
   });
 
   @override
@@ -30,12 +32,12 @@ class ImportService {
   Future<ImportResult> run(
     List<BouteillesCompanion> companions, {
     bool overwrite = false,
-    int parseErrors = 0,
+    List<String> parseErrorDetails = const [],
   }) async {
     var inserted = 0;
     var updated = 0;
     var skipped = 0;
-    var errors = parseErrors;
+    final allErrors = List<String>.from(parseErrorDetails);
 
     for (final companion in companions) {
       try {
@@ -51,8 +53,8 @@ class ImportService {
         } else {
           skipped++;
         }
-      } catch (_) {
-        errors++;
+      } catch (e) {
+        allErrors.add('UUID ${companion.id.value} : $e');
       }
     }
 
@@ -60,7 +62,8 @@ class ImportService {
       inserted: inserted,
       updated: updated,
       skipped: skipped,
-      errors: errors,
+      errors: allErrors.length,
+      errorDetails: allErrors,
     );
   }
 }

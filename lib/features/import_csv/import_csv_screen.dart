@@ -51,10 +51,13 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
       final parsed = parseCsv(content);
       final dao = ref.read(bouteillesDaoProvider);
       final service = ImportService(dao);
+      final parseErrorDetails = parsed.errors
+          .map((e) => 'Ligne ${e.lineNumber} — ${e.reason} : ${e.rawLine}')
+          .toList();
       final result = await service.run(
         parsed.companions,
         overwrite: _overwrite,
-        parseErrors: parsed.errorCount,
+        parseErrorDetails: parseErrorDetails,
       );
       setState(() {
         _result = result;
@@ -149,10 +152,16 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
   }
 }
 
-class _ResultCard extends StatelessWidget {
+class _ResultCard extends StatefulWidget {
   final ImportResult result;
-
   const _ResultCard({required this.result});
+
+  @override
+  State<_ResultCard> createState() => _ResultCardState();
+}
+
+class _ResultCardState extends State<_ResultCard> {
+  bool _showErrors = false;
 
   @override
   Widget build(BuildContext context) {
@@ -162,35 +171,55 @@ class _ResultCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Import terminé',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Import terminé',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
-            _Stat(
-              icon: Icons.add_circle_outline,
-              label: 'Insérées',
-              value: result.inserted,
-              color: Colors.green,
-            ),
-            _Stat(
-              icon: Icons.edit_outlined,
-              label: 'Mises à jour',
-              value: result.updated,
-              color: Colors.blue,
-            ),
-            _Stat(
-              icon: Icons.remove_circle_outline,
-              label: 'Ignorées',
-              value: result.skipped,
-              color: Colors.grey,
-            ),
-            _Stat(
-              icon: Icons.error_outline,
-              label: 'Erreurs',
-              value: result.errors,
-              color: Colors.red,
-            ),
+            _Stat(icon: Icons.add_circle_outline, label: 'Insérées',
+                value: widget.result.inserted, color: Colors.green),
+            _Stat(icon: Icons.edit_outlined, label: 'Mises à jour',
+                value: widget.result.updated, color: Colors.blue),
+            _Stat(icon: Icons.remove_circle_outline, label: 'Ignorées',
+                value: widget.result.skipped, color: Colors.grey),
+            _Stat(icon: Icons.error_outline, label: 'Erreurs',
+                value: widget.result.errors, color: Colors.red),
+            if (widget.result.errorDetails.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => setState(() => _showErrors = !_showErrors),
+                child: Row(children: [
+                  Icon(_showErrors ? Icons.expand_less : Icons.expand_more,
+                      size: 18, color: Colors.red),
+                  const SizedBox(width: 4),
+                  Text(_showErrors ? 'Masquer le détail' : 'Voir le détail des erreurs',
+                      style: const TextStyle(color: Colors.red, fontSize: 13)),
+                ]),
+              ),
+              if (_showErrors) ...[
+                const SizedBox(height: 8),
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: SelectionArea(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(8),
+                      itemCount: widget.result.errorDetails.length,
+                      itemBuilder: (context, i) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text(
+                          widget.result.errorDetails[i],
+                          style: const TextStyle(
+                              fontSize: 12, fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ],
         ),
       ),

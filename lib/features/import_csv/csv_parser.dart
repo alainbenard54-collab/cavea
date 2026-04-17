@@ -3,22 +3,34 @@
 
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
-import '../../data/tables/bouteilles.dart';
+import '../../data/database.dart';
 
 const _uuid = Uuid();
 
+class ParseError {
+  final int lineNumber;
+  final String reason;
+  final String rawLine;
+  const ParseError({
+    required this.lineNumber,
+    required this.reason,
+    required this.rawLine,
+  });
+}
+
 class ParseResult {
   final List<BouteillesCompanion> companions;
-  final int errorCount;
+  final List<ParseError> errors;
+  int get errorCount => errors.length;
 
-  const ParseResult({required this.companions, required this.errorCount});
+  const ParseResult({required this.companions, required this.errors});
 }
 
 ParseResult parseCsv(String content) {
-  final lines = content.split('\n');
-  if (lines.isEmpty) return const ParseResult(companions: [], errorCount: 0);
+  // Normalise les fins de ligne Windows/Unix
+  final lines = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
+  if (lines.isEmpty) return const ParseResult(companions: [], errors: []);
 
-  // Lire les en-têtes (1ère ligne)
   final headers = lines.first
       .trim()
       .split(';')
@@ -26,70 +38,103 @@ ParseResult parseCsv(String content) {
       .toList();
 
   final companions = <BouteillesCompanion>[];
-  var errorCount = 0;
+  final errors = <ParseError>[];
 
-  for (final rawLine in lines.skip(1)) {
-    final line = rawLine.trim();
+  for (var i = 1; i < lines.length; i++) {
+    final line = lines[i].trim();
     if (line.isEmpty) continue;
 
     try {
-      final values = line.split(';');
+      final values = _splitLine(line);
       final row = <String, String>{};
-      for (var i = 0; i < headers.length && i < values.length; i++) {
-        row[headers[i]] = values[i].trim();
+      for (var j = 0; j < headers.length && j < values.length; j++) {
+        row[headers[j]] = values[j].trim();
       }
 
-      final companion = _rowToCompanion(row);
+      final (companion, reason) = _rowToCompanion(row);
       if (companion != null) {
         companions.add(companion);
       } else {
-        errorCount++;
+        errors.add(ParseError(
+          lineNumber: i + 1,
+          reason: reason ?? 'Champ obligatoire manquant',
+          rawLine: line.length > 80 ? '${line.substring(0, 80)}…' : line,
+        ));
       }
-    } catch (_) {
-      errorCount++;
+    } catch (e) {
+      errors.add(ParseError(
+        lineNumber: i + 1,
+        reason: 'Exception : $e',
+        rawLine: line.length > 80 ? '${line.substring(0, 80)}…' : line,
+      ));
     }
   }
 
-  return ParseResult(companions: companions, errorCount: errorCount);
+  return ParseResult(companions: companions, errors: errors);
 }
 
-BouteillesCompanion? _rowToCompanion(Map<String, String> row) {
-  // Champs obligatoires
+// Respecte les champs entre guillemets contenant des ";"
+List<String> _splitLine(String line) {
+  final result = <String>[];
+  final current = StringBuffer();
+  var inQuotes = false;
+
+  for (var i = 0; i < line.length; i++) {
+    final char = line[i];
+    if (char == '"') {
+      inQuotes = !inQuotes;
+    } else if (char == ';' && !inQuotes) {
+      result.add(current.toString());
+      current.clear();
+    } else {
+      current.write(char);
+    }
+  }
+  result.add(current.toString());
+  return result;
+}
+
+(BouteillesCompanion?, String?) _rowToCompanion(Map<String, String> row) {
   final domaine = row['domaine'];
+  if (domaine == null || domaine.isEmpty) return (null, 'domaine vide');
+
   final appellation = row['appellation'];
-  final millesimeStr = row['millesime'];
+  if (appellation == null || appellation.isEmpty) return (null, 'appellation vide');
+
+  final millesimeStr = row['millesime'] ?? '';
+  final millesime = int.tryParse(millesimeStr);
+  if (millesime == null) return (null, 'millesime invalide : "$millesimeStr"');
+
   final couleur = row['couleur'];
+  if (couleur == null || couleur.isEmpty) return (null, 'couleur vide');
 
-  if (domaine == null || domaine.isEmpty) return null;
-  if (appellation == null || appellation.isEmpty) return null;
-  final millesime = int.tryParse(millesimeStr ?? '');
-  if (millesime == null) return null;
-  if (couleur == null || couleur.isEmpty) return null;
+  final rawId = row['id']?.trim() ?? '';
+  final id = rawId.isEmpty ? _uuid.v4() : rawId;
 
-  final id =
-      (row['id']?.isEmpty ?? true) ? _uuid.v4() : row['id']!;
-
-  return BouteillesCompanion(
-    id: Value(id),
-    domaine: Value(domaine),
-    appellation: Value(appellation),
-    millesime: Value(millesime),
-    couleur: Value(couleur),
-    cru: Value(_nullIfEmpty(row['cru'])),
-    contenance: Value(row['contenance'] ?? ''),
-    emplacement: Value(row['emplacement'] ?? ''),
-    dateEntree: Value(row['date_entree'] ?? ''),
-    dateSortie: Value(_nullIfEmpty(row['date_sortie'])),
-    prixAchat: Value(_parseReal(row['prix_achat'])),
-    gardeMin: Value(int.tryParse(row['garde_min'] ?? '')),
-    gardeMax: Value(int.tryParse(row['garde_max'] ?? '')),
-    commentaireEntree: Value(_nullIfEmpty(row['commentaire_entree'])),
-    noteDegus: Value(_parseReal(row['note_degus'])),
-    commentaireDegus: Value(_nullIfEmpty(row['commentaire_degus'])),
-    fournisseurNom: Value(_nullIfEmpty(row['fournisseur_nom'])),
-    fournisseurInfos: Value(_nullIfEmpty(row['fournisseur_infos'])),
-    producteur: Value(_nullIfEmpty(row['producteur'])),
-    updatedAt: Value(DateTime.now().toIso8601String()),
+  return (
+    BouteillesCompanion(
+      id: Value(id),
+      domaine: Value(domaine),
+      appellation: Value(appellation),
+      millesime: Value(millesime),
+      couleur: Value(couleur),
+      cru: Value(_nullIfEmpty(row['cru'])),
+      contenance: Value(row['contenance'] ?? ''),
+      emplacement: Value(row['emplacement'] ?? ''),
+      dateEntree: Value(row['date_entree'] ?? ''),
+      dateSortie: Value(_nullIfEmpty(row['date_sortie'])),
+      prixAchat: Value(_parseReal(row['prix_achat'])),
+      gardeMin: Value(int.tryParse(row['garde_min'] ?? '')),
+      gardeMax: Value(int.tryParse(row['garde_max'] ?? '')),
+      commentaireEntree: Value(_nullIfEmpty(row['commentaire_entree'])),
+      noteDegus: Value(_parseReal(row['note_degus'])),
+      commentaireDegus: Value(_nullIfEmpty(row['commentaire_degus'])),
+      fournisseurNom: Value(_nullIfEmpty(row['fournisseur_nom'])),
+      fournisseurInfos: Value(_nullIfEmpty(row['fournisseur_infos'])),
+      producteur: Value(_nullIfEmpty(row['producteur'])),
+      updatedAt: Value(DateTime.now().toIso8601String()),
+    ),
+    null
   );
 }
 
