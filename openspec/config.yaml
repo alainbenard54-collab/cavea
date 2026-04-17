@@ -1,0 +1,53 @@
+schema: spec-driven
+
+context: |
+  Application Flutter de gestion de cave à vin personnelle.
+  Un seul codebase compilé pour Windows desktop (cible principale) et Android (mobile).
+  Pas de backend serveur, pas d'hébergement cloud — les données vivent dans un fichier
+  SQLite local (cave.db), optionnellement partagé via une API cloud (Google Drive ou Dropbox).
+
+  Tech stack :
+  - Framework : Flutter 3 (Dart)
+  - Base de données : drift (ORM SQLite, migrations déclaratives, streams réactifs)
+  - State management : Riverpod
+  - Navigation : go_router (routes déclaratives desktop + mobile)
+  - UI : Material 3 (NavigationRail ≥600px / BottomNavigationBar <600px)
+
+  Modes de déploiement :
+  - Mode 1 (PC seul) : dart:io direct sur cave.db, aucune sync, aucun StorageAdapter
+  - Mode 2 (PC + Android) : sync manuelle via API cloud, StorageAdapter abstrait
+  - Mode 3 (mobile seul) : futur, hors MVP
+
+  Règles métier critiques :
+  - 1 ligne = 1 bouteille physique
+  - date_sortie vide = en stock ; renseignée = consommée
+  - Déplacer ≠ sortir (changer emplacement, pas date_sortie)
+  - Maturité calculée à la volée : millesime + garde_min/max vs DateTime.now().year
+  - Couleurs maturité : bleu (trop jeune) / vert (optimal) / rouge (à boire)
+
+  Règles de stockage (ne pas violer) :
+  - Modes 2 et 3 : accès au stockage partagé UNIQUEMENT via API cloud, jamais via dart:io
+  - StorageAdapter est l'interface entre SyncService et le backend cloud
+  - DriveStorageAdapter et DropboxStorageAdapter encapsulent OAuth — SyncService ne sait pas lequel est utilisé
+
+  Priorités de développement :
+  MVP d'abord (import CSV → stock → à boire → consommer → ajout en lot → mouvements → sync → settings)
+  Ne pas implémenter de features V1 ou V2 avant que le MVP soit complet.
+
+  Hors périmètre absolu :
+  - Multi-utilisateur concurrent, backend serveur, base distante
+  - Normalisation relationnelle des domaines/appellations
+  - Plan visuel de cave, drag & drop, ML/IA complexe, iOS
+
+rules:
+  proposal:
+    - Inclure une section "Non-goals" explicite
+    - Rester dans le périmètre MVP sauf décision explicite contraire
+    - Référencer le mode de déploiement concerné (Mode 1, 2 ou 3)
+  design:
+    - Toujours préciser la couche d'accès au stockage (dart:io vs StorageAdapter)
+    - Inclure les noms de fichiers drift/Riverpod concernés selon la structure lib/
+  tasks:
+    - Découper en tâches de max 2 heures
+    - Chaque tâche doit être testable indépendamment
+    - Mentionner si la tâche concerne PC uniquement, Android uniquement, ou les deux

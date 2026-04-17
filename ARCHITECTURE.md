@@ -129,49 +129,50 @@ Que l'app tourne sur PC ou Android, la séquence lock/copie/travail/remplacement
 
 ---
 
-## Stockage — couche d'accès selon la plateforme
+## Stockage — couche d'accès selon le mode
 
-### PC (Windows / macOS / Linux)
+### Mode 1 — PC seul (full local)
 
-`dart:io` accède à tout chemin local. Les clients desktop de **Google Drive** (Drive for Desktop), **Dropbox** et **OneDrive** créent un dossier synchronisé ordinaire sur le système de fichiers → aucune API spécifique, `dart:io` suffit.
-
-Exemples de chemins valides pour le dossier partagé :
-- `C:\Users\...\Google Drive\cave\`
-- `C:\Users\...\Dropbox\cave\`
-- `D:\cave\` (chemin local pur)
+Pas de synchronisation. L'app travaille directement sur `cave.db` via `dart:io`. Aucun espace partagé, aucun outil tiers requis.
 
 ```dart
-// Sur PC : accès direct via dart:io
-class StorageAdapter {
-  final String sharedFolderPath;
+// Mode 1 : accès direct dart:io, pas de StorageAdapter
+final db = drift.LazyDatabase(() async {
+  final file = File('D:/cave/cave.db'); // chemin configurable
+  return NativeDatabase(file);
+});
+```
 
-  File get lockFile => File('$sharedFolderPath/cave.lock');
-  File get remoteDb  => File('$sharedFolderPath/cave.db');
+Le fichier peut résider n'importe où sur le système de fichiers local. Il n'y a pas de lock, pas de copie — une seule copie de `cave.db`, toujours ouverte directement.
 
-  Future<bool> isLocked() async => lockFile.exists();
-  Future<void> writeLock(String deviceId) async =>
-      lockFile.writeAsString('$deviceId|${DateTime.now().toIso8601String()}');
-  Future<void> deleteLock() async => lockFile.delete();
-  Future<void> download(String localPath) async =>
-      remoteDb.copy(localPath);
-  Future<void> upload(String localPath) async =>
-      File(localPath).copy(remoteDb.path);
+---
+
+### Modes 2 et 3 — espace partagé via API cloud
+
+Dès qu'un second appareil est impliqué, **l'accès au stockage partagé passe obligatoirement par l'API du service cloud** (Google Drive ou Dropbox). Il n'est pas requis d'installer un client de synchronisation local — l'app appelle l'API directement, que ce soit depuis PC ou Android.
+
+Ce choix garantit une implémentation uniforme entre les deux plateformes : le `StorageAdapter` a la même interface et la même logique sur PC et sur Android, seules les clés OAuth diffèrent.
+
+| Option | API | Complexité | Statut |
+|---|---|---|---|
+| **A** | Google Drive API (`googleapis` Dart) | Moyenne | Retenu |
+| **B** | Dropbox API | Moyenne | Retenu |
+
+> **Point ouvert #1** — choisir entre A et B (ou supporter les deux) avant de développer le mode synchronisé. Les deux suivent le même pattern `StorageAdapter`.
+
+L'interface `StorageAdapter` est identique quel que soit le service :
+
+```dart
+abstract class StorageAdapter {
+  Future<bool> isLocked();
+  Future<void> writeLock(String deviceId);
+  Future<void> deleteLock();
+  Future<void> download(String localPath);   // cloud → local
+  Future<void> upload(String localPath);     // local → cloud
 }
 ```
 
-### Android
-
-Sur Android, les services cloud n'exposent pas de dossier local. L'accès au stockage partagé passe par des **API distantes**, mais la séquence lock/download/upload/unlock reste identique — seul le `StorageAdapter` change d'implémentation.
-
-**Point ouvert** : choisir l'implémentation du `StorageAdapter` Android avant de développer le mode synchronisé sur mobile.
-
-| Option | Mécanisme | Complexité | Remarque |
-|---|---|---|---|
-| **A** | Google Drive API (`googleapis` Dart) | Moyenne | OAuth requis, propre |
-| **B** | Dropbox API | Moyenne | Même niveau que A |
-| **C** | `file_picker` — import/export manuel | Faible | Moins transparent pour l'utilisateur |
-
-> L'interface `StorageAdapter` est la même sur toutes les plateformes — seule l'implémentation concrète diffère. À décider avant de développer le mode synchronisé Android. Au final l'accès à google drive , dropbox ou autre prestataire se fera toujours par l'API de manière à avoir un accès uniforme entre la version PC et la version Android. La seule exception avec un ficheir en chemin local sera pour un usage en full hors ligne (tout sur le PC et pas d'android possible).
+Les implémentations concrètes (`DriveStorageAdapter`, `DropboxStorageAdapter`) encapsulent OAuth et les appels API — le `SyncService` n'en sait rien.
 
 ---
 
