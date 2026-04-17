@@ -54,10 +54,22 @@ Remplacer immédiatement l’ancien logiciel
 
 ---
 
-## 1. Import des données
+## 1. Configuration initiale + import CSV
 
-- import CSV (format clean généré)
-- chargement en base locale
+### Premier lancement
+
+- Détection automatique : aucune config trouvée → wizard de configuration
+- Wizard : choix du mode (Mode 1 seul disponible au MVP), saisie du chemin vers `cave.db`
+- Config persistée (invisible pour l'utilisateur), base créée si absente
+- Utilisateurs avancés Windows : peuvent poser un `.env` à côté de l'exe pour skip le wizard
+
+### Import CSV
+
+- File picker : l'utilisateur choisit son fichier `.csv`
+- Format attendu : UTF-8, séparateur `;` (même format que `cave_clean.csv`)
+- Colonne `id` vide → UUID généré automatiquement
+- Case "écraser les existants" : coché = UPDATE, décoché = SKIP si UUID déjà en base
+- Rapport : X insérées · Y mises à jour · Z ignorées
 
 ---
 

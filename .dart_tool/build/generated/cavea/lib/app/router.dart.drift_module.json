@@ -1,0 +1,11 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter/material.dart",
+    "package:go_router/go_router.dart",
+    "package:cavea/core/config_service.dart",
+    "package:cavea/features/home/home_screen.dart",
+    "package:cavea/features/import_csv/import_csv_screen.dart",
+    "package:cavea/features/setup/setup_screen.dart"
+  ]
+}

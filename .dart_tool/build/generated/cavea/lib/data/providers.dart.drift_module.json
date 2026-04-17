@@ -1,0 +1,8 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter_riverpod/flutter_riverpod.dart",
+    "package:cavea/data/database.dart",
+    "package:cavea/data/daos/bouteille_dao.dart"
+  ]
+}

@@ -235,9 +235,67 @@ optimal     : millesime + garde_min ≤ année_actuelle
 
 ---
 
+## Configuration et premier lancement
+
+### Stratégie à deux niveaux
+
+L'app détecte à chaque démarrage si une configuration valide existe. Deux sources sont consultées, dans l'ordre :
+
+1. **Fichier `.env`** (Windows uniquement) — cherché à côté de l'exécutable. Réservé aux utilisateurs avancés qui veulent pré-configurer avant le premier lancement.
+2. **SharedPreferences** — stockage persistant géré par l'app, invisible pour l'utilisateur (AppData sur Windows, données privées sur Android).
+
+Si aucune configuration valide n'est trouvée → **wizard de premier lancement**.
+
+### Wizard de premier lancement
+
+```
+Étape 1 : choix du mode
+  Mode 1 — PC seul (local)       → disponible
+  Mode 2 — PC + Android (cloud)  → "Non disponible dans cette version"
+  Mode 3 — Mobile seul           → "Non disponible dans cette version"
+
+Étape 2 (Mode 1) : chemin vers le répertoire contenant cave.db
+  → champ texte + bouton "Parcourir" (file picker dossier)
+  → valeur par défaut : Documents/cave
+
+Étape 3 : confirmation
+  → créer cave.db si inexistant
+  → persister la config dans SharedPreferences
+  → proposer l'import CSV (ou "Commencer avec une base vide")
+```
+
+Android ne lit pas `.env`. Le wizard est le seul chemin de configuration sur mobile.
+
+### Format du fichier `.env` (Windows avancé)
+
+Voir `.env.example` à la racine du projet. Variables utilisées en Mode 1 : `STORAGE_MODE=local`, `LOCAL_DB_PATH`.
+
+---
+
+## Import CSV
+
+### Accès au fichier
+
+L'utilisateur choisit son fichier via un **file picker** (aucun chemin codé en dur). Format attendu : CSV UTF-8, séparateur `;`, colonnes identiques à `cave_clean.csv`.
+
+### Comportement par ligne
+
+| Cas | Action |
+|---|---|
+| Colonne `id` vide | Générer un UUID v4, insérer |
+| `id` présent, absent de la base | Insérer avec cet UUID |
+| `id` présent, déjà en base, case "écraser" cochée | UPDATE |
+| `id` présent, déjà en base, case "écraser" non cochée | SKIP |
+
+### Rapport d'import
+
+Afficher à la fin : X insérées · Y mises à jour · Z ignorées.
+
+---
+
 ## Ordre de développement (MVP)
 
-1. Modèle drift + import `cave_clean.csv`
+1. Configuration initiale + wizard + drift model + import CSV
 2. Vue stock + filtres (couleur, appellation, millésime, recherche texte)
 3. Vue "à boire"
 4. Action "consommer" (renseigne `date_sortie`)

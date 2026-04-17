@@ -1,0 +1,1 @@
+{"valid_import":true,"imports":[{"uri":"package:drift/drift.dart","transitive":false},{"uri":"package:drift/native.dart","transitive":false},{"uri":"package:cavea/data/tables/bouteilles.dart","transitive":false},{"uri":"package:cavea/data/daos/bouteille_dao.dart","transitive":false}],"elements":[{"kind":"database","name":"AppDatabase","dart_name":"AppDatabase"}]}

@@ -1,0 +1,12 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter/material.dart",
+    "package:flutter_riverpod/flutter_riverpod.dart",
+    "package:cavea/app/router.dart",
+    "package:cavea/app/theme.dart",
+    "package:cavea/core/config_service.dart",
+    "package:cavea/data/database.dart",
+    "package:cavea/data/providers.dart"
+  ]
+}

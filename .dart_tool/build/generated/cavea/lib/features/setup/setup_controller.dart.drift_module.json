@@ -1,0 +1,8 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter_riverpod/flutter_riverpod.dart",
+    "package:path/path.dart",
+    "package:cavea/core/config_service.dart"
+  ]
+}
