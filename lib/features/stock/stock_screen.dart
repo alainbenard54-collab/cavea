@@ -176,7 +176,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 style: TextStyle(fontSize: 13),
               ),
               tilePadding: const EdgeInsets.symmetric(horizontal: 4),
-              childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
+              childrenPadding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
               children: [
                 Row(
                   children: [
