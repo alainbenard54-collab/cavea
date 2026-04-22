@@ -56,7 +56,17 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           child: SearchBar(
             controller: _searchController,
             hintText: 'Rechercher : domaine, appellation, millésime…',
-            leading: const Icon(Icons.search),
+            backgroundColor: filters.texte.isNotEmpty
+                ? WidgetStatePropertyAll(
+                    Theme.of(context).colorScheme.primaryContainer,
+                  )
+                : null,
+            leading: Icon(
+              Icons.search,
+              color: filters.texte.isNotEmpty
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  : null,
+            ),
             trailing: filters.texte.isNotEmpty
                 ? [
                     IconButton(
