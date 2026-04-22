@@ -36,9 +36,9 @@
 
 ## 7. Validation manuelle (PC)
 
-- [ ] 7.1 Vérifier que les chips couleur fonctionnent en multi-sélect (ex. Liquoreux + Moelleux simultanément)
-- [ ] 7.2 Vérifier que les cellules GARDE sont colorées correctement et affichent le bon delta
-- [ ] 7.3 Activer le filtre "À boire urgent !" : vérifier tri par dépassement décroissant
-- [ ] 7.4 Activer le filtre "À boire" : vérifier tri par proximité de fin de garde
-- [ ] 7.5 Vérifier que les filtres avancés (millésime/appellation) se replient et fonctionnent
-- [ ] 7.6 Vérifier que la navigation ne contient plus "Quoi boire ?"
+- [x] 7.1 Vérifier que les chips couleur fonctionnent en multi-sélect (ex. Liquoreux + Moelleux simultanément)
+- [x] 7.2 Vérifier que les cellules GARDE sont colorées correctement et affichent le bon delta
+- [x] 7.3 Activer le filtre "À boire urgent !" : vérifier tri par dépassement décroissant
+- [x] 7.4 Activer le filtre "À boire" : vérifier tri par proximité de fin de garde
+- [x] 7.5 Vérifier que les filtres avancés (millésime/appellation) se replient et fonctionnent
+- [x] 7.6 Vérifier que la navigation ne contient plus "Quoi boire ?"

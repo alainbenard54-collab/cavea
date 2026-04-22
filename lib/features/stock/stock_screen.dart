@@ -61,10 +61,26 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                     Theme.of(context).colorScheme.primaryContainer,
                   )
                 : null,
+            side: filters.texte.isNotEmpty
+                ? WidgetStatePropertyAll(
+                    BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
+                  )
+                : null,
+            textStyle: filters.texte.isNotEmpty
+                ? WidgetStatePropertyAll(
+                    TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  )
+                : null,
             leading: Icon(
               Icons.search,
               color: filters.texte.isNotEmpty
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  ? Theme.of(context).colorScheme.error
                   : null,
             ),
             trailing: filters.texte.isNotEmpty
