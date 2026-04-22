@@ -96,7 +96,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           orElse: () => const SizedBox.shrink(),
         ),
 
-        // Filtre maturité
+        // Filtre maturité (multi-sélect)
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
           child: SingleChildScrollView(
@@ -105,54 +105,34 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               children: [
                 _MaturityChip(
                   label: 'À boire urgent !',
-                  level: MaturityLevel.aBoireUrgent,
                   color: Colors.red.shade100,
                   selectedColor: Colors.red.shade200,
-                  selected: filters.maturite == MaturityLevel.aBoireUrgent,
-                  onTap: () => ctrl.setMaturite(
-                    filters.maturite == MaturityLevel.aBoireUrgent
-                        ? null
-                        : MaturityLevel.aBoireUrgent,
-                  ),
+                  selected: filters.maturites.contains(MaturityLevel.aBoireUrgent),
+                  onTap: () => ctrl.toggleMaturite(MaturityLevel.aBoireUrgent),
                 ),
                 const SizedBox(width: 6),
                 _MaturityChip(
                   label: 'À boire',
-                  level: MaturityLevel.optimal,
                   color: Colors.green.shade100,
                   selectedColor: Colors.green.shade200,
-                  selected: filters.maturite == MaturityLevel.optimal,
-                  onTap: () => ctrl.setMaturite(
-                    filters.maturite == MaturityLevel.optimal
-                        ? null
-                        : MaturityLevel.optimal,
-                  ),
+                  selected: filters.maturites.contains(MaturityLevel.optimal),
+                  onTap: () => ctrl.toggleMaturite(MaturityLevel.optimal),
                 ),
                 const SizedBox(width: 6),
                 _MaturityChip(
                   label: 'Trop jeune',
-                  level: MaturityLevel.tropJeune,
                   color: Colors.blue.shade100,
                   selectedColor: Colors.blue.shade200,
-                  selected: filters.maturite == MaturityLevel.tropJeune,
-                  onTap: () => ctrl.setMaturite(
-                    filters.maturite == MaturityLevel.tropJeune
-                        ? null
-                        : MaturityLevel.tropJeune,
-                  ),
+                  selected: filters.maturites.contains(MaturityLevel.tropJeune),
+                  onTap: () => ctrl.toggleMaturite(MaturityLevel.tropJeune),
                 ),
                 const SizedBox(width: 6),
                 _MaturityChip(
                   label: '?',
-                  level: MaturityLevel.sansDonnee,
                   color: Colors.grey.shade200,
                   selectedColor: Colors.grey.shade400,
-                  selected: filters.maturite == MaturityLevel.sansDonnee,
-                  onTap: () => ctrl.setMaturite(
-                    filters.maturite == MaturityLevel.sansDonnee
-                        ? null
-                        : MaturityLevel.sansDonnee,
-                  ),
+                  selected: filters.maturites.contains(MaturityLevel.sansDonnee),
+                  onTap: () => ctrl.toggleMaturite(MaturityLevel.sansDonnee),
                 ),
               ],
             ),
@@ -259,7 +239,6 @@ class _StockScreenState extends ConsumerState<StockScreen> {
 
 class _MaturityChip extends StatelessWidget {
   final String label;
-  final MaturityLevel level;
   final Color color;
   final Color selectedColor;
   final bool selected;
@@ -267,7 +246,6 @@ class _MaturityChip extends StatelessWidget {
 
   const _MaturityChip({
     required this.label,
-    required this.level,
     required this.color,
     required this.selectedColor,
     required this.selected,

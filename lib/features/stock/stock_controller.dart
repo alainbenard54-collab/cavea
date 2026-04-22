@@ -13,7 +13,7 @@ class StockFilterState {
   final String texte;
   final String sortColumn;
   final bool sortAscending;
-  final MaturityLevel? maturite;
+  final Set<MaturityLevel> maturites;
 
   const StockFilterState({
     this.couleurs = const {},
@@ -22,7 +22,7 @@ class StockFilterState {
     this.texte = '',
     this.sortColumn = 'domaine',
     this.sortAscending = true,
-    this.maturite,
+    this.maturites = const {},
   });
 
   bool get hasActiveFilters =>
@@ -30,7 +30,7 @@ class StockFilterState {
       appellation != null ||
       millesime != null ||
       texte.isNotEmpty ||
-      maturite != null;
+      maturites.isNotEmpty;
 
   StockFilterState copyWith({
     Set<String>? couleurs,
@@ -39,7 +39,7 @@ class StockFilterState {
     String? texte,
     String? sortColumn,
     bool? sortAscending,
-    Object? maturite = _sentinel,
+    Set<MaturityLevel>? maturites,
   }) {
     return StockFilterState(
       couleurs: couleurs ?? this.couleurs,
@@ -49,9 +49,7 @@ class StockFilterState {
       texte: texte ?? this.texte,
       sortColumn: sortColumn ?? this.sortColumn,
       sortAscending: sortAscending ?? this.sortAscending,
-      maturite: maturite == _sentinel
-          ? this.maturite
-          : maturite as MaturityLevel?,
+      maturites: maturites ?? this.maturites,
     );
   }
 }
@@ -74,16 +72,26 @@ class StockFilterController extends StateNotifier<StockFilterState> {
   void clearCouleurs() =>
       state = state.copyWith(couleurs: {}, appellation: null, millesime: null);
 
+  void toggleMaturite(MaturityLevel value) {
+    final updated = Set<MaturityLevel>.from(state.maturites);
+    if (updated.contains(value)) {
+      updated.remove(value);
+    } else {
+      updated.add(value);
+    }
+    // Quand on active le premier filtre maturité, basculer le tri sur GARDE
+    final newSortColumn = updated.isNotEmpty && state.maturites.isEmpty
+        ? 'gardeMin'
+        : state.sortColumn;
+    state = state.copyWith(maturites: updated, sortColumn: newSortColumn);
+  }
+
   void setAppellation(String? value) =>
       state = state.copyWith(appellation: value, millesime: null);
 
   void setMillesime(int? value) => state = state.copyWith(millesime: value);
 
   void setTexte(String value) => state = state.copyWith(texte: value);
-
-  void setMaturite(MaturityLevel? value) {
-    state = state.copyWith(maturite: value);
-  }
 
   void setSort(String column) {
     if (state.sortColumn == column) {
@@ -101,42 +109,50 @@ final stockFilterProvider =
   (ref) => StockFilterController(),
 );
 
-List<Bouteille> _sorted(
-  List<Bouteille> list,
-  String col,
-  bool asc,
-  MaturityLevel? maturiteFilter,
-) {
-  final s = [...list];
-
-  if (maturiteFilter != null) {
-    // Tri par urgence secondaire dans le groupe de maturité actif
-    s.sort((a, b) {
-      final scoreA = urgencyScore(
-        millesime: a.millesime,
-        gardeMin: a.gardeMin,
-        gardeMax: a.gardeMax,
-      );
-      final scoreB = urgencyScore(
+int _maturityOrder(Bouteille b) => maturitySortOrder(
+      computeMaturity(
         millesime: b.millesime,
         gardeMin: b.gardeMin,
         gardeMax: b.gardeMax,
-      );
-      return scoreB.compareTo(scoreA); // décroissant = plus urgent en premier
+      ),
+    );
+
+int _urgency(Bouteille b) => urgencyScore(
+      millesime: b.millesime,
+      gardeMin: b.gardeMin,
+      gardeMax: b.gardeMax,
+    );
+
+List<Bouteille> _sorted(List<Bouteille> list, String col, bool asc) {
+  final s = [...list];
+
+  if (col == 'gardeMin') {
+    // GARDE : tri par niveau de maturité, puis urgence dans chaque niveau
+    s.sort((a, b) {
+      final mCmp = _maturityOrder(a).compareTo(_maturityOrder(b));
+      if (mCmp != 0) return asc ? mCmp : -mCmp;
+      return _urgency(b).compareTo(_urgency(a)); // plus urgent en premier
     });
     return s;
   }
 
-  int cmp(Bouteille a, Bouteille b) => switch (col) {
+  // Autres colonnes : tri principal + maturité + urgence en secondaire
+  int colCmp(Bouteille a, Bouteille b) => switch (col) {
         'appellation' => a.appellation.compareTo(b.appellation),
         'millesime' => a.millesime.compareTo(b.millesime),
         'couleur' => a.couleur.compareTo(b.couleur),
         'emplacement' => a.emplacement.compareTo(b.emplacement),
-        'gardeMin' => (a.gardeMin ?? 0).compareTo(b.gardeMin ?? 0),
         'prixAchat' => (a.prixAchat ?? 0).compareTo(b.prixAchat ?? 0),
         _ => a.domaine.compareTo(b.domaine),
       };
-  s.sort((a, b) => asc ? cmp(a, b) : cmp(b, a));
+
+  s.sort((a, b) {
+    final cc = asc ? colCmp(a, b) : colCmp(b, a);
+    if (cc != 0) return cc;
+    final mCmp = _maturityOrder(a).compareTo(_maturityOrder(b));
+    if (mCmp != 0) return mCmp;
+    return _urgency(b).compareTo(_urgency(a));
+  });
   return s;
 }
 
@@ -152,18 +168,17 @@ final stockProvider = StreamProvider.autoDispose<List<Bouteille>>((ref) {
       )
       .map((list) {
     var result = list;
-    // Filtre maturité appliqué en Dart
-    if (filters.maturite != null) {
+    if (filters.maturites.isNotEmpty) {
       result = result.where((b) {
         final level = computeMaturity(
           millesime: b.millesime,
           gardeMin: b.gardeMin,
           gardeMax: b.gardeMax,
         );
-        return level == filters.maturite;
+        return filters.maturites.contains(level);
       }).toList();
     }
-    return _sorted(result, filters.sortColumn, filters.sortAscending, filters.maturite);
+    return _sorted(result, filters.sortColumn, filters.sortAscending);
   });
 });
 
@@ -180,7 +195,6 @@ final couleursProvider = FutureProvider.autoDispose<List<String>>((ref) {
 
 final appellationsProvider = FutureProvider.autoDispose<List<String>>((ref) {
   final couleurs = ref.watch(stockFilterProvider.select((s) => s.couleurs));
-  // cascade : si une seule couleur sélectionnée on filtre les appellations
   final couleur = couleurs.length == 1 ? couleurs.first : null;
   return ref
       .watch(bouteillesDaoProvider)
