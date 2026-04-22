@@ -61,21 +61,55 @@ Key fields: `id` (UUID), `domaine`, `appellation`, `millesime`, `couleur`, `cru`
 - Moving a bottle = update `emplacement` — it is **not** a removal
 - `emplacement` is a free-text hierarchy: `Niveau1 > Niveau2 > Niveau3`
 - Maturity computed at runtime: `millesime + garde_min/max` vs `DateTime.now().year`
+- Maturity levels: `tropJeune` (blue) / `optimal` (green) / `aBoireUrgent` (red) / `sansDonnee` (grey)
+- Within each maturity level, urgency sort = `age - gardeMax` descending (higher = more overdue)
+
+**Field protection rules — critical for edit forms:**
+
+These fields must **never** be exposed in a generic edit form. They are only writable via dedicated actions:
+
+| Field | Protected via |
+|---|---|
+| `id` | Never editable (primary key) |
+| `updated_at` | Auto-managed by app |
+| `date_sortie` | Only via "Consommer" action |
+| `note_degus` | Only via "Consommer" action |
+| `commentaire_degus` | Only via "Consommer" action |
+
+All other fields are editable in the full bottle edit form (V1 feature, not MVP).
 
 ---
 
 ## MVP development order
 
-1. drift model + `cave_clean.csv` import
-2. Stock view + filters (colour, appellation, vintage, text search)
-3. "What to drink?" view (colour-coded maturity indicators)
-4. Consume action (sets `date_sortie = today`)
+1. ✅ drift model + `cave_clean.csv` import
+2. ✅ Stock view + filters (couleur multi-sélect, appellation, millésime, recherche texte, layout adaptatif, table desktop triable)
+3. ✅ Maturity integrated into stock view (colonne GARDE colorée + delta, FilterChips maturité multi-sélect, tri urgence secondaire — **pas d'écran séparé "Quoi boire ?"**)
+4. `bottle-actions`: BottomSheet d'actions rapides sur clic bouteille (Déplacer + Consommer + accès fiche complète)
 5. Bulk add (single form → N identical bottles)
-6. Change location (movement, not a removal)
+6. ~~Change location~~ → fusionnée dans `bottle-actions` (étape 4)
 7. Sync mechanism (lock / download / upload)
 8. Settings (mode selection, shared folder path)
 
 Do not implement V1 or V2 features before the MVP is complete.
+
+---
+
+## bottle-actions — spec décidée (étape 4 MVP)
+
+Clic sur une ligne du stock → `BottomSheet` modal avec :
+
+1. **Déplacer** : saisie libre de l'emplacement avec autocomplétion sur les emplacements existants en base → `UPDATE emplacement` uniquement, pas de `date_sortie`
+2. **Consommer** : date de consommation (défaut = aujourd'hui, modifiable via DatePicker pour déclaration tardive), note /10 optionnelle, commentaire de dégustation optionnel → `UPDATE date_sortie + note_degus + commentaire_degus`
+3. **Modifier la fiche** : pointe vers un écran d'édition complète — **interface prête en MVP, implémentation V1**. Affiche "Fonctionnalité à venir" en MVP. Champs protégés exclus (voir ci-dessus).
+4. **Annuler** : ferme le BottomSheet
+
+---
+
+## V1 features (post-MVP — do not implement before MVP complete)
+
+- **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" (l'entrée de navigation est déjà en place en MVP).
+- Fiche lecture seule d'une bouteille (détail complet)
 
 ---
 
