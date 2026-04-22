@@ -105,18 +105,27 @@ class StockTable extends StatelessWidget {
       gardeMax: b.gardeMax,
     );
 
+    // score = age - gardeMax (négatif pour optimal/tropJeune) → valeur absolue pour affichage
+    final absScore = score.abs();
+    final yearsLeft = (b.gardeMax != null)
+        ? (b.millesime + b.gardeMax! - DateTime.now().year)
+        : 0;
+    final yearsUntilReady = (b.gardeMin != null)
+        ? (b.millesime + b.gardeMin! - DateTime.now().year)
+        : 0;
+
     final (bgColor, deltaStr) = switch (level) {
       MaturityLevel.aBoireUrgent => (
           Colors.red.shade50,
-          '+$score an${score > 1 ? 's' : ''}',
+          '+$absScore an${absScore > 1 ? 's' : ''}',
         ),
       MaturityLevel.optimal => (
           Colors.green.shade50,
-          '–$score an${score > 1 ? 's' : ''}',
+          'encore $yearsLeft an${yearsLeft > 1 ? 's' : ''}',
         ),
       MaturityLevel.tropJeune => (
           Colors.blue.shade50,
-          'dans $score an${score > 1 ? 's' : ''}',
+          'dans $yearsUntilReady an${yearsUntilReady > 1 ? 's' : ''}',
         ),
       MaturityLevel.sansDonnee => (null, ''),
     };

@@ -44,10 +44,11 @@ int urgencyScore({
     gardeMax: gardeMax,
     annee: annee,
   );
+  // Sémantique uniforme : score plus élevé = plus urgent → tri décroissant cohérent
   return switch (level) {
-    MaturityLevel.aBoireUrgent => age - gardeMax,
-    MaturityLevel.optimal => gardeMax - age, // plus proche de fin = score élevé
-    MaturityLevel.tropJeune => gardeMin - age, // plus proche de maturité = score élevé
+    MaturityLevel.aBoireUrgent => age - gardeMax,  // positif, plus grand = plus en retard
+    MaturityLevel.optimal => age - gardeMax,       // négatif, moins négatif = moins de temps restant
+    MaturityLevel.tropJeune => age - gardeMin,     // négatif, moins négatif = plus proche de maturité
     MaturityLevel.sansDonnee => 0,
   };
 }
