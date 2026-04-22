@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
+import '../bottle_actions/bottle_actions_sheet.dart';
 import 'bouteille_list_tile.dart';
 
 const _wIcon = 44.0;
@@ -56,13 +57,16 @@ class StockTable extends StatelessWidget {
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: active
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
+            Flexible(
+              child: Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: active
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (active) ...[
@@ -159,7 +163,7 @@ class StockTable extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: null,
+      onTap: () => showBottleActionsSheet(context, b),
       child: _layout([
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),

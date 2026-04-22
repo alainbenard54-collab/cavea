@@ -133,3 +133,20 @@ L'application SHALL utiliser `NavigationRail` pour les largeurs ≥600px (deskto
 #### Scenario: Affichage mobile
 - **WHEN** la fenêtre est <600px de large
 - **THEN** une BottomNavigationBar est visible en bas de l'écran
+
+#### Scenario: Seuil tableau vs liste
+- **WHEN** la largeur disponible du contenu (hors NavigationRail) est ≥ 640px
+- **THEN** le tableau desktop est affiché ; en dessous, la liste mobile est affichée (mesuré via LayoutBuilder)
+
+---
+
+### Requirement: Lignes cliquables ouvrant le BottomSheet d'actions
+Chaque ligne de la liste mobile et du tableau desktop SHALL être cliquable. Un clic SHALL ouvrir le BottomSheet d'actions rapides avec la bouteille correspondante en contexte.
+
+#### Scenario: Clic sur une ligne (desktop)
+- **WHEN** l'utilisateur clique sur une ligne du tableau stock
+- **THEN** le BottomSheet d'actions s'ouvre avec le domaine et le millésime de la bouteille en titre
+
+#### Scenario: Appui sur une ligne (mobile)
+- **WHEN** l'utilisateur appuie sur une ligne de la liste mobile
+- **THEN** le BottomSheet d'actions s'ouvre avec les mêmes 4 actions disponibles

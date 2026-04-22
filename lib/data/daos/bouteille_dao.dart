@@ -116,6 +116,44 @@ class BouteilleDao {
     return _db.update(_db.bouteilles).replace(bouteille);
   }
 
+  Future<void> deplacerBouteille(String id, String emplacement) {
+    return (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
+      BouteillesCompanion(emplacement: Value(emplacement)),
+    );
+  }
+
+  Future<void> consommerBouteille(
+    String id, {
+    required String dateSortie,
+    double? noteDegus,
+    String? commentaireDegus,
+  }) {
+    return (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
+      BouteillesCompanion(
+        dateSortie: Value(dateSortie),
+        noteDegus: noteDegus != null ? Value(noteDegus) : const Value.absent(),
+        commentaireDegus: commentaireDegus != null
+            ? Value(commentaireDegus)
+            : const Value.absent(),
+      ),
+    );
+  }
+
+  Future<List<String>> getDistinctEmplacements() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.emplacement])
+      ..where(
+        _db.bouteilles.dateSortie.isNull() |
+            _db.bouteilles.dateSortie.equals(''),
+      )
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.emplacement)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.emplacement) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
   Future<Bouteille?> getBouteilleById(String id) {
     return (_db.select(_db.bouteilles)..where((b) => b.id.equals(id)))
         .getSingleOrNull();

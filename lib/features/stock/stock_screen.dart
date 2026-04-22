@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/maturity/maturity_service.dart';
-import '../../shared/adaptive_layout.dart';
+import '../bottle_actions/bottle_actions_sheet.dart';
 import 'stock_controller.dart';
 import 'bouteille_list_tile.dart';
 import 'stock_table.dart';
@@ -45,7 +45,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final couleursAsync = ref.watch(couleursProvider);
     final appellationsAsync = ref.watch(appellationsProvider);
     final millesimesAsync = ref.watch(millesimesProvider);
-    final desktop = isDesktop(context);
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -242,18 +242,25 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               if (bouteilles.isEmpty) {
                 return _EmptyState(hasFilters: filters.hasActiveFilters);
               }
-              if (desktop) {
-                return StockTable(
-                  bouteilles: bouteilles,
-                  sortColumn: filters.sortColumn,
-                  sortAscending: filters.sortAscending,
-                  onSort: ctrl.setSort,
-                );
-              }
-              return ListView.builder(
-                itemCount: bouteilles.length,
-                itemBuilder: (context, i) =>
-                    BouteilleListTile(bouteille: bouteilles[i]),
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 640) {
+                    return StockTable(
+                      bouteilles: bouteilles,
+                      sortColumn: filters.sortColumn,
+                      sortAscending: filters.sortAscending,
+                      onSort: ctrl.setSort,
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: bouteilles.length,
+                    itemBuilder: (context, i) => BouteilleListTile(
+                      bouteille: bouteilles[i],
+                      onTap: () =>
+                          showBottleActionsSheet(context, bouteilles[i]),
+                    ),
+                  );
+                },
               );
             },
           ),

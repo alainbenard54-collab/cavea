@@ -18,7 +18,7 @@ Full specifications are in `PRD.md` (features and priorities) and `ARCHITECTURE.
 | Database | drift (SQLite) | Type-safe ORM, declarative migrations, reactive streams |
 | State management | Riverpod | Integrates naturally with drift streams |
 | Navigation | go_router | Declarative, handles desktop and mobile routes |
-| UI | Material 3 | NavigationRail (desktop) / BottomNavigationBar (mobile), threshold 600px |
+| UI | Material 3 | NavigationRail (desktop) / BottomNavigationBar (mobile), threshold 600px. Stock table shown when content area ≥ 640px (measured via LayoutBuilder, excludes NavigationRail width). |
 
 Do not introduce alternative state management (Provider, BLoC, GetX) or navigation solutions without an explicit decision.
 
@@ -59,7 +59,7 @@ Key fields: `id` (UUID), `domaine`, `appellation`, `millesime`, `couleur`, `cru`
 - `date_sortie` empty → bottle in stock
 - `date_sortie` set → bottle consumed / removed
 - Moving a bottle = update `emplacement` — it is **not** a removal
-- `emplacement` is a free-text hierarchy: `Niveau1 > Niveau2 > Niveau3`
+- `emplacement` is a validated hierarchy: `Niveau1` or `Niveau1 > Niveau2 > Niveau3`. Each level: letters (including accented), digits, internal spaces; must start with alphanumeric. Separator: ` > ` (space-chevron-space). Validated on input in the Déplacer form.
 - Maturity computed at runtime: `millesime + garde_min/max` vs `DateTime.now().year`
 - Maturity levels: `tropJeune` (blue) / `optimal` (green) / `aBoireUrgent` (red) / `sansDonnee` (grey)
 - Within each maturity level, urgency sort = `age - gardeMax` descending (higher = more overdue)

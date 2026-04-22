@@ -20,7 +20,13 @@ L'application SHALL permettre de modifier l'emplacement d'une bouteille sans la 
 
 #### Scenario: Autocomplétion emplacement
 - **WHEN** l'utilisateur commence à saisir un emplacement
-- **THEN** les emplacements existants en base correspondants sont proposés en suggestion
+- **THEN** les emplacements existants en base correspondants sont proposés en suggestion (liste inline sous le champ)
+
+#### Scenario: Emplacement invalide
+- **WHEN** l'utilisateur confirme un emplacement ne respectant pas le format hiérarchique
+- **THEN** un message d'erreur s'affiche sous le champ, la sauvegarde est bloquée
+
+**Format emplacement** : `Niveau1` ou `Niveau1 > Niveau2 > …`. Chaque niveau : lettres (y compris accentuées), chiffres, espaces internes — doit commencer par un caractère alphanumérique. Séparateur obligatoire : ` > ` (espace-chevron-espace). Exemples valides : `Cave`, `Cave principale`, `Cave > Étagère 3`, `Cave > Rangée A > Position 2`.
 
 ---
 
