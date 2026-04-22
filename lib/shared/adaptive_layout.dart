@@ -26,9 +26,15 @@ class _AppDestination {
 const _destinations = [
   _AppDestination(
     label: 'Stock',
-    icon: Icons.wine_bar_outlined,
-    selectedIcon: Icons.wine_bar,
+    icon: Icons.inventory_2_outlined,
+    selectedIcon: Icons.inventory_2,
     route: '/',
+  ),
+  _AppDestination(
+    label: 'Quoi boire ?',
+    icon: Icons.local_bar_outlined,
+    selectedIcon: Icons.local_bar,
+    route: '/quoi-boire',
   ),
   _AppDestination(
     label: 'Import CSV',
