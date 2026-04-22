@@ -2,48 +2,56 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 
 class StockFilterState {
-  final String? couleur;
+  final Set<String> couleurs;
   final String? appellation;
   final int? millesime;
   final String texte;
   final String sortColumn;
   final bool sortAscending;
+  final MaturityLevel? maturite;
 
   const StockFilterState({
-    this.couleur,
+    this.couleurs = const {},
     this.appellation,
     this.millesime,
     this.texte = '',
     this.sortColumn = 'domaine',
     this.sortAscending = true,
+    this.maturite,
   });
 
   bool get hasActiveFilters =>
-      couleur != null ||
+      couleurs.isNotEmpty ||
       appellation != null ||
       millesime != null ||
-      texte.isNotEmpty;
+      texte.isNotEmpty ||
+      maturite != null;
 
   StockFilterState copyWith({
-    Object? couleur = _sentinel,
+    Set<String>? couleurs,
     Object? appellation = _sentinel,
     Object? millesime = _sentinel,
     String? texte,
     String? sortColumn,
     bool? sortAscending,
+    Object? maturite = _sentinel,
   }) {
     return StockFilterState(
-      couleur: couleur == _sentinel ? this.couleur : couleur as String?,
+      couleurs: couleurs ?? this.couleurs,
       appellation:
           appellation == _sentinel ? this.appellation : appellation as String?,
       millesime: millesime == _sentinel ? this.millesime : millesime as int?,
       texte: texte ?? this.texte,
       sortColumn: sortColumn ?? this.sortColumn,
       sortAscending: sortAscending ?? this.sortAscending,
+      maturite: maturite == _sentinel
+          ? this.maturite
+          : maturite as MaturityLevel?,
     );
   }
 }
@@ -53,20 +61,29 @@ const _sentinel = Object();
 class StockFilterController extends StateNotifier<StockFilterState> {
   StockFilterController() : super(const StockFilterState());
 
-  // Cascade : changer la couleur réinitialise appellation et millésime
-  void setCouleur(String? value) => state = state.copyWith(
-        couleur: value,
-        appellation: null,
-        millesime: null,
-      );
+  void toggleCouleur(String value) {
+    final updated = Set<String>.from(state.couleurs);
+    if (updated.contains(value)) {
+      updated.remove(value);
+    } else {
+      updated.add(value);
+    }
+    state = state.copyWith(couleurs: updated, appellation: null, millesime: null);
+  }
 
-  // Cascade : changer l'appellation réinitialise le millésime
+  void clearCouleurs() =>
+      state = state.copyWith(couleurs: {}, appellation: null, millesime: null);
+
   void setAppellation(String? value) =>
       state = state.copyWith(appellation: value, millesime: null);
 
   void setMillesime(int? value) => state = state.copyWith(millesime: value);
 
   void setTexte(String value) => state = state.copyWith(texte: value);
+
+  void setMaturite(MaturityLevel? value) {
+    state = state.copyWith(maturite: value);
+  }
 
   void setSort(String column) {
     if (state.sortColumn == column) {
@@ -84,8 +101,32 @@ final stockFilterProvider =
   (ref) => StockFilterController(),
 );
 
-List<Bouteille> _sorted(List<Bouteille> list, String col, bool asc) {
+List<Bouteille> _sorted(
+  List<Bouteille> list,
+  String col,
+  bool asc,
+  MaturityLevel? maturiteFilter,
+) {
   final s = [...list];
+
+  if (maturiteFilter != null) {
+    // Tri par urgence secondaire dans le groupe de maturité actif
+    s.sort((a, b) {
+      final scoreA = urgencyScore(
+        millesime: a.millesime,
+        gardeMin: a.gardeMin,
+        gardeMax: a.gardeMax,
+      );
+      final scoreB = urgencyScore(
+        millesime: b.millesime,
+        gardeMin: b.gardeMin,
+        gardeMax: b.gardeMax,
+      );
+      return scoreB.compareTo(scoreA); // décroissant = plus urgent en premier
+    });
+    return s;
+  }
+
   int cmp(Bouteille a, Bouteille b) => switch (col) {
         'appellation' => a.appellation.compareTo(b.appellation),
         'millesime' => a.millesime.compareTo(b.millesime),
@@ -104,12 +145,26 @@ final stockProvider = StreamProvider.autoDispose<List<Bouteille>>((ref) {
   final dao = ref.watch(bouteillesDaoProvider);
   return dao
       .watchStockFiltered(
-        couleur: filters.couleur,
+        couleurs: filters.couleurs.isEmpty ? null : filters.couleurs.toList(),
         appellation: filters.appellation,
         millesime: filters.millesime,
         texte: filters.texte.isEmpty ? null : filters.texte,
       )
-      .map((list) => _sorted(list, filters.sortColumn, filters.sortAscending));
+      .map((list) {
+    var result = list;
+    // Filtre maturité appliqué en Dart
+    if (filters.maturite != null) {
+      result = result.where((b) {
+        final level = computeMaturity(
+          millesime: b.millesime,
+          gardeMin: b.gardeMin,
+          gardeMax: b.gardeMax,
+        );
+        return level == filters.maturite;
+      }).toList();
+    }
+    return _sorted(result, filters.sortColumn, filters.sortAscending, filters.maturite);
+  });
 });
 
 final stockTotalCountProvider = StreamProvider.autoDispose<int>((ref) {
@@ -123,19 +178,20 @@ final couleursProvider = FutureProvider.autoDispose<List<String>>((ref) {
   return ref.watch(bouteillesDaoProvider).getDistinctCouleurs();
 });
 
-// Filtré par couleur sélectionnée (cascade)
 final appellationsProvider = FutureProvider.autoDispose<List<String>>((ref) {
-  final couleur = ref.watch(stockFilterProvider.select((s) => s.couleur));
+  final couleurs = ref.watch(stockFilterProvider.select((s) => s.couleurs));
+  // cascade : si une seule couleur sélectionnée on filtre les appellations
+  final couleur = couleurs.length == 1 ? couleurs.first : null;
   return ref
       .watch(bouteillesDaoProvider)
       .getDistinctAppellations(couleur: couleur);
 });
 
-// Filtré par couleur + appellation sélectionnées (cascade)
 final millesimesProvider = FutureProvider.autoDispose<List<int>>((ref) {
-  final couleur = ref.watch(stockFilterProvider.select((s) => s.couleur));
+  final couleurs = ref.watch(stockFilterProvider.select((s) => s.couleurs));
   final appellation =
       ref.watch(stockFilterProvider.select((s) => s.appellation));
+  final couleur = couleurs.length == 1 ? couleurs.first : null;
   return ref
       .watch(bouteillesDaoProvider)
       .getDistinctMillesimes(couleur: couleur, appellation: appellation);

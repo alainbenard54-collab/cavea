@@ -1,5 +1,5 @@
 ### Requirement: Affichage de la liste des bouteilles en stock
-L'application SHALL afficher la liste de toutes les bouteilles dont `date_sortie` est NULL ou vide, via un stream réactif. La liste SHALL se mettre à jour automatiquement en cas de modification de la base.
+L'application SHALL afficher la liste de toutes les bouteilles dont `date_sortie` est NULL ou vide, via un stream réactif. La liste SHALL se mettre à jour automatiquement en cas de modification de la base. Quand le filtre maturité est actif, la liste SHALL être triée par urgence au lieu du tri par colonne.
 
 #### Scenario: Affichage initial
 - **WHEN** l'utilisateur ouvre l'écran stock
@@ -16,11 +16,11 @@ L'application SHALL afficher la liste de toutes les bouteilles dont `date_sortie
 ---
 
 ### Requirement: Affichage d'une ligne de bouteille
-Chaque ligne de la liste SHALL afficher au minimum : domaine, appellation, millésime, couleur (sous forme de badge coloré), emplacement. Les champs optionnels (cru, contenance) SHALL être affichés s'ils sont renseignés.
+Chaque ligne de la liste SHALL afficher au minimum : domaine, appellation, millésime, couleur (sous forme d'icône colorée), emplacement. Les champs optionnels (cru, contenance) SHALL être affichés s'ils sont renseignés.
 
 #### Scenario: Ligne complète
 - **WHEN** une bouteille a tous les champs renseignés
-- **THEN** domaine, appellation, millésime, badge couleur et emplacement sont visibles
+- **THEN** domaine, appellation, millésime, icône couleur et emplacement sont visibles
 
 #### Scenario: Champs optionnels absents
 - **WHEN** cru ou contenance sont vides
@@ -28,43 +28,85 @@ Chaque ligne de la liste SHALL afficher au minimum : domaine, appellation, mill�
 
 ---
 
-### Requirement: Filtre par couleur
-L'application SHALL permettre de filtrer la liste par couleur de vin (Rouge, Blanc, Rosé, Effervescent, etc.). Un filtre "Toutes" SHALL remettre l'affichage complet. Les valeurs de couleur disponibles SHALL être déduites des données en base.
+### Requirement: Colonne GARDE colorée selon maturité (vue desktop)
+Dans le tableau desktop, la colonne GARDE SHALL afficher les années de garde avec un fond coloré reflétant la maturité et un delta lisible. Les couleurs SHALL être : rouge pâle pour `aBoireUrgent`, vert pâle pour `optimal`, bleu pâle pour `tropJeune`, neutre pour `sansDonnee`.
 
-#### Scenario: Filtre couleur actif
-- **WHEN** l'utilisateur sélectionne "Rouge"
-- **THEN** seules les bouteilles avec `couleur = 'Rouge'` sont affichées
+#### Scenario: Bouteille à boire d'urgence
+- **WHEN** `age > gardeMax` (`age = annéeActuelle - millesime`)
+- **THEN** la cellule GARDE affiche fond rouge pâle avec `+N an(s)` (années de dépassement)
 
-#### Scenario: Remise à zéro couleur
-- **WHEN** l'utilisateur sélectionne "Toutes"
-- **THEN** toutes les bouteilles en stock sont affichées
+#### Scenario: Bouteille à son apogée
+- **WHEN** `gardeMin <= age <= gardeMax`
+- **THEN** la cellule GARDE affiche fond vert pâle avec `–N an(s)` (temps restant avant fin de garde)
 
----
+#### Scenario: Bouteille trop jeune
+- **WHEN** `age < gardeMin`
+- **THEN** la cellule GARDE affiche fond bleu pâle avec `dans N an(s)` (temps avant maturité)
 
-### Requirement: Filtre par appellation
-L'application SHALL permettre de filtrer par appellation. Les valeurs disponibles SHALL être déduites des données en base (pas de liste codée en dur).
-
-#### Scenario: Filtre appellation actif
-- **WHEN** l'utilisateur sélectionne une appellation
-- **THEN** seules les bouteilles de cette appellation sont affichées
-
----
-
-### Requirement: Filtre par millésime
-L'application SHALL permettre de filtrer par millésime. Les années disponibles SHALL être déduites des données en base, triées décroissant.
-
-#### Scenario: Filtre millésime actif
-- **WHEN** l'utilisateur sélectionne un millésime
-- **THEN** seules les bouteilles de ce millésime sont affichées
+#### Scenario: Données de garde absentes
+- **WHEN** `gardeMin` ou `gardeMax` est null ou 0
+- **THEN** la cellule GARDE affiche `—` sans couleur de fond
 
 ---
 
-### Requirement: Recherche texte sur le domaine
-L'application SHALL permettre une recherche texte libre filtrée sur le champ `domaine` (recherche insensible à la casse, correspondance partielle).
+### Requirement: Filtre couleur multi-sélect
+L'application SHALL permettre de filtrer par plusieurs couleurs simultanément via des FilterChips. Aucune sélection = toutes les couleurs. Les valeurs SHALL être déduites des données en base.
+
+#### Scenario: Sélection multiple
+- **WHEN** l'utilisateur active "Liquoreux" puis "Moelleux"
+- **THEN** les bouteilles liquoreuses ET moelleuses sont affichées (OR logique entre couleurs sélectionnées)
+
+#### Scenario: Désélection totale
+- **WHEN** l'utilisateur désactive tous les chips couleur
+- **THEN** toutes les couleurs sont affichées
+
+---
+
+### Requirement: Filtre maturité avec chips colorés
+L'application SHALL permettre de filtrer par niveau de maturité via des FilterChips colorés. Un seul niveau peut être actif à la fois.
+
+#### Scenario: Filtre aBoireUrgent
+- **WHEN** l'utilisateur active le chip rouge "À boire urgent !"
+- **THEN** seules les bouteilles dont `age > gardeMax` sont affichées, triées par dépassement décroissant
+
+#### Scenario: Filtre optimal
+- **WHEN** l'utilisateur active le chip vert "À boire"
+- **THEN** seules les bouteilles à leur apogée sont affichées, triées par proximité de fin de garde croissante
+
+#### Scenario: Filtre tropJeune
+- **WHEN** l'utilisateur active le chip bleu "Trop jeune"
+- **THEN** seules les bouteilles trop jeunes sont affichées, triées par proximité de maturité croissante
+
+---
+
+### Requirement: Tri secondaire par urgence dans les groupes de maturité
+Quand le filtre maturité est actif, la liste SHALL être triée par score d'urgence décroissant dans le groupe sélectionné.
+
+#### Scenario: Tri urgence dans aBoireUrgent
+- **WHEN** le filtre maturité est `aBoireUrgent`
+- **THEN** les bouteilles sont triées par `age - gardeMax` décroissant (le plus en retard en premier)
+
+#### Scenario: Tri urgence dans optimal
+- **WHEN** le filtre maturité est `optimal`
+- **THEN** les bouteilles sont triées par `gardeMax - age` décroissant (la plus proche de la limite en premier)
+
+---
+
+### Requirement: Filtres avancés repliables
+L'application SHALL proposer un panneau "Filtres avancés" repliable contenant les filtres appellation et millésime. Ce panneau SHALL être replié par défaut.
+
+#### Scenario: Filtre millésime depuis le panneau avancé
+- **WHEN** l'utilisateur sélectionne un millésime dans le panneau avancé
+- **THEN** seules les bouteilles de ce millésime sont affichées, combiné avec les autres filtres actifs
+
+---
+
+### Requirement: Recherche texte
+L'application SHALL permettre une recherche texte libre sur domaine, appellation et millésime (insensible à la casse, correspondance partielle).
 
 #### Scenario: Recherche active
-- **WHEN** l'utilisateur saisit "margaux" dans le champ de recherche
-- **THEN** seules les bouteilles dont le domaine contient "margaux" (insensible à la casse) sont affichées
+- **WHEN** l'utilisateur saisit "margaux"
+- **THEN** seules les bouteilles dont le domaine ou l'appellation contient "margaux" sont affichées
 
 #### Scenario: Recherche vidée
 - **WHEN** l'utilisateur efface le champ de recherche
@@ -73,20 +115,16 @@ L'application SHALL permettre une recherche texte libre filtrée sur le champ `d
 ---
 
 ### Requirement: Combinaison des filtres
-Tous les filtres actifs SHALL s'appliquer simultanément (AND logique). Un compteur SHALL indiquer le nombre de bouteilles affichées vs le total en stock.
+Tous les filtres actifs SHALL s'appliquer simultanément. Les couleurs entre elles sont en OR logique ; tous les autres filtres sont en AND. Un compteur SHALL indiquer le nombre de bouteilles affichées vs le total en stock.
 
-#### Scenario: Plusieurs filtres actifs
-- **WHEN** couleur = "Rouge" ET millésime = 2015 sont tous deux actifs
-- **THEN** seules les bouteilles rouges de 2015 sont affichées
-
-#### Scenario: Compteur
+#### Scenario: Compteur avec filtres actifs
 - **WHEN** des filtres sont actifs
-- **THEN** l'interface affiche "X bouteilles (sur Y)"
+- **THEN** l'interface affiche "X / Y bouteilles"
 
 ---
 
 ### Requirement: Layout adaptatif
-L'application SHALL utiliser `NavigationRail` pour les largeurs ≥600px (desktop) et `BottomNavigationBar` pour les largeurs <600px (mobile). Les destinations de navigation SHALL être identiques dans les deux cas.
+L'application SHALL utiliser `NavigationRail` pour les largeurs ≥600px (desktop) et `BottomNavigationBar` pour les largeurs <600px (mobile).
 
 #### Scenario: Affichage desktop
 - **WHEN** la fenêtre est ≥600px de large

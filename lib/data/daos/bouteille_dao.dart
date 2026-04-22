@@ -20,7 +20,7 @@ class BouteilleDao {
   }
 
   Stream<List<Bouteille>> watchStockFiltered({
-    String? couleur,
+    List<String>? couleurs,
     String? appellation,
     int? millesime,
     String? texte,
@@ -28,7 +28,9 @@ class BouteilleDao {
     return (_db.select(_db.bouteilles)
           ..where((b) {
             var cond = b.dateSortie.isNull() | b.dateSortie.equals('');
-            if (couleur != null) cond = cond & b.couleur.equals(couleur);
+            if (couleurs != null && couleurs.isNotEmpty) {
+              cond = cond & b.couleur.isIn(couleurs);
+            }
             if (appellation != null) {
               cond = cond & b.appellation.equals(appellation);
             }

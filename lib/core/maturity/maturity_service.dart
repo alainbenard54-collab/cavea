@@ -28,3 +28,26 @@ int maturitySortOrder(MaturityLevel level) => switch (level) {
       MaturityLevel.tropJeune => 2,
       MaturityLevel.sansDonnee => 3,
     };
+
+// Score secondaire dans chaque groupe : valeur plus haute = plus urgent
+int urgencyScore({
+  required int millesime,
+  required int? gardeMin,
+  required int? gardeMax,
+  int? annee,
+}) {
+  if (millesime <= 0 || gardeMin == null || gardeMax == null) return 0;
+  final age = (annee ?? DateTime.now().year) - millesime;
+  final level = computeMaturity(
+    millesime: millesime,
+    gardeMin: gardeMin,
+    gardeMax: gardeMax,
+    annee: annee,
+  );
+  return switch (level) {
+    MaturityLevel.aBoireUrgent => age - gardeMax,
+    MaturityLevel.optimal => gardeMax - age, // plus proche de fin = score élevé
+    MaturityLevel.tropJeune => gardeMin - age, // plus proche de maturité = score élevé
+    MaturityLevel.sansDonnee => 0,
+  };
+}

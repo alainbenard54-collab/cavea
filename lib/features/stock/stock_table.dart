@@ -2,13 +2,13 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter/material.dart';
+import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
 import 'bouteille_list_tile.dart';
 
-// Largeurs fixes pour colonnes non-flexibles
 const _wIcon = 44.0;
 const _wMillesime = 68.0;
-const _wGarde = 96.0;
+const _wGarde = 110.0;
 const _wPrix = 76.0;
 
 class StockTable extends StatelessWidget {
@@ -79,18 +79,70 @@ class StockTable extends StatelessWidget {
     );
   }
 
+  Widget _gardeCell(BuildContext context, Bouteille b) {
+    final style = Theme.of(context).textTheme.bodySmall;
+
+    if (b.gardeMin == null && b.gardeMax == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        child: Text('—', style: style, textAlign: TextAlign.center),
+      );
+    }
+
+    final from = b.gardeMin != null ? (b.millesime + b.gardeMin!).toString() : '?';
+    final to = b.gardeMax != null ? (b.millesime + b.gardeMax!).toString() : '?';
+    final gardeStr = '$from–$to';
+
+    final level = computeMaturity(
+      millesime: b.millesime,
+      gardeMin: b.gardeMin,
+      gardeMax: b.gardeMax,
+    );
+
+    final score = urgencyScore(
+      millesime: b.millesime,
+      gardeMin: b.gardeMin,
+      gardeMax: b.gardeMax,
+    );
+
+    final (bgColor, deltaStr) = switch (level) {
+      MaturityLevel.aBoireUrgent => (
+          Colors.red.shade50,
+          '+$score an${score > 1 ? 's' : ''}',
+        ),
+      MaturityLevel.optimal => (
+          Colors.green.shade50,
+          '–$score an${score > 1 ? 's' : ''}',
+        ),
+      MaturityLevel.tropJeune => (
+          Colors.blue.shade50,
+          'dans $score an${score > 1 ? 's' : ''}',
+        ),
+      MaturityLevel.sansDonnee => (null, ''),
+    };
+
+    return Container(
+      color: bgColor,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(gardeStr, style: style, textAlign: TextAlign.center),
+          if (deltaStr.isNotEmpty)
+            Text(
+              deltaStr,
+              style: style?.copyWith(fontSize: 10),
+              textAlign: TextAlign.center,
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _dataRow(BuildContext context, Bouteille b) {
     final theme = Theme.of(context);
     final style = theme.textTheme.bodySmall;
-
-    String gardeStr() {
-      if (b.gardeMin == null && b.gardeMax == null) return '—';
-      final from =
-          b.gardeMin != null ? (b.millesime + b.gardeMin!).toString() : '?';
-      final to =
-          b.gardeMax != null ? (b.millesime + b.gardeMax!).toString() : '?';
-      return '$from–$to';
-    }
 
     String prixStr() {
       if (b.prixAchat == null) return '—';
@@ -98,28 +150,20 @@ class StockTable extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: null, // futur : ouvrir la fiche
+      onTap: null,
       child: _layout([
-        // Icône couleur
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Icon(Icons.wine_bar, color: couleurVin(b.couleur), size: 22),
         ),
-        // Domaine
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
           child: Text(b.domaine, style: style, overflow: TextOverflow.ellipsis),
         ),
-        // Appellation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Text(
-            b.appellation,
-            style: style,
-            overflow: TextOverflow.ellipsis,
-          ),
+          child: Text(b.appellation, style: style, overflow: TextOverflow.ellipsis),
         ),
-        // Millésime
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
           child: Text(
@@ -128,32 +172,14 @@ class StockTable extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        // Emplacement
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Text(
-            b.emplacement,
-            style: style,
-            overflow: TextOverflow.ellipsis,
-          ),
+          child: Text(b.emplacement, style: style, overflow: TextOverflow.ellipsis),
         ),
-        // Garde (années réelles)
+        _gardeCell(context, b),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Text(
-            gardeStr(),
-            style: style,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        // Prix
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Text(
-            prixStr(),
-            style: style,
-            textAlign: TextAlign.right,
-          ),
+          child: Text(prixStr(), style: style, textAlign: TextAlign.right),
         ),
       ]),
     );

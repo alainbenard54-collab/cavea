@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/maturity/maturity_service.dart';
 import '../../shared/adaptive_layout.dart';
 import 'stock_controller.dart';
 import 'bouteille_list_tile.dart';
@@ -44,10 +45,10 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final couleursAsync = ref.watch(couleursProvider);
     final appellationsAsync = ref.watch(appellationsProvider);
     final millesimesAsync = ref.watch(millesimesProvider);
-
     final desktop = isDesktop(context);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Barre de recherche
         Padding(
@@ -67,40 +68,136 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             onChanged: ctrl.setTexte,
           ),
         ),
-        // Filtres en cascade
+
+        // Filtre couleur multi-sélect
+        couleursAsync.maybeWhen(
+          data: (couleurs) => couleurs.isEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: couleurs.map((c) {
+                        final selected = filters.couleurs.contains(c);
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: FilterChip(
+                            label: Text(c),
+                            selected: selected,
+                            onSelected: (_) => ctrl.toggleCouleur(c),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+          orElse: () => const SizedBox.shrink(),
+        ),
+
+        // Filtre maturité
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: _CascadeDropdown<String>(
-                  hint: 'Couleur',
-                  value: filters.couleur,
-                  items: couleursAsync.valueOrNull ?? [],
-                  onChanged: ctrl.setCouleur,
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _MaturityChip(
+                  label: 'À boire urgent !',
+                  level: MaturityLevel.aBoireUrgent,
+                  color: Colors.red.shade100,
+                  selectedColor: Colors.red.shade200,
+                  selected: filters.maturite == MaturityLevel.aBoireUrgent,
+                  onTap: () => ctrl.setMaturite(
+                    filters.maturite == MaturityLevel.aBoireUrgent
+                        ? null
+                        : MaturityLevel.aBoireUrgent,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _CascadeDropdown<String>(
-                  hint: 'Appellation',
-                  value: filters.appellation,
-                  items: appellationsAsync.valueOrNull ?? [],
-                  onChanged: ctrl.setAppellation,
+                const SizedBox(width: 6),
+                _MaturityChip(
+                  label: 'À boire',
+                  level: MaturityLevel.optimal,
+                  color: Colors.green.shade100,
+                  selectedColor: Colors.green.shade200,
+                  selected: filters.maturite == MaturityLevel.optimal,
+                  onTap: () => ctrl.setMaturite(
+                    filters.maturite == MaturityLevel.optimal
+                        ? null
+                        : MaturityLevel.optimal,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _CascadeDropdown<int>(
-                  hint: 'Millésime',
-                  value: filters.millesime,
-                  items: millesimesAsync.valueOrNull ?? [],
-                  onChanged: ctrl.setMillesime,
+                const SizedBox(width: 6),
+                _MaturityChip(
+                  label: 'Trop jeune',
+                  level: MaturityLevel.tropJeune,
+                  color: Colors.blue.shade100,
+                  selectedColor: Colors.blue.shade200,
+                  selected: filters.maturite == MaturityLevel.tropJeune,
+                  onTap: () => ctrl.setMaturite(
+                    filters.maturite == MaturityLevel.tropJeune
+                        ? null
+                        : MaturityLevel.tropJeune,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                _MaturityChip(
+                  label: '?',
+                  level: MaturityLevel.sansDonnee,
+                  color: Colors.grey.shade200,
+                  selectedColor: Colors.grey.shade400,
+                  selected: filters.maturite == MaturityLevel.sansDonnee,
+                  onTap: () => ctrl.setMaturite(
+                    filters.maturite == MaturityLevel.sansDonnee
+                        ? null
+                        : MaturityLevel.sansDonnee,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+
+        // Filtres avancés repliables
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              title: const Text(
+                'Filtres avancés',
+                style: TextStyle(fontSize: 13),
+              ),
+              tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+              childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _CascadeDropdown<String>(
+                        hint: 'Appellation',
+                        value: filters.appellation,
+                        items: appellationsAsync.valueOrNull ?? [],
+                        onChanged: ctrl.setAppellation,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _CascadeDropdown<int>(
+                        hint: 'Millésime',
+                        value: filters.millesime,
+                        items: millesimesAsync.valueOrNull ?? [],
+                        onChanged: ctrl.setMillesime,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
         // Bouton reset + compteur
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
@@ -129,7 +226,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             ],
           ),
         ),
-        // Liste ou tableau selon la largeur
+
+        // Liste ou tableau
         Expanded(
           child: stockAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -159,6 +257,37 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   }
 }
 
+class _MaturityChip extends StatelessWidget {
+  final String label;
+  final MaturityLevel level;
+  final Color color;
+  final Color selectedColor;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _MaturityChip({
+    required this.label,
+    required this.level,
+    required this.color,
+    required this.selectedColor,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      backgroundColor: color,
+      selectedColor: selectedColor,
+      onSelected: (_) => onTap(),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide.none,
+    );
+  }
+}
+
 class _CascadeDropdown<T> extends StatelessWidget {
   final String hint;
   final T? value;
@@ -174,7 +303,6 @@ class _CascadeDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // key force la reconstruction quand value change (cascade reset)
     return DropdownButtonFormField<T>(
       key: ValueKey(value),
       initialValue: value,
