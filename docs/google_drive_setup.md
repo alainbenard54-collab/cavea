@@ -1,0 +1,187 @@
+# Configuration Google Drive pour Cavea
+
+Ce guide explique comment activer la synchronisation Google Drive dans Cavea selon votre cas d'usage.
+
+---
+
+## Quel mode choisir ?
+
+| Mode | Appareils | Google Drive requis ? |
+|---|---|---|
+| **Mode 1 — PC seul** | Windows uniquement | ❌ Rien à faire |
+| **Mode 2 — PC + Android** | Windows + smartphone Android | ✅ Configuration nécessaire |
+| **Mode 3 — Android seul** | Smartphone uniquement | ✅ Configuration nécessaire (futur) |
+
+Si vous utilisez uniquement le PC Windows → **passez votre chemin, rien à faire**.
+
+---
+
+## Ce qu'est Google Drive dans ce contexte
+
+Cavea ne stocke pas vos données sur un serveur tiers : votre fichier `cave.db` reste **votre fichier**. Google Drive sert uniquement de « clé USB virtuelle » pour le transférer entre vos appareils.
+
+Concrètement :
+- Quand vous cliquez **Synchroniser** sur le PC, Cavea envoie `cave.db` vers votre Drive privé
+- Sur Android, Cavea télécharge ce même fichier pour afficher votre cave
+- Un mécanisme de **verrouillage** empêche deux appareils de modifier la base en même temps
+
+---
+
+## Ce qu'est GCP (Google Cloud Platform)
+
+Pour qu'une application ait le droit d'accéder à Google Drive, Google exige qu'elle soit **enregistrée** — comme un utilisateur crée un compte pour accéder à un service. Cet enregistrement se fait sur la [Google Cloud Console](https://console.cloud.google.com), la plateforme de développement de Google. C'est **gratuit** pour un usage personnel.
+
+L'enregistrement génère des **identifiants** (un code d'application) que Cavea utilisera pour prouver à Google qu'il s'agit bien de votre application personnelle.
+
+---
+
+## Étape A — Créer votre projet GCP (une seule fois)
+
+> Durée estimée : 15–20 minutes. À faire une seule fois, quelle que soit la combinaison d'appareils.
+
+**A-1.** Ouvrez [console.cloud.google.com](https://console.cloud.google.com) et connectez-vous avec votre compte Google (le même que celui que vous utiliserez pour Drive).
+
+**A-2.** Cliquez sur le sélecteur de projet en haut à gauche → **Nouveau projet**.
+- Nom : `Cavea` (ou ce que vous voulez)
+- Organisation : laissez vide
+- Cliquez **Créer**
+
+**A-3.** Dans le menu de gauche : **APIs & Services → Bibliothèque**.
+- Cherchez `Google Drive API`
+- Cliquez sur le résultat → **Activer**
+
+**A-4.** Dans le menu de gauche : **APIs & Services → Écran de consentement OAuth**.
+- Type d'utilisateur : **Externe** → Créer
+- Remplissez :
+  - Nom de l'application : `Cavea`
+  - E-mail d'assistance : votre adresse
+  - E-mail du développeur (en bas) : votre adresse
+- Cliquez **Enregistrer et continuer** jusqu'à la fin (les autres champs sont optionnels)
+- Sur la page **Utilisateurs de test** : ajoutez votre propre adresse e-mail Google
+
+**A-5.** Dans le menu de gauche : **APIs & Services → Identifiants** → **Créer des identifiants**.
+
+→ Continuez selon votre mode ci-dessous.
+
+---
+
+## Mode 2 — PC Windows + Android
+
+### Partie B — Identifiants Desktop (pour le PC)
+
+**B-1.** Dans **Créer des identifiants** → **ID client OAuth 2.0**
+- Type d'application : **Application de bureau**
+- Nom : `Cavea Desktop`
+- Cliquez **Créer**
+
+**B-2.** Une fenêtre affiche votre **ID client** et votre **Secret client**.
+- Téléchargez le fichier JSON (bouton de téléchargement) **ou** notez les deux valeurs
+
+**B-3.** Créez le fichier `google_desktop_secrets.json` avec ce contenu :
+
+```json
+{
+  "client_id": "VOTRE_ID_CLIENT.apps.googleusercontent.com",
+  "client_secret": "VOTRE_SECRET_CLIENT"
+}
+```
+
+**B-4.** Placez ce fichier **à côté de l'exécutable Cavea** :
+
+```
+C:\...\cavea\
+├── cavea.exe
+└── google_desktop_secrets.json   ← ici
+```
+
+> ⚠️ Ne partagez jamais ce fichier. Ne le committez pas dans Git (il est déjà dans `.gitignore`).
+
+---
+
+### Partie C — Identifiants Android (pour le smartphone)
+
+> Cette partie nécessite Android Studio ou le SDK Android installé pour obtenir l'empreinte SHA-1 de votre application.
+
+**C-1.** Dans **Créer des identifiants** → **ID client OAuth 2.0**
+- Type d'application : **Android**
+- Nom : `Cavea Android`
+- Nom du package : `com.example.cavea` (vérifiez dans `android/app/build.gradle` la ligne `applicationId`)
+
+**C-2.** Empreinte SHA-1 : dans un terminal PowerShell, exécutez :
+
+```powershell
+# Si vous avez Android Studio installé :
+keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+```
+
+Repérez la ligne `SHA1:` et copiez la valeur (format `AA:BB:CC:...`).
+
+**C-3.** Collez le SHA-1 dans le formulaire GCP → **Créer**
+
+**C-4.** Dans le menu de gauche : **APIs & Services → Identifiants**, cliquez sur les trois points à droite de votre client Android → **Télécharger le fichier de configuration**
+
+Cela télécharge `google-services.json`.
+
+**C-5.** Placez ce fichier dans :
+
+```
+android/
+└── app/
+    └── google-services.json   ← ici
+```
+
+**C-6.** Ouvrez `android/app/build.gradle` et ajoutez en bas du fichier :
+
+```gradle
+apply plugin: 'com.google.gms.google-services'
+```
+
+**C-7.** Ouvrez `android/build.gradle` (le fichier à la racine du dossier android, pas dans app/) et dans le bloc `dependencies {}` du `buildscript {}`, ajoutez :
+
+```gradle
+classpath 'com.google.gms:google-services:4.4.2'
+```
+
+**C-8.** Dans `AndroidManifest.xml`, remplacez `VOTRE_REVERSED_CLIENT_ID` par la valeur du champ `client_type: 1` → `android_client_info` → le `client_id` inversé que vous trouvez dans `google-services.json`.
+
+> Exemple : si `client_id` est `123456-abc.apps.googleusercontent.com`, le reversed est `com.googleusercontent.apps.123456-abc`.
+
+---
+
+## Mode 3 — Android seul (futur)
+
+Même procédure que la **Partie A** + **Partie C**. La Partie B (Desktop) n'est pas nécessaire.
+
+---
+
+## Tests manuels à effectuer après configuration
+
+### Mode 1 (PC seul) — rien à configurer
+
+**10-1.** Lancer Cavea → vérifier que le wizard de premier lancement s'affiche  
+**10-2.** Choisir "PC seul (local)" → saisir un dossier existant → cliquer Démarrer → vérifier que l'écran Stock s'affiche  
+**10-3.** Vérifier que le bouton "Synchroniser" est absent de la navigation  
+**10-4.** Vérifier que l'onglet Paramètres affiche le bouton "Activer Google Drive" (et non un indicateur de connexion active)
+
+### Mode 2 (PC + Android) — après la configuration GCP ci-dessus
+
+**10-5.** PC : Paramètres → cliquer "Activer Google Drive" → vérifier que le navigateur s'ouvre sur la page de connexion Google  
+**10-6.** PC : se connecter avec son compte Google → vérifier le dialogue "Migrer vers Google Drive ?" → cliquer Migrer → vérifier le snackbar "Mode 2 activé"  
+**10-7.** PC : vérifier que le bouton "Synchroniser" apparaît dans la barre de navigation  
+**10-8.** PC : cliquer "Synchroniser" → vérifier que l'overlay (fond sombre + spinner) s'affiche puis disparaît → vérifier le snackbar "Synchronisation réussie"  
+**10-9.** PC : modifier une bouteille (changer son emplacement via Déplacer) → cliquer "Synchroniser"  
+**10-10.** Android : lancer Cavea → choisir "PC + Android (Google Drive)" dans le wizard → se connecter Google → choisir "Télécharger depuis Drive" → vérifier que la bouteille modifiée en 10-9 est visible avec le bon emplacement  
+**10-11.** Android : modifier une autre bouteille → cliquer "Synchroniser" → PC : cliquer "Synchroniser" → vérifier que la modification Android est visible sur PC  
+**10-12.** Tester le verrou : pendant qu'une sync est en cours sur PC (difficile à intercepter), tenter une sync sur Android → vérifier le snackbar "Cave verrouillée par…"  
+**10-13.** Paramètres → cliquer "Revenir en local" → vérifier le snackbar "Mode local activé" → vérifier que le bouton "Synchroniser" disparaît
+
+---
+
+## Résumé des fichiers à créer/placer
+
+| Fichier | Emplacement | Mode concerné |
+|---|---|---|
+| `google_desktop_secrets.json` | À côté de `cavea.exe` | Mode 2 PC |
+| `google-services.json` | `android/app/` | Mode 2 ou 3 Android |
+
+Les templates et instructions sont dans `assets/google_desktop_secrets.json.template`.
