@@ -6,13 +6,18 @@ Ce guide explique comment activer la synchronisation Google Drive dans Cavea sel
 
 ## Quel mode choisir ?
 
-| Mode | Appareils | Google Drive requis ? |
+| Mode | Situation | Google Drive requis ? |
 |---|---|---|
-| **Mode 1 — PC seul** | Windows uniquement | ❌ Rien à faire |
-| **Mode 2 — PC + Android** | Windows + smartphone Android | ✅ Configuration nécessaire |
-| **Mode 3 — Android seul** | Smartphone uniquement | ✅ Configuration nécessaire (futur) |
+| **Mode 1 — Windows seul** | Un seul PC, cave.db local | ❌ Rien à faire |
+| **Mode 2 — Partage** | Plusieurs appareils partageant la même cave | ✅ Configuration nécessaire |
+| **Mode 3 — Android seul** | Un seul Android, cave.db local | ❌ Rien à faire (futur) |
 
-Si vous utilisez uniquement le PC Windows → **passez votre chemin, rien à faire**.
+**Mode 2 couvre toutes les combinaisons de partage :**
+- Windows + Android (cas le plus courant)
+- Plusieurs PC Windows partageant la même cave
+- Plusieurs Android partageant la même cave
+
+La règle est simple : **un seul appareil sans partage = Mode 1 ou 3, aucune clé requise. Dès que vous partagez entre appareils = Mode 2, configuration nécessaire.**
 
 ---
 
@@ -21,9 +26,10 @@ Si vous utilisez uniquement le PC Windows → **passez votre chemin, rien à fai
 Cavea ne stocke pas vos données sur un serveur tiers : votre fichier `cave.db` reste **votre fichier**. Google Drive sert uniquement de « clé USB virtuelle » pour le transférer entre vos appareils.
 
 Concrètement :
-- Quand vous cliquez **Synchroniser** sur le PC, Cavea envoie `cave.db` vers votre Drive privé
-- Sur Android, Cavea télécharge ce même fichier pour afficher votre cave
+- Quand vous cliquez **Synchroniser**, Cavea envoie `cave.db` vers votre espace Drive privé
+- Sur l'autre appareil, Cavea télécharge ce même fichier
 - Un mécanisme de **verrouillage** empêche deux appareils de modifier la base en même temps
+- La configuration (credentials) est à faire une fois par appareil participant au partage
 
 ---
 
@@ -150,7 +156,7 @@ classpath 'com.google.gms:google-services:4.4.2'
 
 ## Mode 3 — Android seul (futur)
 
-Même procédure que la **Partie A** + **Partie C**. La Partie B (Desktop) n'est pas nécessaire.
+Mode 3 = un seul Android avec `cave.db` stocké localement sur l'appareil. **Aucune configuration Google Drive n'est requise** — même principe que Mode 1 sur Windows. Ce mode n'est pas encore disponible dans la version actuelle de Cavea.
 
 ---
 

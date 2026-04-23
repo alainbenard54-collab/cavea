@@ -26,24 +26,30 @@ Do not introduce alternative state management (Provider, BLoC, GetX) or navigati
 
 ## Deployment modes — critical for storage decisions
 
-### Mode 1 — PC only (full local)
-- `dart:io` direct access to `cave.db`
+### Mode 1 — Windows only (full local)
+- `dart:io` direct access to `cave.db` on the local filesystem
 - No StorageAdapter, no sync, no lock — single copy, always open directly
-- No cloud dependency of any kind
+- No cloud dependency, no credentials required
 
-### Mode 2 — PC + Android (primary target)
-- Both apps share `cave.db` via a **cloud API** (Google Drive or Dropbox)
+### Mode 2 — Shared (any device combination)
+- **Any combination** of devices sharing the same `cave.db` via cloud API: Windows+Windows, Android+Android, or Windows+Android
 - Sync is manual and symmetric: lock → download → work locally → upload → unlock
-- `StorageAdapter` interface abstracts the cloud backend
+- `StorageAdapter` interface abstracts the cloud backend (Google Drive MVP, Dropbox V1)
+- Requires OAuth credentials setup on every participating device (GCP project + per-platform credentials)
+- The defining characteristic is **sharing across devices**, not the specific device types
 
-### Mode 3 — Mobile only (future, out of MVP)
-- Same architecture as Mode 2, only the active views differ
+### Mode 3 — Android only (full local, future)
+- `dart:io` / SQLite direct access to `cave.db` stored in the app's local storage on Android
+- No StorageAdapter, no sync, no lock — mirrors Mode 1 but on Android
+- No cloud dependency, no credentials required
+- Out of MVP scope
 
 ---
 
 ## Storage rules — enforce strictly
 
-- Modes 2 and 3 **must** access shared storage via cloud API only — never via `dart:io` on a locally synced folder. This would break Android.
+- Mode 2 **must** access shared storage via cloud API only — never via `dart:io` on a locally synced folder. This would break Android.
+- Mode 1 and Mode 3 use direct local storage only — never involve StorageAdapter or SyncService.
 - `StorageAdapter` is the contract between `SyncService` and the cloud backend. Do not bypass this abstraction.
 - `DriveStorageAdapter` and `DropboxStorageAdapter` are the concrete implementations — they encapsulate OAuth and API calls. `SyncService` must not know which backend is used.
 
