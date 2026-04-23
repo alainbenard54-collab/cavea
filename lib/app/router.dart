@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/config_service.dart';
 import '../features/bulk_add/bulk_add_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/setup/setup_screen.dart';
 import '../features/stock/stock_screen.dart';
 import '../shared/adaptive_layout.dart';
@@ -34,7 +35,9 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
               ? 1
               : location == '/import-csv'
                   ? 2
-                  : 0;
+                  : location == '/settings'
+                      ? 3
+                      : 0;
           return AppShell(selectedIndex: index, child: child);
         },
         routes: [
@@ -49,6 +52,10 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
           GoRoute(
             path: '/import-csv',
             builder: (context, state) => const ImportCsvScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),

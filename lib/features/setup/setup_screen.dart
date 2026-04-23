@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
+import '../../services/drive_storage_adapter.dart';
 import 'setup_controller.dart';
 
 class SetupScreen extends ConsumerWidget {
@@ -25,8 +28,7 @@ class SetupScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(32),
             child: switch (state.step) {
               SetupStep.modeChoice => _ModeChoiceStep(
-                onSelect:
-                    ref.read(setupControllerProvider.notifier).selectMode,
+                onSelect: ref.read(setupControllerProvider.notifier).selectMode,
               ),
               SetupStep.pathInput => _PathInputStep(
                 state: state,
@@ -38,6 +40,15 @@ class SetupScreen extends ConsumerWidget {
                 controller: ref.read(setupControllerProvider.notifier),
                 onComplete: onComplete,
               ),
+              SetupStep.driveAuth => _DriveAuthStep(
+                state: state,
+                controller: ref.read(setupControllerProvider.notifier),
+              ),
+              SetupStep.driveChoice => _DriveChoiceStep(
+                state: state,
+                controller: ref.read(setupControllerProvider.notifier),
+                onComplete: onComplete,
+              ),
             },
           ),
         ),
@@ -45,6 +56,8 @@ class SetupScreen extends ConsumerWidget {
     );
   }
 }
+
+// ── Choix du mode ─────────────────────────────────────────────────────────────
 
 class _ModeChoiceStep extends StatelessWidget {
   final void Function(String) onSelect;
@@ -72,11 +85,11 @@ class _ModeChoiceStep extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _ModeCard(
-          title: 'PC + Android',
-          description: 'Non disponible dans cette version.',
+          title: 'PC + Android (Google Drive)',
+          description:
+              'Synchronisation via Google Drive — nécessite un compte Google et le fichier google_desktop_secrets.json.',
           icon: Icons.sync,
-          enabled: false,
-          onTap: null,
+          onTap: () => onSelect('drive'),
         ),
         const SizedBox(height: 12),
         _ModeCard(
@@ -116,14 +129,15 @@ class _ModeCard extends StatelessWidget {
           style: TextStyle(color: enabled ? null : Colors.grey),
         ),
         subtitle: Text(description),
-        trailing:
-            enabled ? const Icon(Icons.chevron_right) : null,
+        trailing: enabled ? const Icon(Icons.chevron_right) : null,
         onTap: onTap,
         enabled: enabled,
       ),
     );
   }
 }
+
+// ── Mode 1 : saisie chemin ────────────────────────────────────────────────────
 
 class _PathInputStep extends ConsumerWidget {
   final SetupState state;
@@ -193,6 +207,8 @@ class _PathInputStep extends ConsumerWidget {
   }
 }
 
+// ── Mode 1 : confirmation ─────────────────────────────────────────────────────
+
 class _ConfirmationStep extends StatelessWidget {
   final SetupState state;
   final SetupController controller;
@@ -238,6 +254,157 @@ class _ConfirmationStep extends StatelessWidget {
     );
   }
 }
+
+// ── Mode 2 : authentification Drive ──────────────────────────────────────────
+
+class _DriveAuthStep extends ConsumerWidget {
+  final SetupState state;
+  final SetupController controller;
+
+  const _DriveAuthStep({required this.state, required this.controller});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final folderController = TextEditingController(text: state.folderPath);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Connexion Google Drive',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Choisissez d\'abord le dossier local pour cave.db (cache de travail), '
+          'puis connectez votre compte Google.',
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: folderController,
+                decoration: InputDecoration(
+                  labelText: 'Dossier local (cache)',
+                  errorText: state.errorMessage,
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: controller.setFolderPath,
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filled(
+              icon: const Icon(Icons.folder_open),
+              onPressed: () async {
+                final dir = await FilePicker.platform.getDirectoryPath(
+                  dialogTitle: 'Dossier local pour cave.db',
+                );
+                if (dir != null) {
+                  controller.setFolderPath(dir);
+                  folderController.text = dir;
+                }
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        if (state.isLoading)
+          const Center(child: CircularProgressIndicator())
+        else
+          FilledButton.icon(
+            icon: const Icon(Icons.login),
+            label: const Text('Connecter Google Drive'),
+            onPressed: () async {
+              if (state.folderPath.isEmpty || !Directory(state.folderPath).existsSync()) {
+                controller.setFolderPath(state.folderPath); // déclenche validation
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Choisissez un dossier local valide.')),
+                );
+                return;
+              }
+              await controller.authenticateDrive(
+                folderPath: state.folderPath,
+                secretsPath: DriveStorageAdapter.desktopSecretsPath,
+              );
+            },
+          ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: controller.backToModeChoice,
+          child: const Text('Retour'),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Mode 2 : choix nouvelle cave / télécharger ───────────────────────────────
+
+class _DriveChoiceStep extends StatelessWidget {
+  final SetupState state;
+  final SetupController controller;
+  final void Function(AppConfig) onComplete;
+
+  const _DriveChoiceStep({
+    required this.state,
+    required this.controller,
+    required this.onComplete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Google Drive connecté',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        const Text('Comment souhaitez-vous démarrer ?'),
+        const SizedBox(height: 24),
+        if (state.isLoading)
+          const Center(child: CircularProgressIndicator())
+        else ...[
+          FilledButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Nouvelle cave (cave.db vide)'),
+            onPressed: () async {
+              final config = await controller.confirmDriveNew();
+              onComplete(config);
+            },
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.cloud_download),
+            label: const Text('Télécharger cave.db depuis Drive'),
+            onPressed: () async {
+              try {
+                final config = await controller.confirmDriveDownload();
+                onComplete(config);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Téléchargement échoué : $e')),
+                );
+              }
+            },
+          ),
+        ],
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: controller.backToModeChoice,
+          child: const Text('Retour'),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 class _ConfigRow extends StatelessWidget {
   final String label;

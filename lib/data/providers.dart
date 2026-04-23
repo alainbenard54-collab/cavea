@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'database.dart';
 import 'daos/bouteille_dao.dart';
 
-// Overridé dans ProviderScope après configuration (voir main.dart)
+// Overridé dans ProviderScope après configuration (voir main.dart).
+// Pour la sync : _AppWrapperState close l'AppDatabase existant, puis setState()
+// recrée le ProviderScope avec la nouvelle instance → tous les streams reconnectent.
 final appDatabaseProvider = Provider<AppDatabase>(
   (ref) => throw UnimplementedError('appDatabaseProvider must be overridden'),
 );

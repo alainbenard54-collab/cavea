@@ -47,6 +47,12 @@ dependencies:
   path: ^1.9.0
   # Utilitaires
   uuid: ^4.4.0
+  # Sync Google Drive
+  googleapis: ^13.2.0
+  googleapis_auth: ^2.0.0
+  google_sign_in: ^6.2.1
+  flutter_secure_storage: ^9.2.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

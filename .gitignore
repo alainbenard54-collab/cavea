@@ -32,5 +32,9 @@ stock.csv
 historique.csv
 clean_stock_archive.py
 
+# Identifiants OAuth Google Drive (ne jamais committer)
+google_desktop_secrets.json
+android/app/google-services.json
+
 # Apprentissage / preparation du projet
 discussion_prealable.docx
