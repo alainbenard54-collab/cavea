@@ -136,16 +136,26 @@ android/
     └── google-services.json   ← ici
 ```
 
-**C-6.** Ouvrez `android/app/build.gradle` et ajoutez en bas du fichier :
+**C-6.** Ouvrez `android/settings.gradle.kts` et ajoutez le plugin google-services dans le bloc `plugins {}` existant :
 
-```gradle
-apply plugin: 'com.google.gms.google-services'
+```kotlin
+plugins {
+    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+    id("com.android.application") version "8.11.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false   // ← ajouter cette ligne
+}
 ```
 
-**C-7.** Ouvrez `android/build.gradle` (le fichier à la racine du dossier android, pas dans app/) et dans le bloc `dependencies {}` du `buildscript {}`, ajoutez :
+**C-7.** Ouvrez `android/app/build.gradle.kts` et ajoutez `id("com.google.gms.google-services")` dans le bloc `plugins {}` existant :
 
-```gradle
-classpath 'com.google.gms:google-services:4.4.2'
+```kotlin
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")   // ← ajouter cette ligne
+}
 ```
 
 **C-8.** Dans `AndroidManifest.xml`, remplacez `VOTRE_REVERSED_CLIENT_ID` par la valeur du champ `client_type: 1` → `android_client_info` → le `client_id` inversé que vous trouvez dans `google-services.json`.
