@@ -65,8 +65,6 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  bool _previouslySyncing = false;
-
   void _onDestinationSelected(BuildContext context, int index) {
     context.go(_destinations[index].route);
   }

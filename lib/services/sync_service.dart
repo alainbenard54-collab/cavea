@@ -37,16 +37,16 @@ class SyncError extends SyncState {
 // Enregistrés par _AppWrapperState au démarrage.
 // Permettent à SyncService de fermer/rouvrir la base sans dépendre de Flutter.
 
-typedef _CloseDbCallback = Future<void> Function();
-typedef _ReopenDbCallback = Future<void> Function();
+typedef CloseDbCallback = Future<void> Function();
+typedef ReopenDbCallback = Future<void> Function();
 
-_CloseDbCallback? _closeDbCallback;
-_ReopenDbCallback? _reopenDbCallback;
+CloseDbCallback? _closeDbCallback;
+ReopenDbCallback? _reopenDbCallback;
 
 /// À appeler depuis _AppWrapperState.initState() dès que la DB est ouverte.
 void registerSyncDbCallbacks({
-  required _CloseDbCallback onClose,
-  required _ReopenDbCallback onReopen,
+  required CloseDbCallback onClose,
+  required ReopenDbCallback onReopen,
 }) {
   _closeDbCallback = onClose;
   _reopenDbCallback = onReopen;
@@ -68,19 +68,20 @@ class SyncService extends StateNotifier<SyncState> {
   /// 2. Si le lock est à un autre → état locked, arrêt
   /// 3. Sinon → lock → download → close drift → replace → reopen drift → idle
   Future<void> sync() async {
-    if (_adapter == null) return; // Mode 1 : no-op
+    final adapter = _adapter;
+    if (adapter == null) return; // Mode 1 : no-op
     if (state is SyncSyncing) return;
 
     state = const SyncSyncing();
     bool lockAcquired = false;
 
     try {
-      final status = await _adapter!.getLockStatus();
+      final status = await adapter.getLockStatus();
 
       if (status.isOurs) {
         // On détient déjà le lock d'une sync précédente → upload d'abord
-        await _adapter!.uploadDb(File(configService.config!.dbPath));
-        await _adapter!.unlock();
+        await adapter.uploadDb(File(configService.config!.dbPath));
+        await adapter.unlock();
       } else if (status.isLocked) {
         // Lock appartient à un autre appareil
         state = SyncLocked(status.lockedBy!);
@@ -88,14 +89,14 @@ class SyncService extends StateNotifier<SyncState> {
       }
 
       // Acquérir le lock
-      await _adapter!.lock();
+      await adapter.lock();
       lockAcquired = true;
 
       // Fermer drift (l'overlay bloque toute interaction UI à ce stade)
       if (_closeDbCallback != null) await _closeDbCallback!();
 
       // Télécharger le fichier (remplace le fichier local)
-      await _adapter!.downloadDb(configService.config!.dbPath);
+      await adapter.downloadDb(configService.config!.dbPath);
 
       // Rouvrir drift sur le nouveau fichier
       if (_reopenDbCallback != null) await _reopenDbCallback!();
@@ -105,7 +106,7 @@ class SyncService extends StateNotifier<SyncState> {
     } catch (e) {
       if (lockAcquired) {
         try {
-          await _adapter!.unlock();
+          await adapter.unlock();
         } catch (_) {}
       }
       // Tenter de rouvrir la base même en cas d'erreur
@@ -120,12 +121,13 @@ class SyncService extends StateNotifier<SyncState> {
 
   /// Uploade et libère le lock (à appeler avant de quitter l'app en Mode 2).
   Future<void> releaseIfNeeded() async {
-    if (_adapter == null) return;
+    final adapter = _adapter;
+    if (adapter == null) return;
     try {
-      final status = await _adapter!.getLockStatus();
+      final status = await adapter.getLockStatus();
       if (status.isOurs) {
-        await _adapter!.uploadDb(File(configService.config!.dbPath));
-        await _adapter!.unlock();
+        await adapter.uploadDb(File(configService.config!.dbPath));
+        await adapter.unlock();
       }
     } catch (_) {}
   }

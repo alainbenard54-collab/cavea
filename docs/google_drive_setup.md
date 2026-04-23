@@ -166,29 +166,6 @@ Mode 3 = un seul Android avec `cave.db` stocké localement sur l'appareil. **Auc
 
 ---
 
-## Tests manuels à effectuer après configuration
-
-### Mode 1 (PC seul) — rien à configurer
-
-**10-1.** Lancer Cavea → vérifier que le wizard de premier lancement s'affiche  
-**10-2.** Choisir "PC seul (local)" → saisir un dossier existant → cliquer Démarrer → vérifier que l'écran Stock s'affiche  
-**10-3.** Vérifier que le bouton "Synchroniser" est absent de la navigation  
-**10-4.** Vérifier que l'onglet Paramètres affiche le bouton "Activer Google Drive" (et non un indicateur de connexion active)
-
-### Mode 2 (PC + Android) — après la configuration GCP ci-dessus
-
-**10-5.** PC : Paramètres → cliquer "Activer Google Drive" → vérifier que le navigateur s'ouvre sur la page de connexion Google  
-**10-6.** PC : se connecter avec son compte Google → vérifier le dialogue "Migrer vers Google Drive ?" → cliquer Migrer → vérifier le snackbar "Mode 2 activé"  
-**10-7.** PC : vérifier que le bouton "Synchroniser" apparaît dans la barre de navigation  
-**10-8.** PC : cliquer "Synchroniser" → vérifier que l'overlay (fond sombre + spinner) s'affiche puis disparaît → vérifier le snackbar "Synchronisation réussie"  
-**10-9.** PC : modifier une bouteille (changer son emplacement via Déplacer) → cliquer "Synchroniser"  
-**10-10.** Android : lancer Cavea → choisir "PC + Android (Google Drive)" dans le wizard → se connecter Google → choisir "Télécharger depuis Drive" → vérifier que la bouteille modifiée en 10-9 est visible avec le bon emplacement  
-**10-11.** Android : modifier une autre bouteille → cliquer "Synchroniser" → PC : cliquer "Synchroniser" → vérifier que la modification Android est visible sur PC  
-**10-12.** Tester le verrou : pendant qu'une sync est en cours sur PC (difficile à intercepter), tenter une sync sur Android → vérifier le snackbar "Cave verrouillée par…"  
-**10-13.** Paramètres → cliquer "Revenir en local" → vérifier le snackbar "Mode local activé" → vérifier que le bouton "Synchroniser" disparaît
-
----
-
 ## Résumé des fichiers à créer/placer
 
 | Fichier | Emplacement | Mode concerné |
