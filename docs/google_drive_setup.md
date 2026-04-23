@@ -158,10 +158,6 @@ plugins {
 }
 ```
 
-**C-8.** Dans `AndroidManifest.xml`, remplacez `VOTRE_REVERSED_CLIENT_ID` par la valeur du champ `client_type: 1` → `android_client_info` → le `client_id` inversé que vous trouvez dans `google-services.json`.
-
-> Exemple : si `client_id` est `123456-abc.apps.googleusercontent.com`, le reversed est `com.googleusercontent.apps.123456-abc`.
-
 ---
 
 ## Mode 3 — Android seul (futur)

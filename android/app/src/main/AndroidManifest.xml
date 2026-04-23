@@ -33,15 +33,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- google_sign_in OAuth callback -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Remplacer VOTRE_REVERSED_CLIENT_ID par le reversed_client_id
-                     depuis google-services.json (ex: com.googleusercontent.apps.XXX) -->
-                <data android:scheme="VOTRE_REVERSED_CLIENT_ID"/>
-            </intent-filter>
+
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
