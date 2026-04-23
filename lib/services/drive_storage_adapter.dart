@@ -256,7 +256,9 @@ class DriveStorageAdapter implements StorageAdapter {
   // ── Chargement des credentials Desktop ──────────────────────────────────────
 
   /// Lit client_id et client_secret depuis [secretsFilePath].
-  /// Format : {"client_id": "...", "client_secret": "..."}
+  /// Accepte les deux formats :
+  ///   - Téléchargé depuis GCP : {"installed": {"client_id": "...", "client_secret": "..."}}
+  ///   - Format simplifié :       {"client_id": "...", "client_secret": "..."}
   static Future<({String clientId, String clientSecret})> loadDesktopCredentials(
     String secretsFilePath,
   ) async {
@@ -267,7 +269,9 @@ class DriveStorageAdapter implements StorageAdapter {
         'Créez-le depuis le template google_desktop_secrets.json.template',
       );
     }
-    final json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+    final root = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+    // Le fichier téléchargé depuis GCP a une clé "installed" (application de bureau)
+    final json = (root['installed'] ?? root) as Map<String, dynamic>;
     return (
       clientId: json['client_id'] as String,
       clientSecret: json['client_secret'] as String,
