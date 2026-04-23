@@ -31,6 +31,12 @@ const _destinations = [
     route: '/',
   ),
   _AppDestination(
+    label: 'Ajouter',
+    icon: Icons.add_circle_outline,
+    selectedIcon: Icons.add_circle,
+    route: '/bulk-add',
+  ),
+  _AppDestination(
     label: 'Import CSV',
     icon: Icons.upload_file_outlined,
     selectedIcon: Icons.upload_file,

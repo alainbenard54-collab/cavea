@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/config_service.dart';
+import '../features/bulk_add/bulk_add_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
 import '../features/setup/setup_screen.dart';
 import '../features/stock/stock_screen.dart';
@@ -29,13 +30,21 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
       ShellRoute(
         builder: (context, state, child) {
           final location = state.matchedLocation;
-          final index = location == '/import-csv' ? 1 : 0;
+          final index = location == '/bulk-add'
+              ? 1
+              : location == '/import-csv'
+                  ? 2
+                  : 0;
           return AppShell(selectedIndex: index, child: child);
         },
         routes: [
           GoRoute(
             path: '/',
             builder: (context, state) => const StockScreen(),
+          ),
+          GoRoute(
+            path: '/bulk-add',
+            builder: (context, state) => const BulkAddScreen(),
           ),
           GoRoute(
             path: '/import-csv',

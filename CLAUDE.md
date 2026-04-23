@@ -85,8 +85,8 @@ All other fields are editable in the full bottle edit form (V1 feature, not MVP)
 1. ✅ drift model + `cave_clean.csv` import
 2. ✅ Stock view + filters (couleur multi-sélect, appellation, millésime, recherche texte, layout adaptatif, table desktop triable)
 3. ✅ Maturity integrated into stock view (colonne GARDE colorée + delta, FilterChips maturité multi-sélect, tri urgence secondaire — **pas d'écran séparé "Quoi boire ?"**)
-4. `bottle-actions`: BottomSheet d'actions rapides sur clic bouteille (Déplacer + Consommer + accès fiche complète)
-5. Bulk add (single form → N identical bottles)
+4. ✅ `bottle-actions`: BottomSheet d'actions rapides sur clic bouteille (Déplacer + Consommer + accès fiche complète)
+5. ✅ Bulk add (formulaire → N bouteilles identiques, répartition multi-emplacement)
 6. ~~Change location~~ → fusionnée dans `bottle-actions` (étape 4)
 7. Sync mechanism (lock / download / upload)
 8. Settings (mode selection, shared folder path)
@@ -103,6 +103,42 @@ Clic sur une ligne du stock → `BottomSheet` modal avec :
 2. **Consommer** : date de consommation (défaut = aujourd'hui, modifiable via DatePicker pour déclaration tardive), note /10 optionnelle, commentaire de dégustation optionnel → `UPDATE date_sortie + note_degus + commentaire_degus`
 3. **Modifier la fiche** : pointe vers un écran d'édition complète — **interface prête en MVP, implémentation V1**. Affiche "Fonctionnalité à venir" en MVP. Champs protégés exclus (voir ci-dessus).
 4. **Annuler** : ferme le BottomSheet
+
+---
+
+## bulk-add — spec finale (étape 5 MVP ✅)
+
+Formulaire d'ajout en lot : champs communs + quantité totale + section "Répartition" avec groupes dynamiques.
+
+**Champs communs (tous non-protégés)** : `domaine`, `appellation`, `millesime`, `couleur`, `cru`, `contenance` (défaut "75 cl"), `prix_achat`, `garde_min`, `garde_max`, `commentaire_entree`, `fournisseur_nom`, `fournisseur_infos`, `producteur`, `date_entree` (défaut = aujourd'hui).
+
+**Répartition** : liste de groupes `(quantité, emplacement)` avec autocomplétion emplacement. Contrainte : somme des quantités == quantité totale déclarée. Si un seul emplacement = une seule ligne. L'app crée N lignes indépendantes en base (1 ligne = 1 bouteille physique, UUID distinct par ligne).
+
+**Autocomplétion champs texte** : domaine, appellation, cru, contenance, fournisseur_nom proposent les valeurs existantes en base (toutes bouteilles — stock ET consommées) via recherche plein texte contient. Les emplacements de répartition suivent le même principe.
+
+**Validation garde** :
+- Si `garde_min` et `garde_max` sont tous les deux renseignés : `garde_min ≤ garde_max` obligatoire (snackbar d'erreur sinon, insertion bloquée).
+- Si l'un ou l'autre est vide : dialogue de confirmation avertit que la maturité ne pourra pas être calculée. L'utilisateur choisit "Confirmer sans garde" ou "Retour".
+
+**Champs protégés exclus** : `id`, `updated_at`, `date_sortie`, `note_degus`, `commentaire_degus`.
+
+---
+
+## settings — spec planifiée (étape 8 MVP)
+
+Écran de configuration accessible depuis la navigation principale.
+
+**Paramètres Mode 1 :**
+- Chemin vers le répertoire contenant `cave.db` (modifiable, file picker)
+
+**Paramètres Mode 2 (non disponible en MVP, placeholder):**
+- Service cloud (Google Drive / Dropbox)
+
+**Valeurs par défaut formulaire bulk-add :**
+- `couleur_defaut` (défaut en dur : "Rouge" — utilisé si la valeur est présente en base)
+- `contenance_defaut` (défaut en dur : "75 cl")
+
+Ces valeurs sont lues depuis `ConfigService` au chargement de l'écran d'ajout. Si la valeur configurée n'est pas dans la liste chargée depuis la base, elle est ignorée (l'utilisateur sélectionne manuellement).
 
 ---
 

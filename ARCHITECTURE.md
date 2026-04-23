@@ -184,26 +184,43 @@ lib/
 ├── app/
 │   ├── router.dart              # go_router — toutes les routes
 │   └── theme.dart               # Material 3 theme
+├── core/
+│   ├── config_service.dart      # configuration persistante (SharedPreferences + .env)
+│   └── maturity/
+│       └── maturity_service.dart  # calcul maturité (tropJeune/optimal/aBoireUrgent)
 ├── data/
 │   ├── database.dart            # drift DB, définition des tables
+│   ├── database.g.dart          # code généré drift
+│   ├── providers.dart           # Riverpod providers (DB, DAO)
 │   ├── daos/
-│   │   └── bouteille_dao.dart   # requêtes CRUD + filtres
-│   └── sync/
-│       ├── sync_service.dart    # orchestration download/upload
-│       └── lock_manager.dart    # gestion cave.lock
-├── domain/
-│   └── bouteille.dart           # modèle métier (calcul maturité, etc.)
+│   │   └── bouteille_dao.dart   # requêtes CRUD + filtres + listes distinctes
+│   └── tables/
+│       └── bouteilles.dart      # définition table drift
 ├── features/
-│   ├── stock/                   # liste + filtres
-│   ├── a_boire/                 # vue "que boire" avec indicateurs couleur
-│   ├── ajout/                   # formulaire unitaire + ajout en lot
-│   ├── mouvements/              # changement d'emplacement
-│   ├── historique/              # bouteilles consommées (V1)
-│   ├── import_csv/              # parsing cave_clean.csv
-│   └── settings/                # choix mode, chemin dossier partagé
+│   ├── bottle_actions/          # BottomSheet actions bouteille (Déplacer, Consommer)
+│   │   ├── bottle_actions_sheet.dart
+│   │   └── widgets/
+│   │       ├── deplacer_form.dart
+│   │       └── consommer_form.dart
+│   ├── bulk_add/                # formulaire ajout en lot
+│   │   ├── bulk_add_screen.dart
+│   │   ├── bulk_add_controller.dart
+│   │   └── widgets/
+│   │       └── repartition_row.dart
+│   ├── import_csv/              # parsing et import CSV
+│   │   ├── import_csv_screen.dart
+│   │   ├── import_service.dart
+│   │   └── csv_parser.dart
+│   ├── setup/                   # wizard premier lancement
+│   │   ├── setup_screen.dart
+│   │   └── setup_controller.dart
+│   └── stock/                   # liste stock + filtres + maturité
+│       ├── stock_screen.dart
+│       ├── stock_controller.dart
+│       ├── stock_table.dart     # table triable desktop (≥ 640px)
+│       └── bouteille_list_tile.dart
 └── shared/
-    ├── widgets/                 # composants réutilisables
-    └── adaptive_layout.dart     # bascule desktop/mobile
+    └── adaptive_layout.dart     # bascule desktop/mobile (600px)
 ```
 
 ---
@@ -295,12 +312,12 @@ Afficher à la fin : X insérées · Y mises à jour · Z ignorées.
 
 ## Ordre de développement (MVP)
 
-1. Configuration initiale + wizard + drift model + import CSV
-2. Vue stock + filtres (couleur, appellation, millésime, recherche texte)
-3. Vue "à boire"
-4. Action "consommer" (renseigne `date_sortie`)
-5. Ajout en lot
-6. Changement d'emplacement
+1. ✅ Configuration initiale + wizard + drift model + import CSV
+2. ✅ Vue stock + filtres (couleur multi-sélect, appellation, millésime, recherche texte, table desktop triable)
+3. ✅ Maturité intégrée dans la vue stock — colonne GARDE colorée, FilterChips maturité, tri urgence (pas d'écran séparé "à boire")
+4. ✅ Actions bouteille — BottomSheet avec Déplacer (autocomplétion emplacement), Consommer (date + note + commentaire), stub Modifier
+5. ✅ Ajout en lot — formulaire multi-champs, répartition dynamique, autocomplétion domaine/appellation/cru/contenance/fournisseur, validation garde
+6. ~~Changement d'emplacement~~ → fusionné dans étape 4 (BottomSheet)
 7. Mécanisme sync (lock / download / upload)
 8. Settings (chemin dossier partagé, mode)
 

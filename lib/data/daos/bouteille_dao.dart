@@ -112,6 +112,14 @@ class BouteilleDao {
     return _db.into(_db.bouteilles).insert(bouteille);
   }
 
+  Future<void> insertBouteilles(List<BouteillesCompanion> bouteilles) {
+    return _db.transaction(() async {
+      for (final b in bouteilles) {
+        await _db.into(_db.bouteilles).insert(b);
+      }
+    });
+  }
+
   Future<bool> updateBouteille(BouteillesCompanion bouteille) {
     return _db.update(_db.bouteilles).replace(bouteille);
   }
@@ -150,6 +158,75 @@ class BouteilleDao {
     final rows = await query.get();
     return rows
         .map((r) => r.read(_db.bouteilles.emplacement) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getAllDistinctContenances() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.contenance])
+      ..where(_db.bouteilles.contenance.isNotNull())
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.contenance)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.contenance) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getAllDistinctCouleurs() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.couleur])
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.couleur)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.couleur) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getAllDistinctCrus() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.cru])
+      ..where(_db.bouteilles.cru.isNotNull())
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.cru)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.cru) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getDistinctDomaines() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.domaine])
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.domaine)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.domaine) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getAllDistinctAppellations() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.appellation])
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.appellation)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.appellation) ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> getDistinctFournisseurs() async {
+    final query = _db.selectOnly(_db.bouteilles, distinct: true)
+      ..addColumns([_db.bouteilles.fournisseurNom])
+      ..where(_db.bouteilles.fournisseurNom.isNotNull())
+      ..orderBy([OrderingTerm.asc(_db.bouteilles.fournisseurNom)]);
+    final rows = await query.get();
+    return rows
+        .map((r) => r.read(_db.bouteilles.fournisseurNom) ?? '')
         .where((s) => s.isNotEmpty)
         .toList();
   }
