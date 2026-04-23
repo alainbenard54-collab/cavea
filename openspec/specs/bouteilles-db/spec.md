@@ -65,6 +65,14 @@ L'application SHALL fournir un DAO `BouteilleDao` exposant : insertion d'une bou
 - **WHEN** `getDistinctEmplacements()` est appelé
 - **THEN** retourne la liste des emplacements non vides distincts présents dans le stock courant, triés alphabétiquement
 
+#### Scenario: Insertion en lot atomique
+- **WHEN** `insertBouteilles(List<BouteillesCompanion>)` est appelé avec une liste non vide
+- **THEN** toutes les bouteilles sont insérées dans une seule transaction ; en cas d'erreur, aucune n'est persistée
+
+#### Scenario: Valeurs distinctes toutes bouteilles (autocomplétion formulaire)
+- **WHEN** `getAllDistinctCouleurs()`, `getAllDistinctAppellations()`, `getAllDistinctCrus()`, `getAllDistinctContenances()`, `getDistinctDomaines()`, `getDistinctFournisseurs()` sont appelés
+- **THEN** retournent les valeurs uniques présentes dans **toutes** les bouteilles (stock ET consommées), triées alphabétiquement — permettent d'alimenter les champs autocomplétion du formulaire d'ajout sans perdre des valeurs dont toutes les bouteilles ont été consommées
+
 ---
 
 ### Requirement: Providers Riverpod
