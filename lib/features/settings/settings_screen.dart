@@ -263,7 +263,14 @@ class _DriveActiveTile extends ConsumerWidget {
 
     if (confirm != true) return;
 
-    // Supprimer le token OAuth pour forcer un nouveau flow à la prochaine activation
+    // Libérer le lock Drive si on le détient (upload + unlock).
+    try {
+      await activeSyncService?.releaseIfNeeded();
+    } catch (_) {
+      // Échec réseau : on bascule quand même en local, le lock expirera en 24h.
+    }
+
+    // Supprimer le token OAuth pour forcer un nouveau flow à la prochaine activation.
     await DriveStorageAdapter().signOut();
 
     final newConfig = AppConfig(

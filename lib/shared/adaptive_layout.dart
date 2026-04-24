@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io' show exit;
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -244,9 +245,9 @@ class _AppShellState extends ConsumerState<AppShell> {
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              SystemNavigator.pop();
+              exit(0); // Terminate process — SystemNavigator.pop() laisserait l'app en arrière-plan.
             },
-            child: const Text('Annuler'),
+            child: const Text('Quitter'),
           ),
           FilledButton(
             onPressed: () {
