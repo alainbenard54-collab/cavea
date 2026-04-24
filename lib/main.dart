@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:async' show unawaited;
+
+import 'dart:ui' show AppExitResponse;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/router.dart';
@@ -9,6 +13,8 @@ import 'core/config_service.dart';
 import 'data/database.dart';
 import 'data/providers.dart';
 import 'services/sync_service.dart';
+
+final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,52 +33,101 @@ class AppWrapper extends StatefulWidget {
   State<AppWrapper> createState() => _AppWrapperState();
 }
 
-class _AppWrapperState extends State<AppWrapper> {
+class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   AppDatabase? _db;
+  String? _pendingSnackbarMessage;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (configService.isConfigured) {
       _db = AppDatabase(configService.config!.dbPath);
       _registerSyncCallbacks();
+      if (configService.config?.storageMode == 'drive') {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _runStartupSync());
+      }
     }
   }
 
-  // Enregistre les callbacks close/reopen utilisés par SyncService.
-  // L'overlay bloque toute interaction UI pendant la fenêtre close→reopen.
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _db?.close();
+    super.dispose();
+  }
+
+  // ── WidgetsBindingObserver ────────────────────────────────────────────────
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() async {
+    final syncSvc = activeSyncService;
+    if (syncSvc == null || !syncSvc.isWriteMode) {
+      return AppExitResponse.exit;
+    }
+    // Déclenche SyncExiting → overlay dans AppShell + upload + unlock + quit
+    unawaited(syncSvc.releaseAndExit());
+    return AppExitResponse.cancel;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Android best-effort : pas de dialog, pas de garantie sur hard kill
+    if (state == AppLifecycleState.detached) {
+      activeSyncService?.releaseIfNeeded();
+    }
+  }
+
+  // ── Callbacks drift close/reopen ─────────────────────────────────────────
+
   void _registerSyncCallbacks() {
     registerSyncDbCallbacks(
       onClose: () async {
         await _db?.close();
-        // On laisse _db pointé vers la base fermée :
-        // le ProviderScope garde son override sans null, mais
-        // toute lecture sur la base fermée sera ignorée (overlay actif).
       },
-      onReopen: () async {
+      onReopen: ({String? message}) async {
+        _pendingSnackbarMessage = message;
         setState(() {
           _db = AppDatabase(configService.config!.dbPath);
-          // ProviderScope se recrée avec la nouvelle instance → streams reconnectent.
         });
+        // Attendre la reconstruction effective du ProviderScope avant de
+        // rendre la main à SyncService. Sans ce await, _isDisposed reste
+        // false et _startWithLock est remis à false par l'ancien SyncService
+        // avant que le nouveau puisse le lire → _lockHeldByUs = false.
+        await WidgetsBinding.instance.endOfFrame;
       },
     );
   }
+
+  // ── Startup sync Mode 2 ───────────────────────────────────────────────────
+
+  Future<void> _runStartupSync() async {
+    await activeSyncService?.syncOnStartup();
+  }
+
+  // ── Wizard complete ───────────────────────────────────────────────────────
 
   void _onSetupComplete() {
     setState(() {
       _db = AppDatabase(configService.config!.dbPath);
     });
     _registerSyncCallbacks();
-  }
-
-  @override
-  void dispose() {
-    _db?.close();
-    super.dispose();
+    if (configService.config?.storageMode == 'drive') {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _runStartupSync());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_pendingSnackbarMessage != null) {
+      final msg = _pendingSnackbarMessage!;
+      _pendingSnackbarMessage = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      });
+    }
     return ProviderScope(
       // ValueKey force la recréation du ProviderScope après le wizard ou sync
       key: ValueKey(_db),
@@ -92,6 +147,7 @@ class CaveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       title: 'Cavea',
       theme: buildTheme(),
       routerConfig: buildRouter(onSetupComplete),

@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
@@ -16,9 +17,10 @@ import 'package:uuid/uuid.dart';
 
 import 'storage_adapter.dart';
 
-const _driveScope = drive.DriveApi.driveAppdataScope;
+const _driveScope = drive.DriveApi.driveFileScope;
 const _lockFileName = 'cave.db.lock';
 const _dbFileName = 'cave.db';
+const _folderName = 'Cavea';
 
 const _secureStorage = FlutterSecureStorage(
   aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -29,15 +31,14 @@ const _keyRefreshToken = 'drive_refresh_token';
 const _keyDeviceId = 'drive_device_id';
 
 /// Implémentation Google Drive de [StorageAdapter].
-/// Utilise appDataFolder (espace privé de l'app, invisible dans Drive UI).
+/// Utilise un dossier "Cavea" visible dans l'interface Google Drive.
 class DriveStorageAdapter implements StorageAdapter {
   drive.DriveApi? _driveApi;
   http.Client? _authClient;
+  String? _folderId;
 
   // ── Authentification ────────────────────────────────────────────────────────
 
-  /// Authentifie via le flux approprié à la plateforme.
-  /// Persiste le refresh_token (Desktop) ou délègue à google_sign_in (Android).
   Future<void> authenticate({String? desktopClientId, String? desktopClientSecret}) async {
     if (Platform.isAndroid) {
       await _authenticateAndroid();
@@ -58,7 +59,6 @@ class DriveStorageAdapter implements StorageAdapter {
     AutoRefreshingAuthClient authClient;
 
     if (savedToken != null) {
-      // Restaurer depuis le refresh token persisté
       final credentials = AccessCredentials(
         AccessToken('Bearer', '', DateTime.now().toUtc().subtract(const Duration(seconds: 1))),
         savedToken,
@@ -70,7 +70,6 @@ class DriveStorageAdapter implements StorageAdapter {
         http.Client(),
       );
     } else {
-      // Flux OAuth complet : ouvre le navigateur, serveur localhost géré par googleapis_auth
       authClient = await clientViaUserConsent(
         ClientId(clientId, clientSecret),
         [_driveScope],
@@ -78,7 +77,6 @@ class DriveStorageAdapter implements StorageAdapter {
           await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         },
       );
-      // Persister le refresh token
       if (authClient.credentials.refreshToken != null) {
         await _secureStorage.write(
           key: _keyRefreshToken,
@@ -94,7 +92,6 @@ class DriveStorageAdapter implements StorageAdapter {
   Future<void> _authenticateAndroid() async {
     final googleSignIn = GoogleSignIn(scopes: [_driveScope]);
 
-    // Essayer sign-in silencieux d'abord
     var account = await googleSignIn.signInSilently();
     account ??= await googleSignIn.signIn();
 
@@ -107,7 +104,7 @@ class DriveStorageAdapter implements StorageAdapter {
         auth.accessToken!,
         DateTime.now().toUtc().add(const Duration(hours: 1)),
       ),
-      null, // Google Sign-In gère le refresh via signInSilently
+      null,
       [_driveScope],
     );
     _authClient = authenticatedClient(http.Client(), credentials);
@@ -116,18 +113,18 @@ class DriveStorageAdapter implements StorageAdapter {
 
   Future<void> _ensureAuthenticated() async {
     if (_driveApi != null) return;
-    // Tenter de restaurer depuis token persisté (Desktop)
     if (!Platform.isAndroid) {
       final savedToken = await _secureStorage.read(key: _keyRefreshToken);
-      if (savedToken == null) throw Exception('Non authentifié. Configurez le Mode 2 dans les paramètres.');
-      // Les credentials seront chargés à la prochaine authenticate() ; ici on échoue proprement
-      throw Exception('Session expirée. Veuillez vous reconnecter dans les paramètres.');
+      if (savedToken == null) {
+        throw Exception('Non authentifié. Configurez le Mode 2 dans les paramètres.');
+      }
+      final creds = await loadDesktopCredentials(desktopSecretsPath);
+      await _authenticateDesktop(clientId: creds.clientId, clientSecret: creds.clientSecret);
+      return;
     }
-    // Android : tenter sign-in silencieux
     await _authenticateAndroid();
   }
 
-  /// Révoque les tokens et efface les données persistées.
   Future<void> signOut() async {
     await _secureStorage.delete(key: _keyRefreshToken);
     if (Platform.isAndroid) {
@@ -136,26 +133,56 @@ class DriveStorageAdapter implements StorageAdapter {
     _authClient?.close();
     _authClient = null;
     _driveApi = null;
+    _folderId = null;
   }
 
   // ── Device ID ───────────────────────────────────────────────────────────────
 
   Future<String> _getDeviceId() async {
-    var id = await _secureStorage.read(key: _keyDeviceId);
+    final prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString(_keyDeviceId);
     if (id == null) {
       id = const Uuid().v4();
-      await _secureStorage.write(key: _keyDeviceId, value: id);
+      await prefs.setString(_keyDeviceId, id);
     }
     return id;
+  }
+
+  // ── Dossier Cavea ────────────────────────────────────────────────────────────
+
+  /// Trouve ou crée le dossier "Cavea" à la racine du Drive.
+  /// Met en cache l'ID pour éviter des appels répétés.
+  Future<String> _ensureFolder() async {
+    if (_folderId != null) return _folderId!;
+    await _ensureAuthenticated();
+
+    final result = await _driveApi!.files.list(
+      spaces: 'drive',
+      q: "name='$_folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      $fields: 'files(id)',
+    );
+
+    if (result.files?.isNotEmpty == true) {
+      _folderId = result.files!.first.id!;
+      return _folderId!;
+    }
+
+    final folder = drive.File()
+      ..name = _folderName
+      ..mimeType = 'application/vnd.google-apps.folder';
+    final created = await _driveApi!.files.create(folder, $fields: 'id');
+    _folderId = created.id!;
+    return _folderId!;
   }
 
   // ── Helpers Drive ───────────────────────────────────────────────────────────
 
   Future<String?> _findFileId(String name) async {
     await _ensureAuthenticated();
+    final folderId = await _ensureFolder();
     final result = await _driveApi!.files.list(
-      spaces: 'appDataFolder',
-      q: "name='$name' and trashed=false",
+      spaces: 'drive',
+      q: "name='$name' and '$folderId' in parents and trashed=false",
       $fields: 'files(id)',
     );
     return result.files?.firstOrNull?.id;
@@ -163,6 +190,7 @@ class DriveStorageAdapter implements StorageAdapter {
 
   Future<void> _uploadBytes(String name, List<int> bytes) async {
     await _ensureAuthenticated();
+    final folderId = await _ensureFolder();
     final media = drive.Media(Stream.value(bytes), bytes.length);
     final existingId = await _findFileId(name);
 
@@ -171,7 +199,7 @@ class DriveStorageAdapter implements StorageAdapter {
     } else {
       final file = drive.File()
         ..name = name
-        ..parents = ['appDataFolder'];
+        ..parents = [folderId];
       await _driveApi!.files.create(file, uploadMedia: media);
     }
   }
@@ -211,7 +239,6 @@ class DriveStorageAdapter implements StorageAdapter {
       final lockedAt = DateTime.tryParse(json['locked_at'] as String? ?? '');
       if (lockedAt == null) return const LockStatus.notLocked();
 
-      // Ignorer les locks > 24h (stale lock)
       if (DateTime.now().toUtc().difference(lockedAt.toUtc()).inHours >= 24) {
         return const LockStatus.notLocked();
       }
@@ -221,7 +248,6 @@ class DriveStorageAdapter implements StorageAdapter {
       if (lockedBy == myId) return const LockStatus.lockedByUs();
       return LockStatus.lockedByOther(lockedBy ?? 'inconnu');
     } catch (_) {
-      // Fichier absent ou illisible → pas verrouillé
       return const LockStatus.notLocked();
     }
   }
@@ -253,12 +279,19 @@ class DriveStorageAdapter implements StorageAdapter {
     await _uploadBytes(_dbFileName, bytes);
   }
 
+  @override
+  Future<bool> remoteDbExists() async {
+    final fileId = await _findFileId(_dbFileName);
+    return fileId != null;
+  }
+
+  /// Supprime cave.db du Drive (utilisé par le wizard pour écraser une cave existante).
+  Future<void> deleteDb() async {
+    await _deleteFile(_dbFileName);
+  }
+
   // ── Chargement des credentials Desktop ──────────────────────────────────────
 
-  /// Lit client_id et client_secret depuis [secretsFilePath].
-  /// Accepte les deux formats :
-  ///   - Téléchargé depuis GCP : {"installed": {"client_id": "...", "client_secret": "..."}}
-  ///   - Format simplifié :       {"client_id": "...", "client_secret": "..."}
   static Future<({String clientId, String clientSecret})> loadDesktopCredentials(
     String secretsFilePath,
   ) async {
@@ -270,7 +303,6 @@ class DriveStorageAdapter implements StorageAdapter {
       );
     }
     final root = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-    // Le fichier téléchargé depuis GCP a une clé "installed" (application de bureau)
     final json = (root['installed'] ?? root) as Map<String, dynamic>;
     return (
       clientId: json['client_id'] as String,
@@ -278,10 +310,17 @@ class DriveStorageAdapter implements StorageAdapter {
     );
   }
 
-  /// Chemin attendu du fichier de credentials Desktop (à côté de l'exe).
+  /// Cherche google_desktop_secrets.json dans deux emplacements, par ordre de priorité :
+  /// 1. À côté de l'exécutable (build/windows/.../Debug|Release/) — pour les builds packagés
+  /// 2. À la racine du projet (répertoire de travail) — survit à flutter clean
   static String get desktopSecretsPath {
     if (kIsWeb || !Platform.isWindows) return '';
+    const fileName = 'google_desktop_secrets.json';
     final exeDir = File(Platform.resolvedExecutable).parent.path;
-    return p.join(exeDir, 'google_desktop_secrets.json');
+    final nextToExe = p.join(exeDir, fileName);
+    if (File(nextToExe).existsSync()) return nextToExe;
+    // Fallback : répertoire de travail courant (racine projet en dev)
+    final cwd = p.join(Directory.current.path, fileName);
+    return cwd;
   }
 }

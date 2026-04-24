@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/sync_service.dart';
 
-/// Icône d'état de synchronisation Google Drive.
-/// Visible uniquement en Mode 2 (syncService.isActive).
+/// Indicateur d'état permanent dans la navigation.
+/// Icône de mode (PC / nuage) + icône de verrou (écriture / lecture seule) en Mode 2.
 class SyncStatusIndicator extends ConsumerStatefulWidget {
   const SyncStatusIndicator({super.key});
 
@@ -37,41 +37,72 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
   @override
   Widget build(BuildContext context) {
     final syncState = ref.watch(syncServiceProvider);
-    final service = ref.read(syncServiceProvider.notifier);
+    final mode = ref.watch(storageModeProvider);
+    final isMode2 = mode == 'drive';
 
-    if (!service.isActive) return const SizedBox.shrink();
+    // Icône de mode — toujours affichée
+    final modeIcon = Tooltip(
+      message: isMode2 ? 'Mode partagé — Google Drive' : 'Mode local — PC seul',
+      child: Icon(
+        isMode2 ? Icons.cloud : Icons.computer,
+        color: isMode2 ? Colors.blue : Colors.grey,
+        size: 20,
+      ),
+    );
 
+    if (!isMode2) {
+      _rotationCtrl.stop();
+      return modeIcon;
+    }
+
+    // Icône de verrou / statut (Mode 2 uniquement)
+    Widget? statusIcon;
     switch (syncState) {
-      case SyncSyncing():
+      case SyncIdle():
+        _rotationCtrl.stop();
+        statusIcon = const Tooltip(
+          message: 'Votre cave est ouverte en écriture',
+          child: Icon(Icons.lock_open, color: Colors.green, size: 20),
+        );
+
+      case SyncReadOnly():
+        _rotationCtrl.stop();
+        statusIcon = const Tooltip(
+          message: 'Consultation uniquement — cave ouverte sur un autre appareil',
+          child: Icon(Icons.lock, color: Colors.amber, size: 20),
+        );
+
+      case SyncSyncing() || SyncExiting():
         _rotationCtrl.repeat();
-        return Tooltip(
+        statusIcon = Tooltip(
           message: 'Synchronisation en cours…',
           child: RotationTransition(
             turns: _rotationCtrl,
-            child: const Icon(Icons.sync, color: Colors.blue),
+            child: const Icon(Icons.sync, color: Colors.blue, size: 20),
           ),
         );
 
-      case SyncLocked(:final lockedBy):
+      case SyncError():
         _rotationCtrl.stop();
-        return Tooltip(
-          message: 'Cave verrouillée par $lockedBy',
-          child: const Icon(Icons.lock_outline, color: Colors.orange),
+        statusIcon = const Tooltip(
+          message: 'Erreur de synchronisation',
+          child: Icon(Icons.sync_problem, color: Colors.red, size: 20),
         );
 
-      case SyncError(:final message):
+      case SyncStarting() || SyncNeedsCrashRecovery() || SyncNeedsLockChoice():
         _rotationCtrl.stop();
-        return Tooltip(
-          message: 'Erreur : $message',
-          child: const Icon(Icons.sync_problem, color: Colors.red),
-        );
-
-      case SyncIdle():
-        _rotationCtrl.stop();
-        return const Tooltip(
-          message: 'Synchronisation disponible',
-          child: Icon(Icons.sync, color: Colors.grey),
-        );
+        statusIcon = null; // Rien pendant le démarrage (overlay affiché)
     }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        modeIcon,
+        if (statusIcon != null) ...[
+          const SizedBox(width: 4),
+          statusIcon,
+        ],
+      ],
+    );
   }
 }

@@ -15,8 +15,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final config = configService.config;
-    final isMode2 = config?.storageMode == 'drive';
+    final isMode2 = ref.watch(storageModeProvider) == 'drive';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Paramètres')),
@@ -35,13 +34,34 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Cavea'),
             subtitle: const Text('Gestionnaire de cave à vin personnel'),
             trailing: TextButton(
-              onPressed: () => showAboutDialog(
+              onPressed: () => showDialog(
                 context: context,
-                applicationName: 'Cavea',
-                applicationVersion: '1.0.0',
-                applicationLegalese: '© 2026 Alain Benard\nLicence Apache 2.0',
+                builder: (dialogContext) => AlertDialog(
+                  title: const Text('Cavea'),
+                  content: const Text(
+                    'Version 1.0.0\n\n© 2026 Alain Benard\nLicence Apache 2.0',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        showLicensePage(
+                          context: context,
+                          applicationName: 'Cavea',
+                          applicationVersion: '1.0.0',
+                          applicationLegalese: '© 2026 Alain Benard',
+                        );
+                      },
+                      child: const Text('Voir les licences'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: const Text('Fermer'),
+                    ),
+                  ],
+                ),
               ),
-              child: const Text('Licence'),
+              child: const Text('À propos'),
             ),
           ),
         ],
@@ -78,7 +98,7 @@ class _DriveActivationTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef widgetRef) {
     return ListTile(
       leading: const Icon(Icons.cloud_outlined),
-      title: const Text('PC + Android (Google Drive)'),
+      title: const Text('Mode partagé (Google Drive)'),
       subtitle: const Text('Mode actuel : PC seul (local)'),
       trailing: FilledButton(
         onPressed: () => _activateDrive(context, widgetRef),
@@ -135,7 +155,7 @@ class _DriveActivationTile extends ConsumerWidget {
     // Proposer la migration
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Migrer vers Google Drive ?'),
         content: const Text(
           'Voulez-vous envoyer votre cave.db actuel vers Google Drive ?\n\n'
@@ -143,11 +163,11 @@ class _DriveActivationTile extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Annuler'),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text('Migrer'),
           ),
         ],
@@ -169,6 +189,7 @@ class _DriveActivationTile extends ConsumerWidget {
     try {
       final dbFile = File(configService.config!.dbPath);
       await adapter.uploadDb(dbFile);
+      await adapter.lock();
     } catch (e) {
       messenger.clearSnackBars();
       if (!context.mounted) return;
@@ -177,6 +198,9 @@ class _DriveActivationTile extends ConsumerWidget {
       );
       return;
     }
+
+    // Le prochain SyncService démarrera avec le lock déjà acquis
+    primeNextSyncWithLock();
 
     // Basculer en Mode 2
     final newConfig = AppConfig(
@@ -191,8 +215,7 @@ class _DriveActivationTile extends ConsumerWidget {
       const SnackBar(content: Text('Mode 2 activé — synchronisation Google Drive disponible')),
     );
 
-    // Forcer la reconstruction du provider sync
-    ref.invalidate(syncServiceProvider);
+    ref.read(storageModeProvider.notifier).state = 'drive';
   }
 }
 
@@ -206,7 +229,7 @@ class _DriveActiveTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef widgetRef) {
     return ListTile(
       leading: const Icon(Icons.cloud_done, color: Colors.green),
-      title: const Text('PC + Android (Google Drive)'),
+      title: const Text('Mode partagé (Google Drive)'),
       subtitle: const Text('Mode actuel : synchronisation activée'),
       trailing: OutlinedButton(
         onPressed: () => _deactivateDrive(context, widgetRef),
@@ -218,7 +241,7 @@ class _DriveActiveTile extends ConsumerWidget {
   Future<void> _deactivateDrive(BuildContext context, WidgetRef ref) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Revenir en mode local ?'),
         content: const Text(
           'L\'app passera en mode PC seul.\n'
@@ -227,11 +250,11 @@ class _DriveActiveTile extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Annuler'),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: const Text('Confirmer'),
           ),
         ],
@@ -240,13 +263,16 @@ class _DriveActiveTile extends ConsumerWidget {
 
     if (confirm != true) return;
 
+    // Supprimer le token OAuth pour forcer un nouveau flow à la prochaine activation
+    await DriveStorageAdapter().signOut();
+
     final newConfig = AppConfig(
       storageMode: 'local',
       dbPath: configService.config!.dbPath,
     );
     await configService.save(newConfig);
 
-    ref.invalidate(syncServiceProvider);
+    ref.read(storageModeProvider.notifier).state = 'local';
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

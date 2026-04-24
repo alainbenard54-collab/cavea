@@ -42,4 +42,7 @@ abstract class StorageAdapter {
 
   /// Uploade [localDb] vers le stockage cloud (crée ou remplace).
   Future<void> uploadDb(File localDb);
+
+  /// Retourne true si cave.db existe dans le stockage cloud.
+  Future<bool> remoteDbExists();
 }

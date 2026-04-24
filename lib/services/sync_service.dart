@@ -3,13 +3,16 @@
 
 import 'dart:io';
 
+import 'dart:ui' show AppExitType;
+
+import 'package:flutter/services.dart' show ServicesBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config_service.dart';
 import 'storage_adapter.dart';
 import 'drive_storage_adapter.dart';
 
-// ── État ─────────────────────────────────────────────────────────────────────
+// ── États ─────────────────────────────────────────────────────────────────────
 
 sealed class SyncState {
   const SyncState();
@@ -19,13 +22,35 @@ class SyncIdle extends SyncState {
   const SyncIdle();
 }
 
+/// Sync de démarrage en cours — UI bloquée.
+class SyncStarting extends SyncState {
+  const SyncStarting();
+}
+
+/// Upload ou download en cours (bouton Sync ou recovery).
 class SyncSyncing extends SyncState {
   const SyncSyncing();
 }
 
-class SyncLocked extends SyncState {
+/// Lock à nous depuis une session précédente interrompue — choix utilisateur requis.
+class SyncNeedsCrashRecovery extends SyncState {
+  const SyncNeedsCrashRecovery();
+}
+
+/// Lock appartient à un autre appareil — choix utilisateur requis.
+class SyncNeedsLockChoice extends SyncState {
   final String lockedBy;
-  const SyncLocked(this.lockedBy);
+  const SyncNeedsLockChoice(this.lockedBy);
+}
+
+/// Mode lecture seule — lock tiers actif, aucune écriture Drive possible.
+class SyncReadOnly extends SyncState {
+  const SyncReadOnly();
+}
+
+/// Fermeture en cours — upload + unlock avant quitter.
+class SyncExiting extends SyncState {
+  const SyncExiting();
 }
 
 class SyncError extends SyncState {
@@ -34,16 +59,14 @@ class SyncError extends SyncState {
 }
 
 // ── Callbacks close/reopen drift ─────────────────────────────────────────────
-// Enregistrés par _AppWrapperState au démarrage.
 // Permettent à SyncService de fermer/rouvrir la base sans dépendre de Flutter.
 
 typedef CloseDbCallback = Future<void> Function();
-typedef ReopenDbCallback = Future<void> Function();
+typedef ReopenDbCallback = Future<void> Function({String? message});
 
 CloseDbCallback? _closeDbCallback;
 ReopenDbCallback? _reopenDbCallback;
 
-/// À appeler depuis _AppWrapperState.initState() dès que la DB est ouverte.
 void registerSyncDbCallbacks({
   required CloseDbCallback onClose,
   required ReopenDbCallback onReopen,
@@ -52,109 +75,252 @@ void registerSyncDbCallbacks({
   _reopenDbCallback = onReopen;
 }
 
+// ── État persisté entre recréations du ProviderScope ─────────────────────────
+// Survit à la recréation du ProviderScope déclenchée par _reopenDbCallback.
+
+bool _startWithLock = false;
+bool _startAsReadOnly = false;
+
+/// À appeler juste avant de basculer storageModeProvider vers 'drive' après
+/// une migration (Settings). Le prochain SyncService démarrera avec le lock.
+void primeNextSyncWithLock() => _startWithLock = true;
+
+// ── Référence globale pour didRequestAppExit (main.dart) ─────────────────────
+
+SyncService? activeSyncService;
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 class SyncService extends StateNotifier<SyncState> {
-  final StorageAdapter? _adapter; // null en Mode 1
+  final StorageAdapter? _adapter;
+  bool _isDisposed = false;
+  bool _lockHeldByUs = false;
 
-  SyncService(this._adapter) : super(const SyncIdle());
+  SyncService(this._adapter)
+      : super(_startAsReadOnly ? const SyncReadOnly() : const SyncIdle()) {
+    _lockHeldByUs = _startWithLock;
+    _startWithLock = false;
+    _startAsReadOnly = false;
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _lockHeldByUs = false;
+    super.dispose();
+  }
 
   bool get isActive => _adapter != null;
 
-  /// Synchronise cave.db avec Google Drive.
-  ///
-  /// Protocole :
-  /// 1. Si le lock est à nous → upload local → unlock
-  /// 2. Si le lock est à un autre → état locked, arrêt
-  /// 3. Sinon → lock → download → close drift → replace → reopen drift → idle
-  Future<void> sync() async {
-    final adapter = _adapter;
-    if (adapter == null) return; // Mode 1 : no-op
-    if (state is SyncSyncing) return;
+  /// Vrai si cet appareil détient le lock et peut écrire sur Drive.
+  bool get isWriteMode {
+    final s = state;
+    return s is SyncIdle || s is SyncSyncing;
+  }
 
-    state = const SyncSyncing();
-    bool lockAcquired = false;
+  /// Vrai si on est en lecture seule (lock appartient à un autre appareil).
+  bool get isReadOnly => state is SyncReadOnly;
+
+  // ── Démarrage automatique ─────────────────────────────────────────────────
+
+  /// Appelé automatiquement au démarrage en Mode 2 (depuis _AppWrapperState).
+  /// Gère les trois cas : lock libre, lock à nous (crash), lock tiers.
+  Future<void> syncOnStartup() async {
+    final adapter = _adapter;
+    if (adapter == null) return;
+    if (_isDisposed) return;
+
+    state = const SyncStarting();
 
     try {
       final status = await adapter.getLockStatus();
 
       if (status.isOurs) {
-        // On détient déjà le lock d'une sync précédente → upload d'abord
-        await adapter.uploadDb(File(configService.config!.dbPath));
-        await adapter.unlock();
-      } else if (status.isLocked) {
-        // Lock appartient à un autre appareil
-        state = SyncLocked(status.lockedBy!);
+        if (_isDisposed) return;
+        state = const SyncNeedsCrashRecovery();
         return;
       }
 
-      // Acquérir le lock
+      if (status.isLocked) {
+        if (_isDisposed) return;
+        state = SyncNeedsLockChoice(status.lockedBy!);
+        return;
+      }
+
+      // Lock libre — acquérir et synchroniser
       await adapter.lock();
-      lockAcquired = true;
+      _lockHeldByUs = true;
 
-      // Fermer drift (l'overlay bloque toute interaction UI à ce stade)
-      if (_closeDbCallback != null) await _closeDbCallback!();
+      final remoteExists = await adapter.remoteDbExists();
+      if (remoteExists) {
+        _startWithLock = true;
+        if (_closeDbCallback != null) await _closeDbCallback!();
+        await adapter.downloadDb(configService.config!.dbPath);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+        // Le ProviderScope peut avoir été recréé — le nouveau SyncService
+        // a repris _startWithLock=true et démarre avec _lockHeldByUs=true.
+        if (_isDisposed) return;
+        _lockHeldByUs = true; // fallback si ProviderScope non recréé
+        _startWithLock = false;
+      } else {
+        // Premier lancement : uploader la base locale
+        await adapter.uploadDb(File(configService.config!.dbPath));
+      }
 
-      // Télécharger le fichier (remplace le fichier local)
-      await adapter.downloadDb(configService.config!.dbPath);
-
-      // Rouvrir drift sur le nouveau fichier
-      if (_reopenDbCallback != null) await _reopenDbCallback!();
-
-      // Le lock reste posé : il sera libéré lors de la prochaine sync (upload)
+      if (_isDisposed) return;
       state = const SyncIdle();
     } catch (e) {
-      if (lockAcquired) {
-        try {
-          await adapter.unlock();
-        } catch (_) {}
+      _startWithLock = false;
+      _startAsReadOnly = false;
+      if (_lockHeldByUs) {
+        try { await adapter.unlock(); } catch (_) {}
+        _lockHeldByUs = false;
       }
-      // Tenter de rouvrir la base même en cas d'erreur
-      if (_reopenDbCallback != null) {
-        try {
-          await _reopenDbCallback!();
-        } catch (_) {}
-      }
+      if (_isDisposed) return;
       state = SyncError(e.toString());
     }
   }
 
-  /// Uploade et libère le lock (à appeler avant de quitter l'app en Mode 2).
-  Future<void> releaseIfNeeded() async {
+  // ── Résolution crash recovery ─────────────────────────────────────────────
+
+  /// Choix "Envoyer mes données locales" : upload local → garde le lock → écriture.
+  Future<void> resolveOwnLockWithUpload() async {
     final adapter = _adapter;
     if (adapter == null) return;
+
+    state = const SyncSyncing();
     try {
-      final status = await adapter.getLockStatus();
-      if (status.isOurs) {
-        await adapter.uploadDb(File(configService.config!.dbPath));
-        await adapter.unlock();
+      await adapter.uploadDb(File(configService.config!.dbPath));
+      _lockHeldByUs = true;
+      if (_isDisposed) return;
+      state = const SyncIdle();
+    } catch (e) {
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
+  /// Choix "Repartir depuis Google Drive" : download Drive → garde le lock → écriture.
+  Future<void> resolveOwnLockWithDownload() async {
+    final adapter = _adapter;
+    if (adapter == null) return;
+
+    state = const SyncSyncing();
+    bool dbWasClosed = false;
+    try {
+      _startWithLock = true;
+      if (_closeDbCallback != null) {
+        await _closeDbCallback!();
+        dbWasClosed = true;
       }
+      await adapter.downloadDb(configService.config!.dbPath);
+      if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+      if (_isDisposed) return;
+      _lockHeldByUs = true;
+      _startWithLock = false;
+      state = const SyncIdle();
+    } catch (e) {
+      _startWithLock = false;
+      if (dbWasClosed && _reopenDbCallback != null) {
+        try { await _reopenDbCallback!(message: null); } catch (_) {}
+      }
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
+  // ── Mode lecture seule ────────────────────────────────────────────────────
+
+  /// Choix "Consulter en lecture seule" : download sans lock → lecture seule.
+  Future<void> enterReadOnly() async {
+    final adapter = _adapter;
+    if (adapter == null) return;
+
+    state = const SyncSyncing();
+    bool dbWasClosed = false;
+    try {
+      final remoteExists = await adapter.remoteDbExists();
+      if (remoteExists) {
+        _startAsReadOnly = true;
+        if (_closeDbCallback != null) {
+          await _closeDbCallback!();
+          dbWasClosed = true;
+        }
+        await adapter.downloadDb(configService.config!.dbPath);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+        if (_isDisposed) return;
+        _startAsReadOnly = false;
+      }
+      _lockHeldByUs = false;
+      if (_isDisposed) return;
+      state = const SyncReadOnly();
+    } catch (e) {
+      _startAsReadOnly = false;
+      if (dbWasClosed && _reopenDbCallback != null) {
+        try { await _reopenDbCallback!(message: null); } catch (_) {}
+      }
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
+  // ── Sync manuelle (bouton) ────────────────────────────────────────────────
+
+  /// Upload uniquement — lock conservé. N'a d'effet qu'en mode écriture.
+  Future<void> sync() async {
+    final adapter = _adapter;
+    if (adapter == null) return;
+    if (!isWriteMode) return;
+    if (state is SyncSyncing) return;
+
+    state = const SyncSyncing();
+    try {
+      await adapter.uploadDb(File(configService.config!.dbPath));
+      if (_isDisposed) return;
+      state = const SyncIdle();
+    } catch (e) {
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
+  // ── Fermeture ─────────────────────────────────────────────────────────────
+
+  /// Déclenché par didRequestAppExit() — upload + unlock puis quitter.
+  Future<void> releaseAndExit() async {
+    if (_isDisposed) return;
+    state = const SyncExiting();
+    await releaseIfNeeded();
+    if (_isDisposed) return;
+    await ServicesBinding.instance.exitApplication(AppExitType.required);
+  }
+
+  /// Upload + unlock si on détient le lock. Appelé à la fermeture ou best-effort Android.
+  Future<void> releaseIfNeeded() async {
+    final adapter = _adapter;
+    if (adapter == null || !_lockHeldByUs) return;
+    try {
+      await adapter.uploadDb(File(configService.config!.dbPath));
+      await adapter.unlock();
+      _lockHeldByUs = false;
     } catch (_) {}
   }
 }
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
-/// Provider no-op pour Mode 1 (sans StorageAdapter).
-final _noOpSyncServiceProvider = StateNotifierProvider<SyncService, SyncState>(
-  (ref) => SyncService(null),
-);
+final storageModeProvider = StateProvider<String>((ref) {
+  return configService.config?.storageMode ?? 'local';
+});
 
-/// Provider avec DriveStorageAdapter pour Mode 2.
-final _driveSyncServiceProvider = StateNotifierProvider<SyncService, SyncState>(
-  (ref) {
-    final adapter = DriveStorageAdapter();
-    return SyncService(adapter);
-  },
-);
-
-/// Provider actif selon le mode configuré.
-/// En Mode 1 : SyncService inactif (state toujours idle, sync = no-op).
-/// En Mode 2 : SyncService avec DriveStorageAdapter.
 final syncServiceProvider = StateNotifierProvider<SyncService, SyncState>((ref) {
-  final mode = configService.config?.storageMode ?? 'local';
-  if (mode == 'drive') {
-    return ref.watch(_driveSyncServiceProvider.notifier);
-  }
-  return ref.watch(_noOpSyncServiceProvider.notifier);
+  final mode = ref.watch(storageModeProvider);
+  final service = mode == 'drive'
+      ? SyncService(DriveStorageAdapter())
+      : SyncService(null);
+  activeSyncService = service;
+  ref.onDispose(() {
+    if (identical(activeSyncService, service)) activeSyncService = null;
+  });
+  return service;
 });

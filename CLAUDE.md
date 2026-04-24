@@ -33,7 +33,7 @@ Do not introduce alternative state management (Provider, BLoC, GetX) or navigati
 
 ### Mode 2 — Shared (any device combination)
 - **Any combination** of devices sharing the same `cave.db` via cloud API: Windows+Windows, Android+Android, or Windows+Android
-- Sync is manual and symmetric: lock → download → work locally → upload → unlock
+- Sync is semi-automatic: download + lock auto au démarrage, upload + unlock auto à la fermeture. Sync manuelle disponible en cours de session via bouton.
 - `StorageAdapter` interface abstracts the cloud backend (Google Drive MVP, Dropbox V1)
 - Requires OAuth credentials setup on every participating device (GCP project + per-platform credentials)
 - The defining characteristic is **sharing across devices**, not the specific device types
@@ -110,6 +110,8 @@ Clic sur une ligne du stock → `BottomSheet` modal avec :
 3. **Modifier la fiche** : pointe vers un écran d'édition complète — **interface prête en MVP, implémentation V1**. Affiche "Fonctionnalité à venir" en MVP. Champs protégés exclus (voir ci-dessus).
 4. **Annuler** : ferme le BottomSheet
 
+**Mode lecture seule** : quand `SyncReadOnly` est actif (lock détenu par un autre appareil), le BottomSheet affiche uniquement un message "Mode lecture seule — modifications indisponibles" et un bouton "Fermer". Les actions Déplacer, Consommer, Modifier la fiche sont cachées.
+
 ---
 
 ## bulk-add — spec finale (étape 5 MVP ✅)
@@ -127,6 +129,27 @@ Formulaire d'ajout en lot : champs communs + quantité totale + section "Répart
 - Si l'un ou l'autre est vide : dialogue de confirmation avertit que la maturité ne pourra pas être calculée. L'utilisateur choisit "Confirmer sans garde" ou "Retour".
 
 **Champs protégés exclus** : `id`, `updated_at`, `date_sortie`, `note_degus`, `commentaire_degus`.
+
+---
+
+## Mode lecture seule — règles UI (Mode 2)
+
+Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre appareil) :
+
+| Élément | Comportement |
+|---|---|
+| Navigation "Ajouter" | Grisée — tap bloqué avec snackbar "Indisponible en mode lecture seule" |
+| Navigation "Import CSV" | Grisée — tap bloqué avec snackbar |
+| BottomSheet bouteille | Affiche uniquement "Mode lecture seule" + bouton Fermer |
+| Bouton "Synchroniser" | Caché (déjà absent quand `!isWriteMode`) |
+| Onglet Stock | Entièrement accessible en lecture |
+| Onglet Paramètres | Accessible (peut changer de mode) |
+
+---
+
+## Android — layout landscape (planifié, non MVP)
+
+En orientation paysage sur mobile, la hauteur disponible pour la liste du stock est très réduite (nav bar + filtres prennent la majorité). Design décidé : filtres et barre de recherche collapsibles via un bouton "Filtres" dans l'AppBar, similaire aux filtres avancés actuels. À implémenter dans `stock_screen.dart` en détectant `MediaQuery.of(context).orientation == Orientation.landscape && !isDesktop(context)`.
 
 ---
 

@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -65,41 +66,67 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
+  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=2).
+  static const _writeOnlyIndices = {1, 2};
+
   void _onDestinationSelected(BuildContext context, int index) {
+    final syncState = ref.read(syncServiceProvider);
+    if (syncState is SyncReadOnly && _writeOnlyIndices.contains(index)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Indisponible en mode lecture seule')),
+      );
+      return;
+    }
     context.go(_destinations[index].route);
   }
 
   @override
   Widget build(BuildContext context) {
     final syncState = ref.watch(syncServiceProvider);
+    ref.watch(storageModeProvider);
     final syncService = ref.read(syncServiceProvider.notifier);
-    final isSyncing = syncState is SyncSyncing;
 
-    // Feedback post-sync (transition syncing→idle ou syncing→locked/error)
+    // Réactions aux transitions d'état
     ref.listen<SyncState>(syncServiceProvider, (previous, next) {
-      if (previous is SyncSyncing && mounted) {
-        switch (next) {
-          case SyncIdle():
+      if (!mounted) return;
+      switch (next) {
+        case SyncIdle():
+          // Snackbar uniquement après un upload manuel (SyncSyncing → SyncIdle)
+          // Pas après startup (SyncStarting → SyncIdle)
+          if (previous is SyncSyncing) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Synchronisation réussie')),
+              const SnackBar(content: Text('Cave sauvegardée sur Drive')),
             );
-          case SyncLocked(:final lockedBy):
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Cave verrouillée par $lockedBy — réessayez plus tard')),
-            );
-          case SyncError(:final message):
-            showDialog<void>(
-              context: context,
-              builder: (_) => _SyncErrorDialog(
-                message: message,
-                onRetry: () => syncService.sync(),
-              ),
-            );
-          case SyncSyncing():
-            break;
-        }
+          }
+        case SyncError(:final message):
+          showDialog<void>(
+            context: context,
+            builder: (_) => _SyncErrorDialog(
+              message: message,
+              onRetry: syncService.sync,
+            ),
+          );
+        case SyncNeedsCrashRecovery():
+          _showCrashRecoveryDialog(context, syncService);
+        case SyncNeedsLockChoice(:final lockedBy):
+          _showLockTiersDialog(context, syncService, lockedBy);
+        default:
+          break;
       }
     });
+
+    // États qui bloquent l'UI (overlay plein écran)
+    final isBlocking = syncState is SyncSyncing ||
+        syncState is SyncStarting ||
+        syncState is SyncNeedsCrashRecovery ||
+        syncState is SyncNeedsLockChoice ||
+        syncState is SyncExiting;
+
+    final isReadOnly = syncState is SyncReadOnly;
+
+    // Le bouton Sync n'est visible qu'en mode écriture
+    final showSyncButton =
+        syncService.isActive && (syncState is SyncIdle || syncState is SyncSyncing);
 
     final desktop = isDesktop(context);
 
@@ -111,7 +138,8 @@ class _AppShellState extends ConsumerState<AppShell> {
             _DesktopRail(
               selectedIndex: widget.selectedIndex,
               syncService: syncService,
-              syncState: syncState,
+              showSyncButton: showSyncButton,
+              isReadOnly: isReadOnly,
               onDestinationSelected: (i) => _onDestinationSelected(context, i),
             ),
             const VerticalDivider(thickness: 1, width: 1),
@@ -125,30 +153,30 @@ class _AppShellState extends ConsumerState<AppShell> {
         bottomNavigationBar: _MobileBar(
           selectedIndex: widget.selectedIndex,
           syncService: syncService,
-          syncState: syncState,
+          showSyncButton: showSyncButton,
+          isReadOnly: isReadOnly,
           onDestinationSelected: (i) => _onDestinationSelected(context, i),
         ),
       );
     }
 
-    // Overlay de blocage pendant la sync (fermeture/réouverture de drift)
-    if (isSyncing) {
+    if (isBlocking) {
       return Stack(
         children: [
           shellContent,
-          const IgnorePointer(
+          IgnorePointer(
             ignoring: false,
             child: ColoredBox(
-              color: Color(0x80000000),
+              color: const Color(0x80000000),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(color: Colors.white),
+                    const SizedBox(height: 16),
                     Text(
-                      'Synchronisation en cours…',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      _overlayMessage(syncState),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
@@ -161,6 +189,76 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return shellContent;
   }
+
+  String _overlayMessage(SyncState state) => switch (state) {
+        SyncStarting() || SyncNeedsCrashRecovery() || SyncNeedsLockChoice() =>
+          'Connexion à Google Drive…',
+        SyncExiting() => 'Sauvegarde en cours…',
+        _ => 'Synchronisation en cours…',
+      };
+
+  void _showCrashRecoveryDialog(BuildContext context, SyncService syncService) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Session précédente interrompue'),
+        content: const Text('La dernière session ne s\'est pas terminée correctement.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              syncService.resolveOwnLockWithUpload();
+            },
+            child: const Text('Envoyer mes données locales'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              syncService.resolveOwnLockWithDownload();
+            },
+            child: const Text(
+              'Repartir depuis Google Drive\n(perte de modifications locales possible)',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLockTiersDialog(
+    BuildContext context,
+    SyncService syncService,
+    String lockedBy,
+  ) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cave utilisée sur un autre appareil'),
+        content: const Text(
+          'Votre cave est actuellement ouverte sur un autre appareil.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              SystemNavigator.pop();
+            },
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              syncService.enterReadOnly();
+            },
+            child: const Text('Consulter en lecture seule'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Navigation Desktop ────────────────────────────────────────────────────────
@@ -168,13 +266,15 @@ class _AppShellState extends ConsumerState<AppShell> {
 class _DesktopRail extends StatelessWidget {
   final int selectedIndex;
   final SyncService syncService;
-  final SyncState syncState;
+  final bool showSyncButton;
+  final bool isReadOnly;
   final void Function(int) onDestinationSelected;
 
   const _DesktopRail({
     required this.selectedIndex,
     required this.syncService,
-    required this.syncState,
+    required this.showSyncButton,
+    required this.isReadOnly,
     required this.onDestinationSelected,
   });
 
@@ -190,21 +290,27 @@ class _DesktopRail extends StatelessWidget {
               child: Column(
                 children: [
                   const SyncStatusIndicator(),
-                  const SizedBox(height: 4),
-                  _SyncButton(syncService: syncService, syncState: syncState),
+                  if (showSyncButton) ...[
+                    const SizedBox(height: 4),
+                    _SyncButton(syncService: syncService),
+                  ],
                 ],
               ),
             )
-          : null,
-      destinations: _destinations
-          .map(
-            (d) => NavigationRailDestination(
-              icon: Icon(d.icon),
-              selectedIcon: Icon(d.selectedIcon),
-              label: Text(d.label),
+          : const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: SyncStatusIndicator(),
             ),
-          )
-          .toList(),
+      destinations: _destinations.asMap().entries.map((e) {
+        final disabled = isReadOnly && _AppShellState._writeOnlyIndices.contains(e.key);
+        final color = disabled ? Theme.of(context).colorScheme.outline : null;
+        final d = e.value;
+        return NavigationRailDestination(
+          icon: Icon(d.icon, color: color),
+          selectedIcon: Icon(d.selectedIcon, color: color),
+          label: Text(d.label, style: TextStyle(color: color)),
+        );
+      }).toList(),
     );
   }
 }
@@ -214,13 +320,15 @@ class _DesktopRail extends StatelessWidget {
 class _MobileBar extends StatelessWidget {
   final int selectedIndex;
   final SyncService syncService;
-  final SyncState syncState;
+  final bool showSyncButton;
+  final bool isReadOnly;
   final void Function(int) onDestinationSelected;
 
   const _MobileBar({
     required this.selectedIndex,
     required this.syncService,
-    required this.syncState,
+    required this.showSyncButton,
+    required this.isReadOnly,
     required this.onDestinationSelected,
   });
 
@@ -236,23 +344,26 @@ class _MobileBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SyncStatusIndicator(),
-                const SizedBox(width: 8),
-                _SyncButton(syncService: syncService, syncState: syncState),
+                if (showSyncButton) ...[
+                  const SizedBox(width: 8),
+                  _SyncButton(syncService: syncService),
+                ],
               ],
             ),
           ),
         NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
-          destinations: _destinations
-              .map(
-                (d) => NavigationDestination(
-                  icon: Icon(d.icon),
-                  selectedIcon: Icon(d.selectedIcon),
-                  label: d.label,
-                ),
-              )
-              .toList(),
+          destinations: _destinations.asMap().entries.map((e) {
+            final disabled = isReadOnly && _AppShellState._writeOnlyIndices.contains(e.key);
+            final color = disabled ? Theme.of(context).colorScheme.outline : null;
+            final d = e.value;
+            return NavigationDestination(
+              icon: Icon(d.icon, color: color),
+              selectedIcon: Icon(d.selectedIcon, color: color),
+              label: d.label,
+            );
+          }).toList(),
         ),
       ],
     );
@@ -263,15 +374,13 @@ class _MobileBar extends StatelessWidget {
 
 class _SyncButton extends StatelessWidget {
   final SyncService syncService;
-  final SyncState syncState;
 
-  const _SyncButton({required this.syncService, required this.syncState});
+  const _SyncButton({required this.syncService});
 
   @override
   Widget build(BuildContext context) {
-    final isSyncing = syncState is SyncSyncing;
     return TextButton.icon(
-      onPressed: isSyncing ? null : () => syncService.sync(),
+      onPressed: syncService.sync,
       icon: const Icon(Icons.sync, size: 16),
       label: const Text('Synchroniser'),
       style: TextButton.styleFrom(

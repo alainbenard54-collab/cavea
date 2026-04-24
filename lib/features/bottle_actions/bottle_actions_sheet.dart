@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database.dart';
+import '../../services/sync_service.dart';
 import 'widgets/deplacer_form.dart';
 import 'widgets/consommer_form.dart';
 
@@ -21,16 +22,16 @@ void showBottleActionsSheet(BuildContext context, Bouteille bouteille) {
   );
 }
 
-class _BottleActionsSheet extends StatefulWidget {
+class _BottleActionsSheet extends ConsumerStatefulWidget {
   final Bouteille bouteille;
 
   const _BottleActionsSheet({required this.bouteille});
 
   @override
-  State<_BottleActionsSheet> createState() => _BottleActionsSheetState();
+  ConsumerState<_BottleActionsSheet> createState() => _BottleActionsSheetState();
 }
 
-class _BottleActionsSheetState extends State<_BottleActionsSheet> {
+class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
   _SheetView _view = _SheetView.menu;
 
   String get _title {
@@ -80,6 +81,7 @@ class _BottleActionsSheetState extends State<_BottleActionsSheet> {
             child: switch (_view) {
               _SheetView.menu => _Menu(
                   key: const ValueKey('menu'),
+                  isReadOnly: ref.watch(syncServiceProvider) is SyncReadOnly,
                   onDeplacer: () => setState(() => _view = _SheetView.deplacer),
                   onConsommer: () =>
                       setState(() => _view = _SheetView.consommer),
@@ -113,6 +115,7 @@ class _BottleActionsSheetState extends State<_BottleActionsSheet> {
 }
 
 class _Menu extends StatelessWidget {
+  final bool isReadOnly;
   final VoidCallback onDeplacer;
   final VoidCallback onConsommer;
   final VoidCallback onModifierFiche;
@@ -120,6 +123,7 @@ class _Menu extends StatelessWidget {
 
   const _Menu({
     super.key,
+    required this.isReadOnly,
     required this.onDeplacer,
     required this.onConsommer,
     required this.onModifierFiche,
@@ -128,6 +132,33 @@ class _Menu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isReadOnly) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.lock_outline, size: 18, color: Theme.of(context).colorScheme.outline),
+                const SizedBox(width: 8),
+                Text(
+                  'Mode lecture seule — modifications indisponibles',
+                  style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.close),
+            title: const Text('Fermer'),
+            onTap: onAnnuler,
+          ),
+        ],
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
