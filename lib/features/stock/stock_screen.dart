@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/maturity/maturity_service.dart';
+import '../../services/sync_service.dart';
+import '../../shared/adaptive_layout.dart' show isDesktop;
 import '../bottle_actions/bottle_actions_sheet.dart';
 import 'stock_controller.dart';
 import 'bouteille_list_tile.dart';
@@ -19,6 +21,7 @@ class StockScreen extends ConsumerStatefulWidget {
 
 class _StockScreenState extends ConsumerState<StockScreen> {
   final _searchController = SearchController();
+  bool _filtersExpanded = false;
 
   @override
   void dispose() {
@@ -47,10 +50,16 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final millesimesAsync = ref.watch(millesimesProvider);
 
 
+    final isLandscapeMobile = !isDesktop(context) &&
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // En paysage mobile, les filtres sont collapsés par défaut
+    final showFilters = !isLandscapeMobile || _filtersExpanded;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Barre de recherche
+        // Barre de recherche (toujours visible)
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
           child: SearchBar(
@@ -95,8 +104,39 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           ),
         ),
 
+        // En paysage mobile : toggle compact pour les filtres
+        if (isLandscapeMobile)
+          InkWell(
+            onTap: () => setState(() => _filtersExpanded = !_filtersExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    _filtersExpanded ? Icons.expand_less : Icons.expand_more,
+                    size: 18,
+                    color: filters.hasActiveFilters
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    filters.hasActiveFilters ? 'Filtres actifs' : 'Filtres',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: filters.hasActiveFilters
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
+                      fontWeight: filters.hasActiveFilters ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
         // Filtre couleur multi-sélect
-        couleursAsync.maybeWhen(
+        if (showFilters) couleursAsync.maybeWhen(
           data: (couleurs) => couleurs.isEmpty
               ? const SizedBox.shrink()
               : Padding(
@@ -123,7 +163,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         ),
 
         // Filtre maturité (multi-sélect)
-        Padding(
+        if (showFilters) Padding(
           padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -166,7 +206,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         ),
 
         // Filtres avancés repliables
-        Padding(
+        if (showFilters) Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -240,7 +280,10 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             error: (e, st) => Center(child: Text('Erreur : $e')),
             data: (bouteilles) {
               if (bouteilles.isEmpty) {
-                return _EmptyState(hasFilters: filters.hasActiveFilters);
+                return _EmptyState(
+                  hasFilters: filters.hasActiveFilters,
+                  isReadOnly: ref.watch(syncServiceProvider) is SyncReadOnly,
+                );
               }
               return LayoutBuilder(
                 builder: (context, constraints) {
@@ -339,8 +382,9 @@ class _CascadeDropdown<T> extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final bool hasFilters;
+  final bool isReadOnly;
 
-  const _EmptyState({required this.hasFilters});
+  const _EmptyState({required this.hasFilters, this.isReadOnly = false});
 
   @override
   Widget build(BuildContext context) {
@@ -356,12 +400,14 @@ class _EmptyState extends StatelessWidget {
           const Icon(Icons.wine_bar_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           const Text('Aucune bouteille en stock', style: TextStyle(fontSize: 18)),
-          const SizedBox(height: 8),
-          FilledButton.icon(
-            icon: const Icon(Icons.upload_file),
-            label: const Text('Importer un CSV'),
-            onPressed: () => context.go('/import-csv'),
-          ),
+          if (!isReadOnly) ...[
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Importer un CSV'),
+              onPressed: () => context.go('/import-csv'),
+            ),
+          ],
         ],
       ),
     );

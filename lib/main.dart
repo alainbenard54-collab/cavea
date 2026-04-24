@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'dart:async' show unawaited;
+import 'dart:io' show Platform;
 
 import 'dart:ui' show AppExitResponse;
 
@@ -36,6 +37,7 @@ class AppWrapper extends StatefulWidget {
 class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   AppDatabase? _db;
   String? _pendingSnackbarMessage;
+  bool _releasedOnPause = false;
 
   @override
   void initState() {
@@ -72,8 +74,23 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Android best-effort : pas de dialog, pas de garantie sur hard kill
-    if (state == AppLifecycleState.detached) {
+    if (Platform.isAndroid) {
+      // Sur Android, 'detached' arrive trop tard (OS tue le process avant la fin
+      // des requêtes HTTP). On release sur 'paused' où l'app a encore du temps.
+      // Sur 'resumed', on re-pose le lock sans re-télécharger.
+      if (state == AppLifecycleState.paused) {
+        final svc = activeSyncService;
+        if (svc != null && svc.isWriteMode) {
+          _releasedOnPause = true;
+          unawaited(svc.releaseIfNeeded());
+        }
+      } else if (state == AppLifecycleState.resumed && _releasedOnPause) {
+        _releasedOnPause = false;
+        unawaited(activeSyncService?.reacquireLock() ?? Future.value());
+      }
+    } else if (state == AppLifecycleState.detached) {
+      // Desktop : didRequestAppExit gère la fermeture propre ;
+      // detached est un filet de sécurité si l'app est tuée autrement.
       activeSyncService?.releaseIfNeeded();
     }
   }

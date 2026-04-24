@@ -152,51 +152,89 @@ class _DriveActivationTile extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    // Proposer la migration
-    final confirm = await showDialog<bool>(
+    // Vérifier si une cave existe déjà sur Drive
+    bool remoteExists = false;
+    try {
+      remoteExists = await adapter.remoteDbExists();
+    } catch (_) {}
+
+    if (!context.mounted) return;
+
+    // Choix selon l'état du Drive
+    final choice = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Migrer vers Google Drive ?'),
-        content: const Text(
-          'Voulez-vous envoyer votre cave.db actuel vers Google Drive ?\n\n'
-          'Tout fichier cave.db existant dans Drive sera écrasé.',
+        title: const Text('Migrer vers Google Drive'),
+        content: Text(
+          remoteExists
+              ? 'Une cave existe déjà sur Google Drive.\n\n'
+                'Que souhaitez-vous faire ?'
+              : 'Voulez-vous envoyer votre cave locale vers Google Drive ?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
+            onPressed: () => Navigator.of(dialogContext).pop(null),
             child: const Text('Annuler'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Migrer'),
-          ),
+          if (remoteExists) ...[
+            OutlinedButton(
+              onPressed: () => Navigator.of(dialogContext).pop('download'),
+              child: const Text('Récupérer la cave du Drive'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop('upload'),
+              child: const Text('Écraser le Drive avec ma cave locale'),
+            ),
+          ] else
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop('upload'),
+              child: const Text('Envoyer ma cave vers Drive'),
+            ),
         ],
       ),
     );
 
-    if (confirm != true) {
+    if (choice == null) {
       await adapter.signOut();
       return;
     }
 
-    // Upload
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Upload en cours…'), duration: Duration(minutes: 1)),
-    );
 
-    try {
-      final dbFile = File(configService.config!.dbPath);
-      await adapter.uploadDb(dbFile);
-      await adapter.lock();
-    } catch (e) {
-      messenger.clearSnackBars();
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload échoué : $e')),
+    if (choice == 'download') {
+      // Télécharger la cave Drive en local
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Téléchargement en cours…'), duration: Duration(minutes: 1)),
       );
-      return;
+      try {
+        await adapter.downloadDb(configService.config!.dbPath);
+        await adapter.lock();
+      } catch (e) {
+        messenger.clearSnackBars();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Téléchargement échoué : $e')),
+        );
+        return;
+      }
+    } else {
+      // Uploader la cave locale vers Drive
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Upload en cours…'), duration: Duration(minutes: 1)),
+      );
+      try {
+        final dbFile = File(configService.config!.dbPath);
+        await adapter.uploadDb(dbFile);
+        await adapter.lock();
+      } catch (e) {
+        messenger.clearSnackBars();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload échoué : $e')),
+        );
+        return;
+      }
     }
 
     // Le prochain SyncService démarrera avec le lock déjà acquis

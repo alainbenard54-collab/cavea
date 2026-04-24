@@ -264,6 +264,38 @@ class SyncService extends StateNotifier<SyncState> {
     }
   }
 
+  // ── Re-acquisition du lock (Android resume) ──────────────────────────────
+
+  /// Repose le lock après un releaseIfNeeded() sur Android pause.
+  /// Ne télécharge PAS depuis Drive (la version locale est à jour).
+  Future<void> reacquireLock() async {
+    final adapter = _adapter;
+    if (adapter == null || _isDisposed || _lockHeldByUs) return;
+
+    state = const SyncStarting();
+    try {
+      final status = await adapter.getLockStatus();
+      if (status.isOurs) {
+        _lockHeldByUs = true;
+        if (_isDisposed) return;
+        state = const SyncIdle();
+        return;
+      }
+      if (status.isLocked) {
+        if (_isDisposed) return;
+        state = SyncNeedsLockChoice(status.lockedBy!);
+        return;
+      }
+      await adapter.lock();
+      _lockHeldByUs = true;
+      if (_isDisposed) return;
+      state = const SyncIdle();
+    } catch (e) {
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
   // ── Sync manuelle (bouton) ────────────────────────────────────────────────
 
   /// Upload uniquement — lock conservé. N'a d'effet qu'en mode écriture.
