@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
-import 'dart:io' show exit;
+import 'dart:io' show Platform, exit;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,6 +130,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         syncService.isActive && (syncState is SyncIdle || syncState is SyncSyncing);
 
     final desktop = isDesktop(context);
+    final isAndroid = Platform.isAndroid;
 
     Widget shellContent;
     if (desktop) {
@@ -156,6 +157,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           syncService: syncService,
           showSyncButton: showSyncButton,
           isReadOnly: isReadOnly,
+          isAndroid: isAndroid,
           onDestinationSelected: (i) => _onDestinationSelected(context, i),
         ),
       );
@@ -323,6 +325,7 @@ class _MobileBar extends StatelessWidget {
   final SyncService syncService;
   final bool showSyncButton;
   final bool isReadOnly;
+  final bool isAndroid;
   final void Function(int) onDestinationSelected;
 
   const _MobileBar({
@@ -330,6 +333,7 @@ class _MobileBar extends StatelessWidget {
     required this.syncService,
     required this.showSyncButton,
     required this.isReadOnly,
+    required this.isAndroid,
     required this.onDestinationSelected,
   });
 
@@ -345,7 +349,18 @@ class _MobileBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SyncStatusIndicator(),
-                if (showSyncButton) ...[
+                // Android écriture : "Sauvegarder et libérer" (remplace "Synchroniser")
+                if (isAndroid && showSyncButton) ...[
+                  const SizedBox(width: 8),
+                  _SaveAndReleaseButton(syncService: syncService),
+                ],
+                // Android lecture seule : "Prendre la main"
+                if (isAndroid && isReadOnly) ...[
+                  const SizedBox(width: 8),
+                  _AcquireLockButton(syncService: syncService),
+                ],
+                // PC uniquement : "Synchroniser"
+                if (!isAndroid && showSyncButton) ...[
                   const SizedBox(width: 8),
                   _SyncButton(syncService: syncService),
                 ],
@@ -367,6 +382,83 @@ class _MobileBar extends StatelessWidget {
           }).toList(),
         ),
       ],
+    );
+  }
+}
+
+// ── Bouton Prendre la main (Android lecture seule) ────────────────────────────
+
+class _AcquireLockButton extends StatelessWidget {
+  final SyncService syncService;
+
+  const _AcquireLockButton({required this.syncService});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => _showConfirmDialog(context),
+      icon: const Icon(Icons.lock_open, size: 16),
+      label: const Text('Prendre la main'),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        textStyle: const TextStyle(fontSize: 12),
+      ),
+    );
+  }
+
+  void _showConfirmDialog(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Passer en mode écriture ?'),
+        content: const Text(
+          'Vos modifications seront sauvegardées sur Drive et le verrou libéré '
+          "uniquement en appuyant sur 'Sauvegarder et libérer' avant de quitter. "
+          "En cas d'oubli, la session suivante proposera de récupérer vos données.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) syncService.acquireLock();
+    });
+  }
+}
+
+// ── Bouton Sauvegarder et libérer (Android écriture) ─────────────────────────
+
+class _SaveAndReleaseButton extends StatelessWidget {
+  final SyncService syncService;
+
+  const _SaveAndReleaseButton({required this.syncService});
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: () async {
+        final success = await syncService.releaseManual();
+        if (!context.mounted) return;
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cave sauvegardée et verrou libéré')),
+          );
+        }
+      },
+      icon: const Icon(Icons.cloud_done, size: 16),
+      label: const Text('Sauvegarder et libérer'),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        textStyle: const TextStyle(fontSize: 12),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 }

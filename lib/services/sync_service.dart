@@ -147,7 +147,25 @@ class SyncService extends StateNotifier<SyncState> {
         return;
       }
 
-      // Lock libre — acquérir et synchroniser
+      if (Platform.isAndroid) {
+        // Android : pas de lock automatique — lecture seule par défaut.
+        // L'utilisateur prend la main explicitement via "Prendre la main".
+        final remoteExists = await adapter.remoteDbExists();
+        if (remoteExists) {
+          _startAsReadOnly = true;
+          if (_closeDbCallback != null) await _closeDbCallback!();
+          await adapter.downloadDb(configService.config!.dbPath);
+          if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+          if (_isDisposed) return;
+          _startAsReadOnly = false;
+        }
+        _lockHeldByUs = false;
+        if (_isDisposed) return;
+        state = const SyncReadOnly();
+        return;
+      }
+
+      // PC : lock libre — acquérir et synchroniser
       await adapter.lock();
       _lockHeldByUs = true;
 
@@ -293,6 +311,61 @@ class SyncService extends StateNotifier<SyncState> {
     } catch (e) {
       if (_isDisposed) return;
       state = SyncError(e.toString());
+    }
+  }
+
+  // ── Prise de main explicite (Android) ────────────────────────────────────
+
+  /// Bouton "Prendre la main" sur Android : acquiert le lock → SyncIdle.
+  /// Si Drive vide, uploade la base locale pour initialiser.
+  Future<void> acquireLock() async {
+    final adapter = _adapter;
+    if (adapter == null || _isDisposed) return;
+
+    state = const SyncSyncing();
+    try {
+      final status = await adapter.getLockStatus();
+      if (status.isLocked && !status.isOurs) {
+        if (_isDisposed) return;
+        state = const SyncError('Cave utilisée par un autre appareil. Réessayez plus tard.');
+        return;
+      }
+      await adapter.lock();
+      _lockHeldByUs = true;
+      final remoteExists = await adapter.remoteDbExists();
+      if (!remoteExists) {
+        await adapter.uploadDb(File(configService.config!.dbPath));
+      }
+      if (_isDisposed) return;
+      state = const SyncIdle();
+    } catch (e) {
+      if (_lockHeldByUs) {
+        try { await adapter.unlock(); } catch (_) {}
+        _lockHeldByUs = false;
+      }
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
+  /// Bouton "Sauvegarder et libérer" sur Android : upload + unlock → SyncReadOnly.
+  /// Retourne true si succès (pour afficher la snackbar côté UI).
+  Future<bool> releaseManual() async {
+    final adapter = _adapter;
+    if (adapter == null || !_lockHeldByUs || _isDisposed) return false;
+
+    state = const SyncSyncing();
+    try {
+      await adapter.uploadDb(File(configService.config!.dbPath));
+      await adapter.unlock();
+      _lockHeldByUs = false;
+      if (_isDisposed) return false;
+      state = const SyncReadOnly();
+      return true;
+    } catch (e) {
+      if (_isDisposed) return false;
+      state = SyncError(e.toString());
+      return false;
     }
   }
 
