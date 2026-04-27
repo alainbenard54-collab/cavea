@@ -94,8 +94,8 @@ All other fields are editable in the full bottle edit form (V1 feature, not MVP)
 4. ✅ `bottle-actions`: BottomSheet d'actions rapides sur clic bouteille (Déplacer + Consommer + accès fiche complète)
 5. ✅ Bulk add (formulaire → N bouteilles identiques, répartition multi-emplacement)
 6. ~~Change location~~ → fusionnée dans `bottle-actions` (étape 4)
-7. Sync mechanism (lock / download / upload)
-8. Settings (mode selection, shared folder path)
+7. ✅ Sync mechanism (lock / download / upload) — Mode 2 Google Drive : syncOnStartup, crash recovery, lock tiers lecture seule, releaseIfNeeded à la fermeture, indicateurs AppBar, bascule Mode 1→2 dans Settings
+8. Settings (chemin cave.db configurable, valeurs par défaut bulk-add couleur/contenance)
 
 Do not implement V1 or V2 features before the MVP is complete.
 
@@ -147,9 +147,17 @@ Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre
 
 ---
 
-## Android — layout landscape (planifié, non MVP)
+## Android — layout landscape
 
-En orientation paysage sur mobile, la hauteur disponible pour la liste du stock est très réduite (nav bar + filtres prennent la majorité). Design décidé : filtres et barre de recherche collapsibles via un bouton "Filtres" dans l'AppBar, similaire aux filtres avancés actuels. À implémenter dans `stock_screen.dart` en détectant `MediaQuery.of(context).orientation == Orientation.landscape && !isDesktop(context)`.
+En orientation paysage sur mobile, les filtres (couleur, maturité, appellation, millésime) sont collapsibles via un toggle "Filtres / Filtres actifs" affiché sous la SearchBar. La SearchBar reste toujours visible.
+
+Détection dans `stock_screen.dart` : `Platform.isAndroid && MediaQuery.of(context).orientation == Orientation.landscape`. **Ne pas utiliser `!isDesktop(context)`** : en paysage un téléphone Android a une largeur ≥ 600 dp, ce qui fait retourner `true` à `isDesktop()` et empêche la détection.
+
+## Android — libération du lock à la fermeture
+
+L'OS Android tue le process quelques ms après `AppLifecycleState.paused`, avant que les requêtes HTTP (upload + delete lock) aient le temps de terminer. Le lock reste donc toujours présent sur Drive après une fermeture Android.
+
+Comportement retenu : au prochain démarrage, si le lock appartient à notre appareil, on résout silencieusement (upload local → lock conservé) sans dialog "Session interrompue". Le dialog crash recovery reste affiché uniquement sur PC (Windows), où la fermeture est interceptée via `didRequestAppExit()` et les requêtes ont le temps de terminer.
 
 ---
 

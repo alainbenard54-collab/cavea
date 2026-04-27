@@ -180,7 +180,7 @@ Les implémentations concrètes (`DriveStorageAdapter`, `DropboxStorageAdapter`)
 
 ```
 lib/
-├── main.dart
+├── main.dart                    # AppWrapper (WidgetsBindingObserver, cycle de vie sync)
 ├── app/
 │   ├── router.dart              # go_router — toutes les routes
 │   └── theme.dart               # Material 3 theme
@@ -211,6 +211,8 @@ lib/
 │   │   ├── import_csv_screen.dart
 │   │   ├── import_service.dart
 │   │   └── csv_parser.dart
+│   ├── settings/                # paramètres : mode sync, à propos (step 8 partiel)
+│   │   └── settings_screen.dart
 │   ├── setup/                   # wizard premier lancement
 │   │   ├── setup_screen.dart
 │   │   └── setup_controller.dart
@@ -219,8 +221,14 @@ lib/
 │       ├── stock_controller.dart
 │       ├── stock_table.dart     # table triable desktop (≥ 640px)
 │       └── bouteille_list_tile.dart
-└── shared/
-    └── adaptive_layout.dart     # bascule desktop/mobile (600px)
+├── services/                    # couche cloud / sync (Mode 2)
+│   ├── storage_adapter.dart     # interface abstraite StorageAdapter
+│   ├── drive_storage_adapter.dart  # impl. Google Drive (drive.file scope, dossier Cavea)
+│   └── sync_service.dart        # états SyncState, syncOnStartup(), releaseIfNeeded()
+├── shared/
+│   └── adaptive_layout.dart     # bascule desktop/mobile (600px), AppBar indicateurs
+└── widgets/
+    └── sync_status_indicator.dart  # icônes mode + verrou dans AppBar (Mode 2 uniquement)
 ```
 
 ---

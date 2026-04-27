@@ -6,7 +6,7 @@
 - [x] 1.4 Mettre à jour `_findFileId()` : `spaces: 'drive'`, filtre `'<folderId>' in parents` (appel `_ensureFolder()` en amont)
 - [x] 1.5 Mettre à jour `_uploadBytes()` : `parents: [folderId]` au lieu de `['appDataFolder']`
 - [x] 1.6 Vérifier que `_deleteFile()` fonctionne toujours (utilise l'id retourné par `_findFileId` — pas de changement de logique)
-- [ ] 1.7 Tester manuellement (PC) : premier lancement crée le dossier `Cavea` visible dans Drive UI, `cave.db` y apparaît après un upload
+- [x] 1.7 Tester manuellement (PC) : premier lancement crée le dossier `Cavea` visible dans Drive UI, `cave.db` y apparaît après un upload
 
 ## 2. SyncService — nouveaux états et syncOnStartup()
 
@@ -32,7 +32,7 @@
 - [x] 4.1 Dans le widget AppBar de `AdaptiveLayout`, ajouter l'icône de mode : `Icons.computer` gris (Mode 1) / `Icons.cloud` bleu (Mode 2), avec tooltip
 - [x] 4.2 En Mode 2, ajouter l'icône de verrou à côté : `Icons.lock_open` vert (écriture) / `Icons.lock` ambre (lecture seule), avec tooltip ; absente pendant `SyncStarting`
 - [x] 4.3 Connecter les icônes au provider `syncServiceProvider` (watch état courant)
-- [ ] 4.4 Vérifier rendu PC (NavigationRail) et Android (BottomNavigationBar) — icônes bien positionnées dans les deux layouts (test manuel)
+- [x] 4.4 Vérifier rendu PC (NavigationRail) et Android (BottomNavigationBar) — icônes bien positionnées dans les deux layouts (test manuel)
 
 ## 5. UI — bouton Sync et snackbar
 
@@ -42,10 +42,10 @@
 
 ## 6. Tests manuels
 
-- [ ] 6.1 PC — démarrage nominal : dossier `Cavea` créé, `cave.db` uploadé, icône nuage + cadenas vert visibles
-- [ ] 6.2 PC — bouton Sync : `cave.db` mis à jour dans Drive, snackbar affiché, lock conservé
-- [ ] 6.3 PC — fermeture Alt+F4 : dialog progression affiché, `cave.db` uploadé, lock supprimé, app fermée
-- [ ] 6.4 PC — simulation crash (kill process) puis redémarrage : dialog crash recovery affiché, choix "Envoyer local" fonctionne, choix "Drive" fonctionne
-- [ ] 6.5 PC — vérifier dans Drive UI : dossier `Cavea` visible, `cave.db` présent, `cave.db.lock` absent après fermeture propre
-- [ ] 6.6 Android — démarrage en Mode 2 : connexion Google, dossier `Cavea` accessible, téléchargement, icônes AppBar correctes
-- [ ] 6.7 Deux appareils — lock tiers : démarrer sur PC (lock acquis), démarrer sur Android → dialog "Consulter en lecture seule" affiché, icône cadenas ambre visible
+- [x] 6.1 PC — démarrage nominal : dossier `Cavea` créé, `cave.db` uploadé, icône nuage + cadenas vert visibles
+- [x] 6.2 PC — bouton Sync : `cave.db` mis à jour dans Drive, snackbar affiché, lock conservé
+- [x] 6.3 PC — fermeture Alt+F4 : dialog progression affiché, `cave.db` uploadé, lock supprimé, app fermée
+- [x] 6.4 PC — simulation crash (kill process) puis redémarrage : dialog crash recovery affiché, choix "Envoyer local" fonctionne, choix "Drive" fonctionne
+- [x] 6.5 PC — vérifier dans Drive UI : dossier `Cavea` visible, `cave.db` présent, `cave.db.lock` absent après fermeture propre
+- [x] 6.6 Android — démarrage en Mode 2 : connexion Google, dossier `Cavea` accessible, téléchargement, icônes AppBar correctes (T-14/T-15 ✅)
+- [~] 6.7 Deux appareils — lock tiers : supersédé par android-lock-ux (le comportement Android est redéfini — lock à nous = lecture seule par défaut, "Prendre la main" explicite)

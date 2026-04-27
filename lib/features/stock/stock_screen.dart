@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,7 +52,9 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final millesimesAsync = ref.watch(millesimesProvider);
 
 
-    final isLandscapeMobile = !isDesktop(context) &&
+    // isDesktop() est basé sur la largeur (≥600dp). Un téléphone en paysage
+    // dépasse ce seuil, donc !isDesktop() serait faux → on utilise Platform.isAndroid.
+    final isLandscapeMobile = Platform.isAndroid &&
         MediaQuery.of(context).orientation == Orientation.landscape;
 
     // En paysage mobile, les filtres sont collapsés par défaut

@@ -93,11 +93,19 @@ class DriveStorageAdapter implements StorageAdapter {
     final googleSignIn = GoogleSignIn(scopes: [_driveScope]);
 
     var account = await googleSignIn.signInSilently();
-    account ??= await googleSignIn.signIn();
+    account ??= await googleSignIn.signIn().timeout(
+      const Duration(seconds: 60),
+      onTimeout: () => throw Exception('La connexion Google a pris trop de temps. Réessayez.'),
+    );
 
     if (account == null) throw Exception('Authentification Google annulée.');
 
-    final auth = await account.authentication;
+    final auth = await account.authentication.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => throw Exception(
+        'Impossible d\'obtenir le token Google (Google Play Services ne répond pas). Réessayez.',
+      ),
+    );
     final credentials = AccessCredentials(
       AccessToken(
         'Bearer',
