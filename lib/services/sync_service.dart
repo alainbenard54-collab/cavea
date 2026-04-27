@@ -312,6 +312,38 @@ class SyncService extends StateNotifier<SyncState> {
     if (!_isDisposed) state = const SyncReadOnly();
   }
 
+  /// Abandon du mode écriture sans sauvegarder : unlock → download Drive → SyncReadOnly.
+  Future<void> abandonWrite() async {
+    final adapter = _adapter;
+    if (adapter == null || !_lockHeldByUs || _isDisposed) return;
+
+    state = const SyncSyncing();
+    bool dbWasClosed = false;
+    try {
+      await adapter.unlock();
+      _lockHeldByUs = false;
+      _startAsReadOnly = true;
+      if (_closeDbCallback != null) {
+        await _closeDbCallback!();
+        dbWasClosed = true;
+      }
+      await adapter.downloadDb(configService.config!.dbPath);
+      if (_reopenDbCallback != null) {
+        await _reopenDbCallback!(message: 'Modifications abandonnées — version Drive restaurée');
+      }
+      if (_isDisposed) return;
+      _startAsReadOnly = false;
+      state = const SyncReadOnly();
+    } catch (e) {
+      _startAsReadOnly = false;
+      if (dbWasClosed && _reopenDbCallback != null) {
+        try { await _reopenDbCallback!(message: null); } catch (_) {}
+      }
+      if (_isDisposed) return;
+      state = SyncError(e.toString());
+    }
+  }
+
   // ── Re-acquisition du lock (Android resume) ──────────────────────────────
 
   /// Repose le lock après un releaseIfNeeded() sur Android pause.

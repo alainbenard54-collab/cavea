@@ -215,24 +215,79 @@ class _AppShellState extends ConsumerState<AppShell> {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Session précédente interrompue'),
-        content: const Text('La dernière session ne s\'est pas terminée correctement.'),
+        content: const Text(
+          'La dernière session ne s\'est pas terminée correctement. '
+          'Choisissez quelle version de la cave conserver.',
+        ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              syncService.resolveOwnLockWithUpload();
+              _showCrashRecoveryConfirm(
+                context,
+                syncService,
+                title: 'Envoyer mes données locales ?',
+                content: 'Votre base locale va remplacer celle de Google Drive. '
+                    'Toute modification effectuée depuis un autre appareil lors de '
+                    'cette session sera perdue.',
+                confirmLabel: 'Envoyer',
+                onConfirm: syncService.resolveOwnLockWithUpload,
+                onCancel: () => _showCrashRecoveryDialog(context, syncService),
+              );
             },
             child: const Text('Envoyer mes données locales'),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              syncService.resolveOwnLockWithDownload();
+              _showCrashRecoveryConfirm(
+                context,
+                syncService,
+                title: 'Repartir depuis Google Drive ?',
+                content: 'La base Google Drive va remplacer votre base locale. '
+                    'Toutes vos modifications locales non sauvegardées seront perdues.',
+                confirmLabel: 'Remplacer ma base locale',
+                onConfirm: syncService.resolveOwnLockWithDownload,
+                onCancel: () => _showCrashRecoveryDialog(context, syncService),
+              );
             },
-            child: const Text(
-              'Repartir depuis Google Drive\n(perte de modifications locales possible)',
-              textAlign: TextAlign.center,
-            ),
+            child: const Text('Repartir depuis Google Drive'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCrashRecoveryConfirm(
+    BuildContext context,
+    SyncService syncService, {
+    required String title,
+    required String content,
+    required String confirmLabel,
+    required VoidCallback onConfirm,
+    required VoidCallback onCancel,
+  }) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              onCancel();
+            },
+            child: const Text('Retour'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              onConfirm();
+            },
+            child: Text(confirmLabel),
           ),
         ],
       ),
@@ -358,9 +413,11 @@ class _MobileBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SyncStatusIndicator(),
-                // Android écriture : "Sauvegarder et libérer" (remplace "Synchroniser")
+                // Android écriture : "Sauvegarder et libérer" + "Retour lecture seule"
                 if (isAndroid && showSyncButton) ...[
                   const SizedBox(width: 8),
+                  _AbandonWriteButton(syncService: syncService),
+                  const SizedBox(width: 4),
                   _SaveAndReleaseButton(syncService: syncService),
                 ],
                 // Android lecture seule : "Prendre la main"
@@ -439,6 +496,53 @@ class _AcquireLockButton extends StatelessWidget {
       ),
     ).then((confirmed) {
       if (confirmed == true) syncService.acquireLock();
+    });
+  }
+}
+
+// ── Bouton Retour lecture seule / Abandonner (Android écriture) ──────────────
+
+class _AbandonWriteButton extends StatelessWidget {
+  final SyncService syncService;
+
+  const _AbandonWriteButton({required this.syncService});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => _showConfirmDialog(context),
+      icon: const Icon(Icons.lock_reset, size: 16),
+      label: const Text('Retour lecture seule'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        textStyle: const TextStyle(fontSize: 12),
+      ),
+    );
+  }
+
+  void _showConfirmDialog(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Abandonner les modifications ?'),
+        content: const Text(
+          'Vos modifications locales non sauvegardées seront perdues. '
+          'La version Google Drive sera rechargée et le verrou libéré.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Abandonner'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) syncService.abandonWrite();
     });
   }
 }
