@@ -107,11 +107,13 @@ class _AppShellState extends ConsumerState<AppShell> {
             );
           }
         case SyncError(:final message):
+          // Sur Android : pas de retry (erreur résolue manuellement) + retour en lecture seule.
           showDialog<void>(
             context: context,
             builder: (_) => _SyncErrorDialog(
               message: message,
-              onRetry: syncService.sync,
+              onRetry: Platform.isAndroid ? null : syncService.sync,
+              onClose: Platform.isAndroid ? syncService.resetToReadOnly : null,
             ),
           );
         case SyncNeedsCrashRecovery():
@@ -488,9 +490,10 @@ class _SyncButton extends StatelessWidget {
 
 class _SyncErrorDialog extends StatelessWidget {
   final String message;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
+  final VoidCallback? onClose;
 
-  const _SyncErrorDialog({required this.message, required this.onRetry});
+  const _SyncErrorDialog({required this.message, this.onRetry, this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -499,16 +502,20 @@ class _SyncErrorDialog extends StatelessWidget {
       content: Text(message),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Fermer'),
-        ),
-        FilledButton(
           onPressed: () {
             Navigator.of(context).pop();
-            onRetry();
+            onClose?.call();
           },
-          child: const Text('Réessayer'),
+          child: const Text('Fermer'),
         ),
+        if (onRetry != null)
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onRetry!();
+            },
+            child: const Text('Réessayer'),
+          ),
       ],
     );
   }

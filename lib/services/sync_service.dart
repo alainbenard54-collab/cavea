@@ -201,7 +201,7 @@ class SyncService extends StateNotifier<SyncState> {
 
   // ── Résolution crash recovery ─────────────────────────────────────────────
 
-  /// Choix "Envoyer mes données locales" : upload local → garde le lock → écriture.
+  /// Choix "Envoyer mes données locales" : upload local → PC garde le lock, Android libère.
   Future<void> resolveOwnLockWithUpload() async {
     final adapter = _adapter;
     if (adapter == null) return;
@@ -209,16 +209,24 @@ class SyncService extends StateNotifier<SyncState> {
     state = const SyncSyncing();
     try {
       await adapter.uploadDb(File(configService.config!.dbPath));
-      _lockHeldByUs = true;
-      if (_isDisposed) return;
-      state = const SyncIdle();
+      if (Platform.isAndroid) {
+        // Android : libère le lock après upload → retour en lecture seule.
+        await adapter.unlock();
+        _lockHeldByUs = false;
+        if (_isDisposed) return;
+        state = const SyncReadOnly();
+      } else {
+        _lockHeldByUs = true;
+        if (_isDisposed) return;
+        state = const SyncIdle();
+      }
     } catch (e) {
       if (_isDisposed) return;
       state = SyncError(e.toString());
     }
   }
 
-  /// Choix "Repartir depuis Google Drive" : download Drive → garde le lock → écriture.
+  /// Choix "Repartir depuis Google Drive" : download Drive → PC garde le lock, Android libère.
   Future<void> resolveOwnLockWithDownload() async {
     final adapter = _adapter;
     if (adapter == null) return;
@@ -226,19 +234,36 @@ class SyncService extends StateNotifier<SyncState> {
     state = const SyncSyncing();
     bool dbWasClosed = false;
     try {
-      _startWithLock = true;
-      if (_closeDbCallback != null) {
-        await _closeDbCallback!();
-        dbWasClosed = true;
+      if (Platform.isAndroid) {
+        // Android : unlock d'abord, puis download → lecture seule.
+        await adapter.unlock();
+        _lockHeldByUs = false;
+        _startAsReadOnly = true;
+        if (_closeDbCallback != null) {
+          await _closeDbCallback!();
+          dbWasClosed = true;
+        }
+        await adapter.downloadDb(configService.config!.dbPath);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: 'Cave synchronisée depuis Drive');
+        if (_isDisposed) return;
+        _startAsReadOnly = false;
+        state = const SyncReadOnly();
+      } else {
+        _startWithLock = true;
+        if (_closeDbCallback != null) {
+          await _closeDbCallback!();
+          dbWasClosed = true;
+        }
+        await adapter.downloadDb(configService.config!.dbPath);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+        if (_isDisposed) return;
+        _lockHeldByUs = true;
+        _startWithLock = false;
+        state = const SyncIdle();
       }
-      await adapter.downloadDb(configService.config!.dbPath);
-      if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
-      if (_isDisposed) return;
-      _lockHeldByUs = true;
-      _startWithLock = false;
-      state = const SyncIdle();
     } catch (e) {
       _startWithLock = false;
+      _startAsReadOnly = false;
       if (dbWasClosed && _reopenDbCallback != null) {
         try { await _reopenDbCallback!(message: null); } catch (_) {}
       }
@@ -280,6 +305,11 @@ class SyncService extends StateNotifier<SyncState> {
       if (_isDisposed) return;
       state = SyncError(e.toString());
     }
+  }
+
+  /// Retour en lecture seule depuis SyncError — Android uniquement, après dialog d'erreur.
+  void resetToReadOnly() {
+    if (!_isDisposed) state = const SyncReadOnly();
   }
 
   // ── Re-acquisition du lock (Android resume) ──────────────────────────────
@@ -338,7 +368,7 @@ class SyncService extends StateNotifier<SyncState> {
         _startWithLock = true;
         if (_closeDbCallback != null) await _closeDbCallback!();
         await adapter.downloadDb(configService.config!.dbPath);
-        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: 'Verrou posé — cave à jour depuis Drive');
         if (_isDisposed) return;
         _lockHeldByUs = true; // fallback si ProviderScope non recréé
         _startWithLock = false;
