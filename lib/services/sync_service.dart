@@ -316,13 +316,13 @@ class SyncService extends StateNotifier<SyncState> {
 
   // ── Prise de main explicite (Android) ────────────────────────────────────
 
-  /// Bouton "Prendre la main" sur Android : acquiert le lock → SyncIdle.
-  /// Si Drive vide, uploade la base locale pour initialiser.
+  /// Bouton "Passer en écriture" sur Android : acquiert le lock → télécharge Drive → SyncIdle.
+  /// Si Drive vide (premier lancement), uploade la base locale.
   Future<void> acquireLock() async {
     final adapter = _adapter;
     if (adapter == null || _isDisposed) return;
 
-    state = const SyncSyncing();
+    state = const SyncStarting();
     try {
       final status = await adapter.getLockStatus();
       if (status.isLocked && !status.isOurs) {
@@ -333,7 +333,16 @@ class SyncService extends StateNotifier<SyncState> {
       await adapter.lock();
       _lockHeldByUs = true;
       final remoteExists = await adapter.remoteDbExists();
-      if (!remoteExists) {
+      if (remoteExists) {
+        // Télécharge la version Drive (peut avoir évolué depuis le démarrage en lecture seule).
+        _startWithLock = true;
+        if (_closeDbCallback != null) await _closeDbCallback!();
+        await adapter.downloadDb(configService.config!.dbPath);
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+        if (_isDisposed) return;
+        _lockHeldByUs = true; // fallback si ProviderScope non recréé
+        _startWithLock = false;
+      } else {
         await adapter.uploadDb(File(configService.config!.dbPath));
       }
       if (_isDisposed) return;

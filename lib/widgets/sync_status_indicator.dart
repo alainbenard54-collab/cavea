@@ -68,7 +68,8 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
       case SyncReadOnly():
         _rotationCtrl.stop();
         statusIcon = const Tooltip(
-          message: 'Consultation uniquement — cave ouverte sur un autre appareil',
+          message: 'Mode lecture seule',
+          triggerMode: TooltipTriggerMode.tap,
           child: Icon(Icons.lock, color: Colors.amber, size: 20),
         );
 

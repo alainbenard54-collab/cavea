@@ -93,10 +93,17 @@ class _AppShellState extends ConsumerState<AppShell> {
       switch (next) {
         case SyncIdle():
           // Snackbar uniquement après un upload manuel (SyncSyncing → SyncIdle)
-          // Pas après startup (SyncStarting → SyncIdle)
+          // Pas après startup (SyncStarting → SyncIdle) ni acquireLock (SyncStarting → SyncIdle)
           if (previous is SyncSyncing) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Cave sauvegardée sur Drive')),
+            );
+          }
+        case SyncReadOnly():
+          // Snackbar après "Sauvegarder et libérer" (SyncSyncing → SyncReadOnly)
+          if (previous is SyncSyncing) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cave sauvegardée et verrou libéré')),
             );
           }
         case SyncError(:final message):
@@ -398,7 +405,7 @@ class _AcquireLockButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: () => _showConfirmDialog(context),
       icon: const Icon(Icons.lock_open, size: 16),
-      label: const Text('Prendre la main'),
+      label: const Text('Passer en écriture'),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         textStyle: const TextStyle(fontSize: 12),
@@ -414,7 +421,8 @@ class _AcquireLockButton extends StatelessWidget {
         content: const Text(
           'Vos modifications seront sauvegardées sur Drive et le verrou libéré '
           "uniquement en appuyant sur 'Sauvegarder et libérer' avant de quitter. "
-          "En cas d'oubli, la session suivante proposera de récupérer vos données.",
+          "En cas d'oubli, la session suivante proposera de récupérer vos données "
+          'si la base est toujours verrouillée.',
         ),
         actions: [
           TextButton(
@@ -443,15 +451,7 @@ class _SaveAndReleaseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton.icon(
-      onPressed: () async {
-        final success = await syncService.releaseManual();
-        if (!context.mounted) return;
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cave sauvegardée et verrou libéré')),
-          );
-        }
-      },
+      onPressed: () => syncService.releaseManual(),
       icon: const Icon(Icons.cloud_done, size: 16),
       label: const Text('Sauvegarder et libérer'),
       style: FilledButton.styleFrom(
