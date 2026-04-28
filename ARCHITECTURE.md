@@ -331,10 +331,31 @@ Afficher à la fin : X insérées · Y mises à jour · Z ignorées.
 
 ---
 
+## Configuration — ConfigService
+
+`lib/core/config_service.dart` — singleton global initialisé dans `main()` avant `runApp()`.
+
+Données persistées dans SharedPreferences :
+
+| Clé | Type | Usage |
+|---|---|---|
+| `storage_mode` | String | `'local'` ou `'drive'` |
+| `db_path` | String | Chemin absolu vers cave.db |
+| `couleur_defaut` | String | Valeur pré-sélectionnée dans bulk-add |
+| `contenance_defaut` | String | Valeur pré-remplie dans bulk-add |
+| `ref_couleurs` | List\<String\> | Liste de référence couleurs (builtin si absent) |
+| `ref_contenances` | List\<String\> | Liste de référence contenances (builtin si absent) |
+| `ref_crus` | List\<String\> | Liste de référence crus (builtin si absent) |
+
+Les listes de référence ont des valeurs builtin par défaut (`ConfigService.builtinCouleurs` etc.) qui s'appliquent si l'utilisateur n'a pas personnalisé la liste. Dans les formulaires d'ajout, la liste affichée = union(liste de référence, valeurs existantes en base).
+
+---
+
 ## Points ouverts
 
 | # | Sujet | Impact |
 |---|---|---|
-| 1 | Accès Google Drive / Dropbox depuis Android (mode mobile seul) | Bloque le mode 3 uniquement — pas le MVP |
-| 2 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
-| 3 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
+| 1 | ~~Accès Google Drive depuis Android~~ | ✅ Résolu — Mode 2 Android opérationnel (android-lock-ux) |
+| 2 | Support Dropbox | V1 — StorageAdapter déjà abstrait, ajouter DropboxStorageAdapter + sélecteur fournisseur dans Settings |
+| 3 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
+| 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |

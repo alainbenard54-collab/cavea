@@ -95,7 +95,7 @@ All other fields are editable in the full bottle edit form (V1 feature, not MVP)
 5. ✅ Bulk add (formulaire → N bouteilles identiques, répartition multi-emplacement)
 6. ~~Change location~~ → fusionnée dans `bottle-actions` (étape 4)
 7. ✅ Sync mechanism (lock / download / upload) — Mode 2 Google Drive : syncOnStartup, crash recovery, lock tiers lecture seule, releaseIfNeeded à la fermeture, indicateurs AppBar, bascule Mode 1→2 dans Settings
-8. Settings (chemin cave.db configurable, valeurs par défaut bulk-add couleur/contenance)
+8. ⏳ Settings — implémenté, en cours de tests (T-7.1→T-7.8) : chemin cave.db (Mode 1, file picker), couleur/contenance par défaut, listes de référence couleurs/contenances/crus éditables, listes fusionnées avec valeurs DB dans bulk-add
 
 Do not implement V1 or V2 features before the MVP is complete.
 
@@ -161,21 +161,33 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 
 ---
 
-## settings — spec planifiée (étape 8 MVP)
+## settings — implémenté (étape 8 MVP)
 
-Écran de configuration accessible depuis la navigation principale.
+Écran de configuration accessible depuis la navigation principale. Sections dans l'ordre d'affichage :
 
-**Paramètres Mode 1 :**
-- Chemin vers le répertoire contenant `cave.db` (modifiable, file picker)
+**1. Emplacement de la cave (Mode 1 uniquement)**
+- Affiche le dossier courant contenant `cave.db`
+- Bouton "Modifier" → `FilePicker.platform.getDirectoryPath()` → sauvegarde dans ConfigService → snackbar "redémarrez l'application"
 
-**Paramètres Mode 2 (non disponible en MVP, placeholder):**
-- Service cloud (Google Drive / Dropbox)
+**2. Ajout en lot — valeurs par défaut**
+- `couleur_defaut` : dropdown depuis `ConfigService.refCouleurs` — pré-sélectionné dans le formulaire si la valeur est présente dans la liste
+- `contenance_defaut` : champ texte — pré-rempli dans le formulaire
+- Persistés dans SharedPreferences via `ConfigService.saveBulkAddDefaults()`
 
-**Valeurs par défaut formulaire bulk-add :**
-- `couleur_defaut` (défaut en dur : "Rouge" — utilisé si la valeur est présente en base)
-- `contenance_defaut` (défaut en dur : "75 cl")
+**3. Listes de référence**
+- Trois listes éditables (chips supprimables + champ "Ajouter") : **Couleurs**, **Contenances**, **Crus**
+- Valeurs builtin par défaut (si jamais modifiées par l'utilisateur) :
+  - Couleurs : Blanc, Blanc effervescent, Blanc liquoreux, Blanc moelleux, Rosé, Rosé effervescent, Rouge
+  - Contenances : 37,5 cl, 50 cl, 75 cl, 1,5 L (magnum)
+  - Crus : 1ER CRU, CRU BOURGEOIS, CRU CLASSE, GRAND CRU, GRAND CRU CLASSE, SECOND VIN
+- Dans le formulaire bulk-add : liste affichée = union(liste de référence, valeurs existantes en base). Les valeurs de référence apparaissent en tête de liste.
 
-Ces valeurs sont lues depuis `ConfigService` au chargement de l'écran d'ajout. Si la valeur configurée n'est pas dans la liste chargée depuis la base, elle est ignorée (l'utilisateur sélectionne manuellement).
+**4. Mode de synchronisation**
+- Activation/désactivation Google Drive (code existant préservé)
+- Support Dropbox prévu en V1 — sélecteur de fournisseur à ajouter quand DropboxStorageAdapter sera implémenté
+
+**5. À propos**
+- Version, licence, lien vers les licences des dépendances
 
 ---
 
