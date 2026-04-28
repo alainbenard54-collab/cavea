@@ -533,6 +533,7 @@ class _CouleurFieldState extends ConsumerState<_CouleurField> {
     return DropdownButtonFormField<String>(
       key: ValueKey(_selected),
       initialValue: _selected,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Couleur *',
         border: const OutlineInputBorder(),

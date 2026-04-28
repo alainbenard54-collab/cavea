@@ -158,6 +158,10 @@ class SyncService extends StateNotifier<SyncState> {
           if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
           if (_isDisposed) return;
           _startAsReadOnly = false;
+        } else {
+          // Drive vide : initialiser la cave partagée avec la base locale.
+          // Pas de lock — on reste en lecture seule ; la prise de main est explicite.
+          await adapter.uploadDb(File(configService.config!.dbPath));
         }
         _lockHeldByUs = false;
         if (_isDisposed) return;
