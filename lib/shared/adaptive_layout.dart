@@ -227,9 +227,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                 context,
                 syncService,
                 title: 'Envoyer mes données locales ?',
-                content: 'Votre base locale va remplacer celle de Google Drive. '
-                    'Toute modification effectuée depuis un autre appareil lors de '
-                    'cette session sera perdue.',
+                content: 'Votre base locale va remplacer la version sur Google Drive. '
+                    'Comme la cave était verrouillée, aucun autre appareil n\'a pu '
+                    'la modifier depuis la dernière synchronisation.',
                 confirmLabel: 'Envoyer',
                 onConfirm: syncService.resolveOwnLockWithUpload,
                 onCancel: () => _showCrashRecoveryDialog(context, syncService),
