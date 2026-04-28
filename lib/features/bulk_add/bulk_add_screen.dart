@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/config_service.dart';
 import '../../data/database.dart';
+import '../../services/sync_service.dart';
 import '../../data/providers.dart';
 import 'bulk_add_controller.dart';
 import 'widgets/repartition_row.dart';
@@ -190,6 +191,19 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Fermer l'écran si le mode passe en lecture seule pendant la saisie
+    ref.listen<SyncState>(syncServiceProvider, (prev, next) {
+      if (next is SyncReadOnly && prev is! SyncReadOnly && mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Retour en lecture seule — saisie annulée'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+
     final state = ref.watch(bulkAddProvider);
     final notifier = ref.read(bulkAddProvider.notifier);
     final theme = Theme.of(context);
@@ -534,6 +548,13 @@ class _CouleurFieldState extends ConsumerState<_CouleurField> {
       key: ValueKey(_selected),
       initialValue: _selected,
       isExpanded: true,
+      // Affichage dans le bouton : texte tronqué avec ellipsis pour les noms longs
+      selectedItemBuilder: (context) => [
+        ...widget.couleurs.map<Widget>(
+          (c) => Text(c, overflow: TextOverflow.ellipsis),
+        ),
+        const Text('Autre…'),
+      ],
       decoration: InputDecoration(
         labelText: 'Couleur *',
         border: const OutlineInputBorder(),

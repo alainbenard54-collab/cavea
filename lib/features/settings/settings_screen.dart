@@ -157,9 +157,22 @@ class _DbPathSectionState extends State<_DbPathSection> {
     ));
     setState(() => _dirPath = dir);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Chemin mis à jour — redémarrez l\'application pour appliquer'),
+    // Forcer la fermeture — continuer avec l'ancien chemin risque une corruption.
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Redémarrage requis'),
+        content: const Text(
+          'Le dossier de la cave a été modifié.\n\n'
+          'L\'application doit redémarrer pour utiliser le nouveau chemin.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => exit(0),
+            child: const Text('Quitter l\'application'),
+          ),
+        ],
       ),
     );
   }
@@ -450,6 +463,39 @@ class _DriveActivationTile extends ConsumerWidget {
     );
 
     if (choice == null) {
+      await adapter.signOut();
+      return;
+    }
+
+    // Confirmation secondaire avant tout écrasement de données
+    if (!context.mounted) return;
+    final confirmTitle = choice == 'download'
+        ? 'Écraser la base locale ?'
+        : 'Écraser la version Drive ?';
+    final confirmContent = choice == 'download'
+        ? 'Votre base locale sera remplacée par la version Google Drive. Toutes les données locales non présentes sur Drive seront perdues.'
+        : 'La version sur Google Drive sera remplacée par votre base locale. Toutes les données Drive non présentes localement seront perdues.';
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(confirmTitle),
+        content: Text(confirmContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) {
       await adapter.signOut();
       return;
     }
