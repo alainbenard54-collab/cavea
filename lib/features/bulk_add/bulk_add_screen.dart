@@ -194,7 +194,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     // Fermer l'écran si le mode passe en lecture seule pendant la saisie
     ref.listen<SyncState>(syncServiceProvider, (prev, next) {
       if (next is SyncReadOnly && prev is! SyncReadOnly && mounted) {
-        Navigator.of(context).pop();
+        context.go('/');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Retour en lecture seule — saisie annulée'),
@@ -253,19 +253,19 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             const SizedBox(height: 10),
             Row(children: [
               Expanded(
-                child: _AutocompleteField(
+                child: _DropdownOptionalField(
                   label: 'Cru',
+                  choices: _crus,
                   initialValue: state.cru,
-                  suggestions: _crus,
                   onChanged: (v) => notifier.set((s) => s.copyWith(cru: v)),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _AutocompleteField(
+                child: _DropdownOptionalField(
                   label: 'Contenance',
+                  choices: _contenances,
                   initialValue: state.contenance,
-                  suggestions: _contenances,
                   onChanged: (v) =>
                       notifier.set((s) => s.copyWith(contenance: v)),
                 ),
@@ -483,107 +483,55 @@ class _CouleurField extends ConsumerStatefulWidget {
 }
 
 class _CouleurFieldState extends ConsumerState<_CouleurField> {
-  String? _selected;
-  bool _custom = false;
+  late final TextEditingController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _applyInitialSelection();
+    final currentCouleur = ref.read(bulkAddProvider).couleur;
+    final def = configService.couleurDefaut;
+    final initial = currentCouleur.isNotEmpty
+        ? currentCouleur
+        : (widget.couleurs.contains(def) ? def : '');
+    _ctrl = TextEditingController(text: initial);
+
+    if (currentCouleur.isEmpty && initial.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(bulkAddProvider.notifier).set((s) => s.copyWith(couleur: initial));
+        }
+      });
+    }
+
+    _ctrl.addListener(() {
+      ref.read(bulkAddProvider.notifier).set((s) => s.copyWith(couleur: _ctrl.text));
+    });
   }
 
   @override
-  void didUpdateWidget(_CouleurField old) {
-    super.didUpdateWidget(old);
-    // Synchronise la sélection quand la liste change (merge DB terminé)
-    if (_selected != null && !widget.couleurs.contains(_selected) && !_custom) {
-      setState(() => _selected = null);
-    } else if (_selected == null && !_custom) {
-      final current = ref.read(bulkAddProvider).couleur;
-      if (current.isNotEmpty && widget.couleurs.contains(current)) {
-        setState(() => _selected = current);
-      }
-    }
-  }
-
-  void _applyInitialSelection() {
-    final currentCouleur = ref.read(bulkAddProvider).couleur;
-    if (currentCouleur.isEmpty) {
-      final def = configService.couleurDefaut;
-      if (widget.couleurs.contains(def)) {
-        _selected = def;
-        // Différé : modifier un provider Riverpod pendant le build est interdit
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            ref.read(bulkAddProvider.notifier).set((s) => s.copyWith(couleur: def));
-          }
-        });
-      }
-    } else if (widget.couleurs.contains(currentCouleur)) {
-      _selected = currentCouleur;
-    }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.read(bulkAddProvider.notifier);
-    if (_custom) {
-      return TextFormField(
-        decoration: InputDecoration(
-          labelText: 'Couleur *',
-          border: const OutlineInputBorder(),
-          isDense: true,
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.list, size: 18),
-            tooltip: 'Choisir dans la liste',
-            onPressed: () => setState(() => _custom = false),
-          ),
-        ),
-        validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
-        onChanged: (v) => notifier.set((s) => s.copyWith(couleur: v)),
-      );
-    }
-    return DropdownButtonFormField<String>(
-      key: ValueKey(_selected),
-      initialValue: _selected,
-      isExpanded: true,
-      // Affichage dans le bouton : texte tronqué avec ellipsis pour les noms longs
-      selectedItemBuilder: (context) => [
-        ...widget.couleurs.map<Widget>(
-          (c) => Text(c, overflow: TextOverflow.ellipsis),
-        ),
-        const Text('Autre…'),
-      ],
-      decoration: InputDecoration(
-        labelText: 'Couleur *',
-        border: const OutlineInputBorder(),
-        isDense: true,
-        suffixIcon: widget.couleurs.isNotEmpty
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.edit, size: 18),
-                tooltip: 'Saisir manuellement',
-                onPressed: () => setState(() => _custom = true),
-              ),
+    return FormField<String>(
+      validator: (_) => _ctrl.text.trim().isEmpty ? 'Obligatoire' : null,
+      builder: (field) => DropdownMenu<String>(
+        controller: _ctrl,
+        enableFilter: true,
+        requestFocusOnTap: true,
+        expandedInsets: EdgeInsets.zero,
+        label: const Text('Couleur *'),
+        errorText: field.errorText,
+        onSelected: (v) {
+          if (v != null) _ctrl.text = v;
+        },
+        dropdownMenuEntries: widget.couleurs
+            .map((c) => DropdownMenuEntry(value: c, label: c))
+            .toList(),
       ),
-      validator: (v) => (v == null || v.isEmpty) ? 'Obligatoire' : null,
-      items: [
-        ...widget.couleurs.map((c) => DropdownMenuItem(value: c, child: Text(c))),
-        const DropdownMenuItem(value: '__custom__', child: Text('Autre…')),
-      ],
-      onChanged: (v) {
-        if (v == '__custom__') {
-          setState(() {
-            _custom = true;
-            _selected = null;
-          });
-          notifier.set((s) => s.copyWith(couleur: ''));
-        } else {
-          setState(() => _selected = v);
-          notifier.set((s) => s.copyWith(couleur: v ?? ''));
-        }
-      },
     );
   }
 }
@@ -622,6 +570,59 @@ class _DateEntreeFieldState extends ConsumerState<_DateEntreeField> {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
+    );
+  }
+}
+
+class _DropdownOptionalField extends StatefulWidget {
+  final String label;
+  final List<String> choices;
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+
+  const _DropdownOptionalField({
+    required this.label,
+    required this.choices,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  @override
+  State<_DropdownOptionalField> createState() => _DropdownOptionalFieldState();
+}
+
+class _DropdownOptionalFieldState extends State<_DropdownOptionalField> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(text: widget.initialValue);
+    _ctrl.addListener(() => widget.onChanged(_ctrl.text));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownMenu<String>(
+      controller: _ctrl,
+      enableFilter: true,
+      requestFocusOnTap: true,
+      expandedInsets: EdgeInsets.zero,
+      label: Text(widget.label),
+      onSelected: (v) {
+        if (v != null) _ctrl.text = v;
+      },
+      trailingIcon: const Icon(Icons.arrow_drop_down),
+      selectedTrailingIcon: const Icon(Icons.arrow_drop_up),
+      dropdownMenuEntries: widget.choices
+          .map((c) => DropdownMenuEntry(value: c, label: c))
+          .toList(),
     );
   }
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
-import 'dart:io';
+import 'dart:io' show File, Platform, exit;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -568,10 +568,12 @@ class _DriveActiveTile extends ConsumerWidget {
       leading: const Icon(Icons.cloud_done, color: Colors.green),
       title: const Text('Mode partagé (Google Drive)'),
       subtitle: const Text('Mode actuel : synchronisation activée'),
-      trailing: OutlinedButton(
-        onPressed: () => _deactivateDrive(context, widgetRef),
-        child: const Text('Revenir en local'),
-      ),
+      trailing: Platform.isAndroid
+          ? null
+          : OutlinedButton(
+              onPressed: () => _deactivateDrive(context, widgetRef),
+              child: const Text('Revenir en local'),
+            ),
     );
   }
 
