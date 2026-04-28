@@ -3,8 +3,10 @@
 
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 
 import '../../core/config_service.dart';
 import '../../services/drive_storage_adapter.dart';
@@ -22,12 +24,46 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ── Emplacement cave.db (Mode 1 uniquement) ──────────────────────
+          if (!isMode2) ...[
+            _SectionTitle('Emplacement de la cave'),
+            const _DbPathSection(),
+            const Divider(height: 32),
+          ],
+
+          // ── Valeurs par défaut ajout en lot ───────────────────────────────
+          _SectionTitle('Ajout en lot — valeurs par défaut'),
+          const _BulkAddDefaultsSection(),
+          const Divider(height: 32),
+
+          // ── Listes de référence ───────────────────────────────────────────
+          _SectionTitle('Listes de référence'),
+          _RefListEditor(
+            title: 'Couleurs',
+            initialValues: configService.refCouleurs,
+            onSave: configService.saveRefCouleurs,
+          ),
+          _RefListEditor(
+            title: 'Contenances',
+            initialValues: configService.refContenances,
+            onSave: configService.saveRefContenances,
+          ),
+          _RefListEditor(
+            title: 'Crus',
+            initialValues: configService.refCrus,
+            onSave: configService.saveRefCrus,
+          ),
+          const Divider(height: 32),
+
+          // ── Mode de synchronisation ───────────────────────────────────────
           _SectionTitle('Mode de synchronisation'),
           if (!isMode2)
             _DriveActivationTile(ref: ref)
           else
             _DriveActiveTile(ref: ref),
           const Divider(height: 32),
+
+          // ── À propos ──────────────────────────────────────────────────────
           _SectionTitle('À propos'),
           ListTile(
             leading: const Icon(Icons.wine_bar),
@@ -70,6 +106,8 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
@@ -84,6 +122,223 @@ class _SectionTitle extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
       ),
+    );
+  }
+}
+
+// ── Section chemin cave.db (Mode 1) ──────────────────────────────────────────
+
+class _DbPathSection extends StatefulWidget {
+  const _DbPathSection();
+
+  @override
+  State<_DbPathSection> createState() => _DbPathSectionState();
+}
+
+class _DbPathSectionState extends State<_DbPathSection> {
+  late String _dirPath;
+
+  @override
+  void initState() {
+    super.initState();
+    final dbPath = configService.config?.dbPath ?? '';
+    _dirPath = dbPath.isEmpty ? '(non configuré)' : p.dirname(dbPath);
+  }
+
+  Future<void> _pickDir() async {
+    final dir = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Dossier contenant cave.db',
+    );
+    if (dir == null || !mounted) return;
+    final current = configService.config!;
+    await configService.save(AppConfig(
+      storageMode: current.storageMode,
+      dbPath: p.join(dir, 'cave.db'),
+    ));
+    setState(() => _dirPath = dir);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Chemin mis à jour — redémarrez l\'application pour appliquer'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.folder_outlined),
+      title: const Text('Dossier cave.db'),
+      subtitle: Text(_dirPath, maxLines: 1, overflow: TextOverflow.ellipsis),
+      trailing: OutlinedButton(
+        onPressed: _pickDir,
+        child: const Text('Modifier'),
+      ),
+    );
+  }
+}
+
+// ── Section valeurs par défaut bulk-add ──────────────────────────────────────
+
+class _BulkAddDefaultsSection extends StatefulWidget {
+  const _BulkAddDefaultsSection();
+
+  @override
+  State<_BulkAddDefaultsSection> createState() => _BulkAddDefaultsSectionState();
+}
+
+class _BulkAddDefaultsSectionState extends State<_BulkAddDefaultsSection> {
+  late String _couleur;
+  late TextEditingController _contenanceCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _couleur = configService.couleurDefaut;
+    _contenanceCtrl = TextEditingController(text: configService.contenanceDefaut);
+  }
+
+  @override
+  void dispose() {
+    _contenanceCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final couleurs = configService.refCouleurs;
+    final displayCouleur = couleurs.contains(_couleur) ? _couleur : null;
+
+    return Column(
+      children: [
+        ListTile(
+          title: const Text('Couleur par défaut'),
+          trailing: DropdownButton<String>(
+            value: displayCouleur,
+            hint: const Text('Choisir…'),
+            items: couleurs
+                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                .toList(),
+            onChanged: (v) {
+              if (v == null) return;
+              setState(() => _couleur = v);
+              configService.saveBulkAddDefaults(couleur: v);
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('Contenance par défaut'),
+          trailing: SizedBox(
+            width: 130,
+            child: TextField(
+              controller: _contenanceCtrl,
+              textAlign: TextAlign.end,
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (v) => configService.saveBulkAddDefaults(contenance: v.trim()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Éditeur de liste de référence ────────────────────────────────────────────
+
+class _RefListEditor extends StatefulWidget {
+  final String title;
+  final List<String> initialValues;
+  final Future<void> Function(List<String>) onSave;
+
+  const _RefListEditor({
+    required this.title,
+    required this.initialValues,
+    required this.onSave,
+  });
+
+  @override
+  State<_RefListEditor> createState() => _RefListEditorState();
+}
+
+class _RefListEditorState extends State<_RefListEditor> {
+  late List<String> _values;
+  final _addCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _values = List.from(widget.initialValues);
+  }
+
+  @override
+  void dispose() {
+    _addCtrl.dispose();
+    super.dispose();
+  }
+
+  void _remove(String v) {
+    setState(() => _values.remove(v));
+    widget.onSave(List.from(_values));
+  }
+
+  void _add() {
+    final v = _addCtrl.text.trim();
+    if (v.isEmpty || _values.contains(v)) return;
+    setState(() => _values.add(v));
+    _addCtrl.clear();
+    widget.onSave(List.from(_values));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      title: Text(widget.title),
+      subtitle: Text('${_values.length} valeur${_values.length > 1 ? 's' : ''}'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: _values
+                    .map((v) => InputChip(
+                          label: Text(v),
+                          onDeleted: () => _remove(v),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _addCtrl,
+                      decoration: const InputDecoration(
+                        hintText: 'Ajouter une valeur…',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: (_) => _add(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: _add,
+                    tooltip: 'Ajouter',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -203,7 +458,6 @@ class _DriveActivationTile extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
 
     if (choice == 'download') {
-      // Télécharger la cave Drive en local
       messenger.showSnackBar(
         const SnackBar(content: Text('Téléchargement en cours…'), duration: Duration(minutes: 1)),
       );
@@ -219,7 +473,6 @@ class _DriveActivationTile extends ConsumerWidget {
         return;
       }
     } else {
-      // Uploader la cave locale vers Drive
       messenger.showSnackBar(
         const SnackBar(content: Text('Upload en cours…'), duration: Duration(minutes: 1)),
       );

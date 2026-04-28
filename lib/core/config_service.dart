@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConfig {
-  final String storageMode; // 'local'
+  final String storageMode; // 'local' ou 'drive'
   final String dbPath; // chemin absolu vers cave.db
 
   const AppConfig({required this.storageMode, required this.dbPath});
@@ -16,11 +16,45 @@ class AppConfig {
 class ConfigService {
   static const _keyMode = 'storage_mode';
   static const _keyDbPath = 'db_path';
+  static const _keyCouleurDefaut = 'couleur_defaut';
+  static const _keyContenanceDefaut = 'contenance_defaut';
+  static const _keyRefCouleurs = 'ref_couleurs';
+  static const _keyRefContenances = 'ref_contenances';
+  static const _keyRefCrus = 'ref_crus';
+
+  static const builtinCouleurs = [
+    'Blanc',
+    'Blanc effervescent',
+    'Blanc liquoreux',
+    'Blanc moelleux',
+    'Rosé',
+    'Rosé effervescent',
+    'Rouge',
+  ];
+  static const builtinContenances = ['37,5 cl', '50 cl', '75 cl', '1,5 L (magnum)'];
+  static const builtinCrus = [
+    '1ER CRU',
+    'CRU BOURGEOIS',
+    'CRU CLASSE',
+    'GRAND CRU',
+    'GRAND CRU CLASSE',
+    'SECOND VIN',
+  ];
 
   AppConfig? _config;
+  String? _couleurDefaut;
+  String? _contenanceDefaut;
+  List<String>? _refCouleurs;
+  List<String>? _refContenances;
+  List<String>? _refCrus;
 
   AppConfig? get config => _config;
   bool get isConfigured => _config != null;
+  String get couleurDefaut => _couleurDefaut ?? 'Rouge';
+  String get contenanceDefaut => _contenanceDefaut ?? '75 cl';
+  List<String> get refCouleurs => _refCouleurs ?? builtinCouleurs;
+  List<String> get refContenances => _refContenances ?? builtinContenances;
+  List<String> get refCrus => _refCrus ?? builtinCrus;
 
   Future<void> load() async {
     // 1. .env à côté de l'exe (Windows desktop uniquement)
@@ -36,6 +70,12 @@ class ConfigService {
     if (mode != null && dbPath != null && dbPath.isNotEmpty) {
       _config = AppConfig(storageMode: mode, dbPath: dbPath);
     }
+
+    _couleurDefaut = prefs.getString(_keyCouleurDefaut);
+    _contenanceDefaut = prefs.getString(_keyContenanceDefaut);
+    _refCouleurs = prefs.getStringList(_keyRefCouleurs);
+    _refContenances = prefs.getStringList(_keyRefContenances);
+    _refCrus = prefs.getStringList(_keyRefCrus);
   }
 
   // Lecture directe du fichier .env depuis le dossier de l'exécutable.
@@ -84,6 +124,36 @@ class ConfigService {
     await prefs.remove(_keyMode);
     await prefs.remove(_keyDbPath);
     _config = null;
+  }
+
+  Future<void> saveBulkAddDefaults({String? couleur, String? contenance}) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (couleur != null) {
+      await prefs.setString(_keyCouleurDefaut, couleur);
+      _couleurDefaut = couleur;
+    }
+    if (contenance != null) {
+      await prefs.setString(_keyContenanceDefaut, contenance);
+      _contenanceDefaut = contenance;
+    }
+  }
+
+  Future<void> saveRefCouleurs(List<String> values) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyRefCouleurs, values);
+    _refCouleurs = values;
+  }
+
+  Future<void> saveRefContenances(List<String> values) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyRefContenances, values);
+    _refContenances = values;
+  }
+
+  Future<void> saveRefCrus(List<String> values) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyRefCrus, values);
+    _refCrus = values;
   }
 }
 

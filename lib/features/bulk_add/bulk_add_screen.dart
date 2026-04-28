@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/config_service.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import 'bulk_add_controller.dart';
@@ -37,6 +38,10 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
   void initState() {
     super.initState();
     _qtCtrl = TextEditingController(text: '1');
+    // Listes pré-remplies depuis la config pour éviter dropdowns vides sur cave neuve
+    _couleurs = configService.refCouleurs;
+    _contenances = configService.refContenances;
+    _crus = configService.refCrus;
     _loadLists();
   }
 
@@ -44,6 +49,19 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
   void dispose() {
     _qtCtrl.dispose();
     super.dispose();
+  }
+
+  // Ref list items en premier, puis valeurs DB non encore présentes.
+  List<String> _mergeWithRef(List<String> dbValues, List<String> refValues) {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final v in refValues) {
+      if (seen.add(v)) result.add(v);
+    }
+    for (final v in dbValues) {
+      if (v.isNotEmpty && seen.add(v)) result.add(v);
+    }
+    return result;
   }
 
   Future<void> _loadLists() async {
@@ -60,12 +78,12 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     if (mounted) {
       setState(() {
         _emplacements = results[0];
-        _couleurs = results[1];
+        _couleurs = _mergeWithRef(results[1], configService.refCouleurs);
         _domaines = results[2];
         _appellations = results[3];
         _fournisseurs = results[4];
-        _contenances = results[5];
-        _crus = results[6];
+        _contenances = _mergeWithRef(results[5], configService.refContenances);
+        _crus = _mergeWithRef(results[6], configService.refCrus);
       });
     }
   }
@@ -455,27 +473,40 @@ class _CouleurFieldState extends ConsumerState<_CouleurField> {
   bool _custom = false;
 
   @override
+  void initState() {
+    super.initState();
+    _applyInitialSelection();
+  }
+
+  @override
   void didUpdateWidget(_CouleurField old) {
     super.didUpdateWidget(old);
-    if (old.couleurs.isEmpty && widget.couleurs.isNotEmpty && _selected == null && !_custom) {
-      final currentCouleur = ref.read(bulkAddProvider).couleur;
-      if (currentCouleur.isEmpty) {
-        // TODO(settings): lire depuis ConfigService.defaultCouleur
-        const defaultCouleur = 'Rouge';
-        if (widget.couleurs.contains(defaultCouleur)) {
-          setState(() => _selected = defaultCouleur);
-          // Différé : modifier un provider Riverpod pendant le build est interdit
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              ref
-                  .read(bulkAddProvider.notifier)
-                  .set((s) => s.copyWith(couleur: defaultCouleur));
-            }
-          });
-        }
-      } else if (widget.couleurs.contains(currentCouleur)) {
-        setState(() => _selected = currentCouleur);
+    // Synchronise la sélection quand la liste change (merge DB terminé)
+    if (_selected != null && !widget.couleurs.contains(_selected) && !_custom) {
+      setState(() => _selected = null);
+    } else if (_selected == null && !_custom) {
+      final current = ref.read(bulkAddProvider).couleur;
+      if (current.isNotEmpty && widget.couleurs.contains(current)) {
+        setState(() => _selected = current);
       }
+    }
+  }
+
+  void _applyInitialSelection() {
+    final currentCouleur = ref.read(bulkAddProvider).couleur;
+    if (currentCouleur.isEmpty) {
+      final def = configService.couleurDefaut;
+      if (widget.couleurs.contains(def)) {
+        _selected = def;
+        // Différé : modifier un provider Riverpod pendant le build est interdit
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ref.read(bulkAddProvider.notifier).set((s) => s.copyWith(couleur: def));
+          }
+        });
+      }
+    } else if (widget.couleurs.contains(currentCouleur)) {
+      _selected = currentCouleur;
     }
   }
 

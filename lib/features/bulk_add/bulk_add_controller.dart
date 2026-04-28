@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/config_service.dart';
 
 class RepartitionGroup {
   final int quantite;
@@ -116,7 +117,10 @@ class BulkAddState {
 
 class BulkAddNotifier extends StateNotifier<BulkAddState> {
   BulkAddNotifier()
-      : super(BulkAddState(dateEntree: DateTime.now()));
+      : super(BulkAddState(
+          dateEntree: DateTime.now(),
+          contenance: configService.contenanceDefaut,
+        ));
 
   void set(BulkAddState Function(BulkAddState) updater) {
     state = updater(state);
