@@ -1,1 +1,0 @@
-{"valid_import":true,"imports":[{"uri":"package:flutter_riverpod/flutter_riverpod.dart","transitive":false},{"uri":"package:cavea/data/database.dart","transitive":false},{"uri":"package:cavea/data/daos/bouteille_dao.dart","transitive":false}],"elements":[]}

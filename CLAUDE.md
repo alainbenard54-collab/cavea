@@ -95,7 +95,7 @@ All other fields are editable in the full bottle edit form (V1 feature, not MVP)
 5. ✅ Bulk add (formulaire → N bouteilles identiques, répartition multi-emplacement)
 6. ~~Change location~~ → fusionnée dans `bottle-actions` (étape 4)
 7. ✅ Sync mechanism (lock / download / upload) — Mode 2 Google Drive : syncOnStartup, crash recovery, lock tiers lecture seule, releaseIfNeeded à la fermeture, indicateurs AppBar, bascule Mode 1→2 dans Settings
-8. ⏳ Settings — implémenté, en cours de tests (T-7.1→T-7.8) : chemin cave.db (Mode 1, file picker), couleur/contenance par défaut, listes de référence couleurs/contenances/crus éditables, listes fusionnées avec valeurs DB dans bulk-add
+8. ✅ Settings — implémenté et testé (T-7.1→T-7.9 OK) : chemin cave.db (Mode 1, file picker), couleur/contenance par défaut, listes de référence couleurs/contenances/crus éditables, listes fusionnées avec valeurs DB dans bulk-add
 
 Do not implement V1 or V2 features before the MVP is complete.
 

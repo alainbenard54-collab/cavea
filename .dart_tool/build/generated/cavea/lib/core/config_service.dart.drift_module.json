@@ -1,8 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:flutter/foundation.dart",
-    "package:path/path.dart",
-    "package:shared_preferences/shared_preferences.dart"
-  ]
-}

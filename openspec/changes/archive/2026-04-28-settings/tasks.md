@@ -40,12 +40,12 @@
 
 ## 7. Tests manuels
 
-- [ ] 7.1 Cave vide — ouvrir "Ajouter" : vérifier dropdown Couleur pré-rempli (builtins), liste Contenance et Cru non vides [TEST MANUEL]
-- [ ] 7.2 Vérifier que `couleurDefaut` ("Rouge") est pré-sélectionné dans le dropdown Couleur [TEST MANUEL]
-- [ ] 7.3 Mode 1 — Paramètres → "Emplacement" : affichage du dossier courant, modifier via file picker, snackbar affiché [TEST MANUEL]
-- [ ] 7.4 Paramètres → "Ajout en lot" : changer couleur par défaut → ouvrir "Ajouter" → vérifier pré-sélection [TEST MANUEL]
-- [ ] 7.5 Paramètres → "Listes de référence" → Couleurs : ajouter "Pétillant" → ouvrir "Ajouter" → vérifier présence [TEST MANUEL]
-- [ ] 7.6 Paramètres → Couleurs : supprimer "Rosé effervescent" (chip X) → ouvrir "Ajouter" → vérifier absence (si non en base) [TEST MANUEL]
-- [ ] 7.7 Cave avec données — vérifier que les couleurs/contenances/crus déjà en base apparaissent en bas de liste même si absents des listes de référence [TEST MANUEL]
-- [ ] 7.8 Mode 2 — vérifier que la section "Emplacement" est absente en Mode 2, listes de référence et defaults toujours visibles [TEST MANUEL]
-- [ ] 7.9 Bulk-add — Cru et Contenance sont des dropdowns : "(aucun)" sélectionnable, "Autre…" bascule vers saisie libre ; contenance défaut pré-sélectionné ; type-ahead clavier fonctionne quand le dropdown est ouvert [TEST MANUEL]
+- [x] 7.1 Cave vide — ouvrir "Ajouter" : vérifier dropdown Couleur pré-rempli (builtins), liste Contenance et Cru non vides [TEST MANUEL]
+- [x] 7.2 Vérifier que `couleurDefaut` ("Rouge") est pré-sélectionné dans le dropdown Couleur [TEST MANUEL]
+- [x] 7.3 Mode 1 — Paramètres → "Emplacement" : affichage du dossier courant, modifier via file picker, snackbar affiché [TEST MANUEL]
+- [x] 7.4 Paramètres → "Ajout en lot" : changer couleur par défaut → ouvrir "Ajouter" → vérifier pré-sélection [TEST MANUEL]
+- [x] 7.5 Paramètres → "Listes de référence" → Couleurs : ajouter "Pétillant" → ouvrir "Ajouter" → vérifier présence [TEST MANUEL]
+- [x] 7.6 Paramètres → Couleurs : supprimer "Rosé effervescent" (chip X) → ouvrir "Ajouter" → vérifier absence (si non en base) [TEST MANUEL]
+- [x] 7.7 Cave avec données — vérifier que les couleurs/contenances/crus déjà en base apparaissent en bas de liste même si absents des listes de référence [TEST MANUEL]
+- [x] 7.8 Mode 2 — vérifier que la section "Emplacement" est absente en Mode 2, listes de référence et defaults toujours visibles [TEST MANUEL]
+- [x] 7.9 Bulk-add — Cru et Contenance sont des dropdowns : "(aucun)" sélectionnable, "Autre…" bascule vers saisie libre ; contenance défaut pré-sélectionné ; type-ahead clavier fonctionne quand le dropdown est ouvert [TEST MANUEL]

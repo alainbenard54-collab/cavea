@@ -1,7 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:cavea/data/daos/bouteille_dao.dart",
-    "package:cavea/data/tables/bouteilles.dart"
-  ]
-}

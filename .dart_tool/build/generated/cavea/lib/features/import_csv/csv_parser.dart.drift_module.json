@@ -1,8 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:drift/drift.dart",
-    "package:uuid/uuid.dart",
-    "package:cavea/data/tables/bouteilles.dart"
-  ]
-}
