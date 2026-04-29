@@ -70,3 +70,25 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "Lancer {#MyAppName}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+// Propose de supprimer les paramètres lors de la désinstallation.
+// Les paramètres (mode sync, chemin cave, listes de référence) sont stockés
+// dans %APPDATA% par Flutter et ne sont pas supprimés automatiquement.
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then
+  begin
+    if MsgBox(
+      'Voulez-vous également supprimer les paramètres de l''application ?' + #13#10 + #13#10 +
+      'Cela efface le mode de synchronisation, le chemin de la cave et les listes ' +
+      'de référence personnalisées.' + #13#10 + #13#10 +
+      'Vos données de cave (cave.db) ne sont pas affectées.',
+      mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+    begin
+      // Supprimer les deux emplacements possibles selon la version installée
+      DelTree(ExpandConstant('{userappdata}\Alain Benard\Cavea'), True, True, True);
+      DelTree(ExpandConstant('{userappdata}\com.cavea\cavea'), True, True, True);
+    end;
+  end;
+end;
