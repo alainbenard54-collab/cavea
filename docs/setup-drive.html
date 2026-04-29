@@ -3,92 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synchronisation Google Drive — Cavea</title>
+  <title>Modes de stockage — Cavea</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 720px;
+      max-width: 760px;
       margin: 40px auto;
       padding: 0 24px 60px;
       color: #1a1a1a;
       line-height: 1.7;
     }
     h1 { font-size: 1.8rem; margin-bottom: 4px; }
-    h2 { font-size: 1.1rem; margin-top: 2rem; color: #5c2d0a; }
+    h2 { font-size: 1.2rem; margin-top: 2.5rem; color: #5c2d0a; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+    h3 { font-size: 1rem; margin-top: 1.5rem; color: #333; }
     .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    /* Mode cards */
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1.5rem 0; }
+    @media (max-width: 560px) { .modes { grid-template-columns: 1fr; } }
+    .mode-card {
+      border: 2px solid #e0d5c8;
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .mode-card.local { border-color: #b0c8b0; background: #f5faf5; }
+    .mode-card.shared { border-color: #b0bfe8; background: #f5f8ff; }
+    .mode-card h3 { margin-top: 0; font-size: 1rem; }
+    .mode-card .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+    .local .badge { background: #d4edda; color: #1a5c2a; }
+    .shared .badge { background: #d0daf7; color: #1a2d7a; }
+
+    /* Icons table */
+    .icons-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .icons-table th { text-align: left; padding: 8px 12px; background: #f7f3ef; font-weight: 600; font-size: 0.9rem; }
+    .icons-table td { padding: 8px 12px; border-top: 1px solid #eee; vertical-align: top; font-size: 0.95rem; }
+    .icon-cell { font-size: 1.3rem; text-align: center; width: 48px; }
+
+    /* Platform behavior */
+    .platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 1rem 0; }
+    @media (max-width: 560px) { .platform-grid { grid-template-columns: 1fr; } }
+    .platform-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px 16px; }
+    .platform-box h3 { margin: 0 0 8px; font-size: 0.95rem; }
+    .platform-box ul { margin: 0; padding-left: 18px; font-size: 0.9rem; }
+
     .tip {
       background: #f0f7f0;
       border-left: 4px solid #2d7a3a;
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-radius: 0 6px 6px 0;
-      margin: 1.5rem 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
     }
-    ol li, ul li { margin-bottom: 0.5rem; }
-    code {
-      background: #f4f4f4;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.9em;
+    .note {
+      background: #fdfaf5;
+      border-left: 4px solid #c8a45a;
+      padding: 10px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
     }
+    ol li, ul li { margin-bottom: 0.4rem; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; }
     a { color: #8b4513; }
     footer { margin-top: 3rem; font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 1rem; }
   </style>
 </head>
 <body>
 
-<h1>☁️ Synchronisation Google Drive</h1>
-<p class="meta">Cavea — Partage de cave entre plusieurs appareils</p>
+<h1>🍷 Cavea — Modes de stockage</h1>
+<p class="meta">Configuration, synchronisation et icônes de l'application</p>
 
-<h2>À quoi sert le Mode 2 ?</h2>
+<!-- ── Modes ── -->
+<h2>Les deux modes de stockage</h2>
 
-<p>Par défaut (Mode 1), votre cave est stockée localement sur un seul appareil.
-Le <strong>Mode 2</strong> permet de partager la même cave entre plusieurs appareils —
-par exemple un PC Windows chez vous et un Android en déplacement —
-via votre propre espace Google Drive.</p>
-
-<div class="tip">
-  Vos données ne transitent jamais par un serveur tiers. Tout passe directement
-  entre votre appareil et votre Google Drive personnel.
+<div class="modes">
+  <div class="mode-card local">
+    <span class="badge">Mode 1</span>
+    <h3>🖥️ Stockage local</h3>
+    <p>La cave est stockée sur votre appareil. Aucune connexion internet requise, aucun compte externe.</p>
+    <p><strong>Plateformes :</strong> Windows (disponible), Android local (prochainement)</p>
+  </div>
+  <div class="mode-card shared">
+    <span class="badge">Mode 2</span>
+    <h3>☁️ Partage via Google Drive</h3>
+    <p>La cave est partagée entre plusieurs appareils via votre Google Drive personnel.</p>
+    <p><strong>Plateformes :</strong> Windows + Android simultanément</p>
+  </div>
 </div>
 
-<h2>Comment ça fonctionne</h2>
+<div class="tip">
+  En Mode 2, vos données ne transitent jamais par un serveur tiers — tout passe directement
+  entre votre appareil et votre propre Google Drive.
+</div>
 
-<p>Cavea crée un dossier <code>Cavea/</code> dans votre Google Drive et y dépose
-votre fichier de cave (<code>cave.db</code>). À chaque ouverture de l'application,
-la cave est téléchargée depuis Drive ; à la fermeture, elle est renvoyée.</p>
+<!-- ── Premier lancement ── -->
+<h2>Choisir son mode au premier lancement</h2>
 
-<p>Un système de verrou garantit qu'un seul appareil peut modifier la cave
-à la fois. Si un autre appareil est déjà en cours d'utilisation, Cavea vous
-en informe et propose de consulter la cave en lecture seule.</p>
+<p>Au premier démarrage, un assistant vous propose de choisir entre les deux modes.
+Ce choix peut être modifié à tout moment depuis les Paramètres.</p>
 
-<h2>Activer le Mode 2</h2>
+<ul>
+  <li><strong>Mode local</strong> → vous indiquez le dossier où stocker <code>cave.db</code>
+      (ou acceptez le dossier proposé par défaut)</li>
+  <li><strong>Mode partagé</strong> → une page de connexion Google s'ouvre dans votre navigateur ;
+      vous autorisez Cavea à accéder à son dossier Drive, puis choisissez si vous voulez
+      commencer avec une cave vide ou récupérer une cave déjà présente sur Drive</li>
+</ul>
 
+<!-- ── Changer de mode ── -->
+<h2>Changer de mode depuis les Paramètres</h2>
+
+<h3>Passer du Mode 1 → Mode 2</h3>
 <ol>
-  <li>Ouvrez Cavea → onglet <strong>Paramètres</strong></li>
-  <li>Section "Mode de synchronisation" → <strong>Activer Google Drive</strong></li>
-  <li>Une page de connexion Google s'ouvre dans votre navigateur</li>
-  <li>Connectez-vous et autorisez Cavea à accéder à son dossier Drive</li>
-  <li>Choisissez : envoyer votre cave locale vers Drive, ou récupérer
-      une cave déjà présente sur Drive</li>
+  <li>Onglet <strong>Paramètres</strong> → section "Mode de synchronisation"</li>
+  <li>Cliquer <strong>Activer Google Drive</strong></li>
+  <li>Authentification Google dans le navigateur</li>
+  <li>Choisir : envoyer votre cave locale vers Drive, ou récupérer la cave Drive</li>
 </ol>
 
-<p>Répétez l'opération sur chaque appareil avec le même compte Google.</p>
+<h3>Revenir du Mode 2 → Mode 1</h3>
+<ol>
+  <li>Onglet <strong>Paramètres</strong> → section "Mode de synchronisation"</li>
+  <li>Cliquer <strong>Revenir en local</strong></li>
+  <li>L'application conserve la copie locale de <code>cave.db</code> et cesse toute synchronisation</li>
+</ol>
 
-<h2>Synchronisation manuelle</h2>
+<h3>Modifier le chemin de la cave (Mode 1 uniquement)</h3>
+<p>Dans les Paramètres, section "Emplacement de la cave", cliquer <strong>Modifier</strong>
+et sélectionner un dossier. Un redémarrage de l'application est nécessaire pour
+que le changement soit pris en compte.</p>
 
-<p>En cours de session, un bouton <strong>Synchroniser</strong> permet d'envoyer
-manuellement les modifications vers Drive sans fermer l'application.
-Les icônes dans la barre de navigation indiquent le mode actif
-et l'état du verrou.</p>
+<!-- ── Synchronisation ── -->
+<h2>Fonctionnement de la synchronisation (Mode 2)</h2>
 
-<h2>Repasser en Mode 1 (local)</h2>
+<p>Un système de verrou garantit qu'un seul appareil peut modifier la cave à la fois.
+Le fichier <code>cave.db</code> est téléchargé depuis Drive à l'ouverture et renvoyé à la fermeture.</p>
 
-<p>À tout moment depuis les Paramètres, vous pouvez désactiver la synchronisation
-Drive. L'application reprend un fonctionnement entièrement local en conservant
-la copie de cave.db présente sur l'appareil.</p>
+<div class="platform-grid">
+  <div class="platform-box">
+    <h3>🖥️ Windows</h3>
+    <ul>
+      <li>Téléchargement automatique au démarrage</li>
+      <li>Envoi automatique à la fermeture de l'application</li>
+      <li>Envoi manuel possible à tout moment via le bouton Synchroniser</li>
+    </ul>
+  </div>
+  <div class="platform-box">
+    <h3>📱 Android</h3>
+    <ul>
+      <li>Téléchargement automatique au démarrage</li>
+      <li>Envoi via le bouton Synchroniser en cours de session</li>
+      <li>⚠️ L'envoi automatique à la fermeture n'est pas garanti sur Android
+          (l'OS peut interrompre le processus)</li>
+    </ul>
+  </div>
+</div>
 
+<div class="note">
+  Sur Android, pensez à appuyer sur <strong>Synchroniser</strong> avant de quitter l'application
+  si vous avez apporté des modifications importantes.
+</div>
+
+<h3>En cas de lock tiers</h3>
+<p>Si un autre appareil détient le verrou quand vous démarrez l'application,
+Cavea vous propose de consulter votre cave <strong>en lecture seule</strong>,
+sans possibilité de modification. Cela protège vos données contre les modifications simultanées.</p>
+
+<!-- ── Icônes ── -->
+<h2>Icônes de statut dans la barre de navigation</h2>
+
+<p>En Mode 2, deux icônes apparaissent dans la barre de l'application pour indiquer
+l'état de la synchronisation.</p>
+
+<table class="icons-table">
+  <thead>
+    <tr>
+      <th class="icon-cell">Icône</th>
+      <th>Mode</th>
+      <th>Signification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="icon-cell">🖥️</td>
+      <td>Local (Mode 1)</td>
+      <td>Cave stockée localement, aucune synchronisation</td>
+    </tr>
+    <tr>
+      <td class="icon-cell">☁️</td>
+      <td>Partagé (Mode 2)</td>
+      <td>Cave connectée à Google Drive</td>
+    </tr>
+    <tr>
+      <td class="icon-cell">🔓</td>
+      <td>Partagé — écriture</td>
+      <td>Vous avez le verrou : les modifications sont possibles</td>
+    </tr>
+    <tr>
+      <td class="icon-cell">🔒</td>
+      <td>Partagé — lecture seule</td>
+      <td>Un autre appareil a le verrou : consultation uniquement</td>
+    </tr>
+    <tr>
+      <td class="icon-cell">⏳</td>
+      <td>Synchronisation en cours</td>
+      <td>Téléchargement ou envoi en cours — patienter</td>
+    </tr>
+    <tr>
+      <td class="icon-cell">⚠️</td>
+      <td>Erreur de synchronisation</td>
+      <td>Problème réseau ou Drive — réessayer via le bouton Synchroniser</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── Contact ── -->
 <h2>Questions et problèmes</h2>
-
 <p>
   Ouvrez un ticket sur
   <a href="https://github.com/alainbenard54-collab/cavea/issues">GitHub Issues</a>.

@@ -88,9 +88,7 @@ class _ModeChoiceStep extends StatelessWidget {
         ],
         _ModeCard(
           title: 'Mode partagé (Google Drive)',
-          description: Platform.isAndroid
-              ? 'Synchronisation via Google Drive — nécessite un compte Google.'
-              : 'Synchronisation via Google Drive — nécessite un compte Google et le fichier google_desktop_secrets.json.',
+          description: 'Partagez votre cave entre plusieurs appareils via Google Drive — nécessite un compte Google.',
           icon: Icons.sync,
           onTap: () => onSelect('drive'),
         ),
