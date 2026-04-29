@@ -221,6 +221,42 @@ Permettre :
 
 ---
 
+## 7. Multi-sélection de bouteilles
+
+Depuis la vue stock, sélectionner plusieurs bouteilles (cases à cocher ou appui long) pour appliquer une action groupée :
+
+- **Déplacer** : toutes vers le même emplacement (saisie unique)
+- **Consommer** : toutes à la même date, note et commentaire optionnels (saisie unique)
+
+Menu d'actions affiché en bas d'écran quand au moins une bouteille est sélectionnée. Annulation possible (désélectionner tout).
+
+---
+
+## 8. Internationalisation (i18n)
+
+Support multilingue via fichiers ARB (`flutter gen-l10n`) :
+
+- Langues livrées : **français** (langue par défaut) et **anglais**
+- Détection automatique de la langue système, sélection manuelle dans les paramètres
+- Contribution externe : ajouter une langue = ajouter un fichier `app_XX.arb` dans `lib/l10n/`
+
+---
+
+## 9. Mise à jour Flutter vers la dernière version stable
+
+Migrer vers la version Flutter stable courante au moment du démarrage V1, avec vérification de compatibilité des dépendances.
+
+---
+
+## 10. Support Linux (desktop)
+
+- Mode 1 (local) : compilation sans changement majeur
+- Mode 2 (Drive) : adaptation du flux OAuth desktop (même approche que Windows, clientId + clientSecret)
+- Packaging : AppImage ou `.deb`
+- Dépendance système requise : `libsqlite3-dev`
+
+---
+
 # 🟠 V2 (intelligence métier)
 
 ## 🎯 Objectif

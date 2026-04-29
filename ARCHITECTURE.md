@@ -8,9 +8,10 @@ Décisions techniques retenues pour l'application de gestion de cave à vin.
 
 | Plateforme | Statut |
 |---|---|
-| Windows | Cible principale (desktop) |
-| Android | Cible mobile |
-| macOS / Linux | Supporté par Flutter, non prioritaire |
+| Windows | Cible principale (desktop) — MVP ✅ |
+| Android | Cible mobile — MVP ✅ |
+| Linux | V1 — effort modéré (Mode 1 sans changement, Mode 2 via OAuth desktop, packaging AppImage/.deb) |
+| macOS | Non prioritaire |
 | iOS | Hors périmètre (coût Apple Developer) |
 
 ---
@@ -351,6 +352,34 @@ Les listes de référence ont des valeurs builtin par défaut (`ConfigService.bu
 
 ---
 
+## Internationalisation (V1)
+
+Approche retenue : **`flutter_localizations` + `intl` + fichiers ARB** (standard Flutter officiel).
+
+```
+lib/l10n/
+├── app_fr.arb   # français (langue par défaut)
+└── app_en.arb   # anglais
+```
+
+- Génération automatique via `flutter gen-l10n` → `AppLocalizations` accessible dans tous les widgets
+- Ajout d'une langue par un contributeur externe = créer `app_XX.arb` + PR
+- Sélection de langue : détection automatique du système + sélection manuelle dans les paramètres (persistée dans SharedPreferences)
+
+---
+
+## Multi-sélection de bouteilles (V1)
+
+Sélection multiple depuis la vue stock via appui long (entrée dans le mode sélection) ou cases à cocher. Barre d'actions contextuelle en bas d'écran :
+
+- **Déplacer** : bottom sheet avec un seul champ emplacement + autocomplétion → `UPDATE emplacement` sur toutes les bouteilles sélectionnées
+- **Consommer** : bottom sheet identique au formulaire Consommer unitaire → `UPDATE date_sortie + note_degus + commentaire_degus` sur toutes
+- **Annuler** : désélection totale, retour en mode normal
+
+Champs protégés et règles identiques à l'action unitaire.
+
+---
+
 ## Points ouverts
 
 | # | Sujet | Impact |
@@ -359,3 +388,5 @@ Les listes de référence ont des valeurs builtin par défaut (`ConfigService.bu
 | 2 | Support Dropbox | V1 — StorageAdapter déjà abstrait, ajouter DropboxStorageAdapter + sélecteur fournisseur dans Settings |
 | 3 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
 | 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
+| 5 | Mise à jour Flutter vers version stable courante | V1 — vérifier compatibilité dépendances avant migration |
+| 6 | Support Linux — packaging AppImage/.deb | V1 |

@@ -194,7 +194,16 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 ## V1 features (post-MVP — do not implement before MVP complete)
 
 - **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" (l'entrée de navigation est déjà en place en MVP).
-- Fiche lecture seule d'une bouteille (détail complet)
+- **Fiche lecture seule** d'une bouteille (détail complet)
+- **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → Déplacer (même emplacement pour toutes) ou Consommer (même date/note/commentaire pour toutes). Voir ARCHITECTURE.md section "Multi-sélection".
+- **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
+- **Filtres avancés** : multi-critères, filtres sauvegardés (ex : "blanc à boire")
+- **Navigation par emplacement** : regroupement hiérarchique, comptage par zone
+- **Historique des consommations** : liste bouteilles consommées, tri par date
+- **Export CSV** : même format que l'import
+- **Support Dropbox** : `DropboxStorageAdapter` + sélecteur fournisseur dans Settings
+- **Support Linux** : Mode 1 sans changement majeur, Mode 2 via OAuth desktop, packaging AppImage/.deb
+- **Mise à jour Flutter** vers la version stable courante au démarrage V1
 
 ---
 
