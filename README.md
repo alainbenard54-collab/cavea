@@ -1,17 +1,24 @@
-# cavea
+# Cavea — Gestionnaire de cave à vin
 
-A new Flutter project.
+Application Flutter de gestion de cave à vin personnelle, disponible sur **Windows** et **Android**.
 
-## Getting Started
+## Fonctionnalités
 
-This project is a starting point for a Flutter application.
+- Vue stock avec filtres (couleur, maturité, appellation, millésime) et recherche
+- Indicateur de maturité par bouteille (trop jeune / optimal / à boire d'urgence)
+- Actions rapides : déplacer, consommer, noter
+- Ajout en lot avec répartition multi-emplacement
+- Synchronisation Google Drive entre appareils (Mode partagé)
+- Paramètres configurables (listes de référence, valeurs par défaut)
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Windows
+Télécharger et exécuter `CaveaSetup-x.x.x.exe` depuis les [releases](../../releases).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Android
+Télécharger `cavea-x.x.x.apk` depuis les [releases](../../releases) — activer "Sources inconnues" dans les paramètres Android avant installation.
+
+## Licence
+
+Apache 2.0 — voir [LICENSE](LICENSE).
