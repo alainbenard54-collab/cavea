@@ -388,13 +388,31 @@ class _DriveActivationTile extends ConsumerWidget {
     final secretsPath = DriveStorageAdapter.desktopSecretsPath;
     if (!Platform.isAndroid && !File(secretsPath).existsSync()) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Fichier google_desktop_secrets.json introuvable à côté de l\'exécutable.\n'
-            'Copiez-le depuis le template dans assets/.',
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Configuration manquante'),
+          content: const Text(
+            'Le fichier de configuration Google Drive est introuvable '
+            'à côté de l\'application.\n\n'
+            'Si vous avez installé Cavea via l\'installateur, '
+            'veuillez le désinstaller puis réinstaller une version récente.\n\n'
+            'Si vous avez copié l\'application manuellement, consultez '
+            'le guide de configuration en ligne.',
           ),
-          duration: const Duration(seconds: 6),
+          actions: [
+            TextButton(
+              onPressed: () => launchUrl(
+                Uri.parse('https://alainbenard54-collab.github.io/cavea/setup-drive.html'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: const Text('Guide en ligne'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Fermer'),
+            ),
+          ],
         ),
       );
       return;

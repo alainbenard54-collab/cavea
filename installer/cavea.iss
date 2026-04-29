@@ -61,6 +61,8 @@ Name: "desktopicon"; Description: "Créer une icône sur le &Bureau"; GroupDescr
 [Files]
 ; Tout le contenu du build Flutter Release (exe + DLL Flutter/Windows + données)
 Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Credentials OAuth Google Drive (distribués avec l'app — normal pour une app desktop)
+Source: "..\google_desktop_secrets.json"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

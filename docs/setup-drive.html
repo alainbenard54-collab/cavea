@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration Google Drive — Cavea</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 24px 60px;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    h2 { font-size: 1.1rem; margin-top: 2rem; color: #5c2d0a; }
+    .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+    .tip {
+      background: #f0f7f0;
+      border-left: 4px solid #2d7a3a;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+    }
+    .warn {
+      background: #fff8e6;
+      border-left: 4px solid #c8840a;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+    }
+    ol li { margin-bottom: 0.5rem; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    a { color: #8b4513; }
+    footer { margin-top: 3rem; font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 1rem; }
+  </style>
+</head>
+<body>
+
+<h1>🔧 Configuration Google Drive</h1>
+<p class="meta">Cavea — Synchronisation entre appareils</p>
+
+<div class="tip">
+  <strong>Pour la plupart des utilisateurs :</strong> si vous avez installé Cavea
+  via l'installateur (<code>CaveaSetup-x.y.z.exe</code>), la configuration est
+  automatique. Vous n'avez rien à faire ici.
+</div>
+
+<h2>Vous avez vu un message "Configuration manquante" ?</h2>
+
+<p>Ce message apparaît quand le fichier de configuration Google Drive
+est absent à côté de l'application. La cause la plus courante est
+une installation incomplète ou ancienne.</p>
+
+<p><strong>Solution rapide :</strong></p>
+<ol>
+  <li>Désinstallez Cavea (Panneau de configuration → Programmes → Cavea → Désinstaller)</li>
+  <li>Téléchargez la dernière version de l'installateur sur
+      <a href="https://github.com/alainbenard54-collab/cavea/releases">la page Releases</a></li>
+  <li>Relancez l'installation</li>
+</ol>
+
+<h2>Qu'est-ce que le Mode 2 (Google Drive) ?</h2>
+
+<p>En Mode 1 (local), votre cave est stockée uniquement sur votre PC Windows.
+Le Mode 2 permet de <strong>partager la même cave entre plusieurs appareils</strong>
+(PC Windows + Android) via votre propre espace Google Drive.</p>
+
+<p>Concrètement :</p>
+<ul>
+  <li>Un dossier <code>Cavea/</code> est créé dans votre Google Drive</li>
+  <li>Le fichier <code>cave.db</code> y est synchronisé à l'ouverture et à la fermeture</li>
+  <li>Un système de verrou (<code>cave.db.lock</code>) garantit qu'un seul appareil
+      écrit à la fois</li>
+  <li>Aucune donnée ne transite par un serveur tiers — tout passe directement
+      entre votre appareil et votre Google Drive</li>
+</ul>
+
+<h2>Comment activer le Mode 2</h2>
+
+<ol>
+  <li>Ouvrez Cavea → onglet <strong>Paramètres</strong></li>
+  <li>Section "Mode de synchronisation" → cliquer <strong>Activer Google Drive</strong></li>
+  <li>Une fenêtre de connexion Google s'ouvre dans votre navigateur</li>
+  <li>Connectez-vous avec le compte Google dont vous souhaitez utiliser le Drive</li>
+  <li>Autorisez Cavea à accéder à son propre dossier Drive</li>
+  <li>Choisissez si vous voulez envoyer votre cave locale vers Drive,
+      ou récupérer une cave déjà présente sur Drive</li>
+</ol>
+
+<div class="warn">
+  <strong>Avertissement :</strong> en Mode 2, Cavea lit et écrase le fichier
+  <code>cave.db</code> sur Drive à chaque synchronisation. N'activez pas le Mode 2
+  simultanément depuis deux appareils différents sans utiliser le mécanisme de
+  synchronisation intégré.
+</div>
+
+<h2>Installation manuelle (utilisateurs avancés)</h2>
+
+<p>Si vous avez copié <code>cavea.exe</code> sans utiliser l'installateur,
+vous devez placer le fichier <code>google_desktop_secrets.json</code> dans
+le même dossier que <code>cavea.exe</code>. Ce fichier est disponible dans
+<a href="https://github.com/alainbenard54-collab/cavea/releases">les assets de la release GitHub</a>.</p>
+
+<h2>Questions et problèmes</h2>
+
+<p>
+  Ouvrez un ticket sur
+  <a href="https://github.com/alainbenard54-collab/cavea/issues">GitHub Issues</a>.
+</p>
+
+<footer>
+  Cavea · Application open source · Licence Apache 2.0 ·
+  <a href="privacy.html">Politique de confidentialité</a> ·
+  <a href="https://github.com/alainbenard54-collab/cavea">github.com/alainbenard54-collab/cavea</a>
+</footer>
+
+</body>
+</html>
