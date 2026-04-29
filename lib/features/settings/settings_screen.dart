@@ -76,7 +76,7 @@ class SettingsScreen extends ConsumerWidget {
                 builder: (dialogContext) => AlertDialog(
                   title: const Text('Cavea'),
                   content: const Text(
-                    'Version 1.0.0\n\n© 2026 Alain Benard\nLicence Apache 2.0',
+                    'Version 0.1.0\n\n© 2026 Alain Benard\nLicence Apache 2.0',
                   ),
                   actions: [
                     TextButton(

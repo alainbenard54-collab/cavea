@@ -76,8 +76,10 @@
   <li>Votre token d'authentification Google est stocké localement sur votre appareil
       dans un espace sécurisé (Keychain sur Android, Credential Store sur Windows).
       Il n'est jamais transmis à un tiers autre que Google.</li>
-  <li>L'application ne peut accéder qu'au dossier qu'elle a créé elle-même
-      (scope <code>drive.file</code>) — elle ne voit pas le reste de votre Drive.</li>
+  <li>L'application utilise le scope <code>drive.file</code> : elle ne peut accéder
+      qu'aux fichiers qu'elle a elle-même créés dans votre Drive (le dossier
+      <code>Cavea/</code>, visible dans votre interface Google Drive).
+      Elle ne peut ni lire ni modifier le reste de votre Drive.</li>
   <li>Aucun fichier de votre Drive n'est lu ou modifié par le développeur.</li>
 </ul>
 <p>

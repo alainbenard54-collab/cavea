@@ -15,7 +15,7 @@
 ;   4. Recompiler ce script
 
 #define MyAppName      "Cavea"
-#define MyAppVersion   "1.0.0"
+#define MyAppVersion   "0.1.0"
 #define MyAppPublisher "Alain Benard"
 #define MyAppURL       "https://github.com/alainbenard54-collab/cavea"
 #define MyAppExeName   "cavea.exe"
