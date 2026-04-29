@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config_service.dart';
 import '../../services/drive_storage_adapter.dart';
@@ -79,6 +80,13 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   actions: [
                     TextButton(
+                      onPressed: () => launchUrl(
+                        Uri.parse('https://alainbenard54-collab.github.io/cavea/privacy.html'),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                      child: const Text('Confidentialité'),
+                    ),
+                    TextButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                         showLicensePage(
@@ -88,7 +96,7 @@ class SettingsScreen extends ConsumerWidget {
                           applicationLegalese: '© 2026 Alain Benard',
                         );
                       },
-                      child: const Text('Voir les licences'),
+                      child: const Text('Licences'),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
