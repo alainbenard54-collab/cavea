@@ -37,5 +37,10 @@ clean_stock_archive.py
 google_desktop_secrets.json
 android/app/google-services.json
 
+# Keystore Android et config de signature (ne jamais committer)
+*.jks
+*.keystore
+android/key.properties
+
 # Apprentissage / preparation du projet
 discussion_prealable.docx
