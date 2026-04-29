@@ -51,8 +51,6 @@ LicenseFile=..\LICENSE
 ; Icône dans Ajout/Suppression de programmes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
-; SourceDir = racine du projet (un niveau au-dessus de installer/)
-SourceDir=..
 
 [Languages]
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
@@ -62,7 +60,7 @@ Name: "desktopicon"; Description: "Créer une icône sur le &Bureau"; GroupDescr
 
 [Files]
 ; Tout le contenu du build Flutter Release (exe + DLL Flutter/Windows + données)
-Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
