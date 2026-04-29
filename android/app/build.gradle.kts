@@ -10,7 +10,7 @@ plugins {
 }
 
 // Chargement de android/key.properties (gitignored — ne jamais committer)
-val keystorePropertiesFile = rootProject.file("android/key.properties")
+val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) load(FileInputStream(keystorePropertiesFile))
 }
