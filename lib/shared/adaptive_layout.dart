@@ -221,7 +221,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   String _overlayMessage(SyncState state) => switch (state) {
         SyncStarting() || SyncNeedsCrashRecovery() || SyncNeedsLockChoice() =>
           'Connexion à Google Drive…',
-        SyncExiting() => 'Sauvegarde en cours…',
+        SyncExiting() || SyncSyncing() => 'Sauvegarde en cours…',
         _ => 'Synchronisation en cours…',
       };
 
@@ -608,9 +608,9 @@ void _showAcquireLockDialog(
       title: const Text('Passer en mode écriture ?'),
       content: Text(
         isAndroid
-            ? "Vos modifications seront sauvegardées sur Drive et le verrou libéré "
-                "uniquement en appuyant sur 'Sauvegarder et libérer' avant de quitter. "
-                "En cas d'oubli, la session suivante proposera de récupérer vos données "
+            ? 'Utilisez "Sauvegarder" pour envoyer vos modifications sur Drive sans quitter. '
+                'Utilisez "Quitter" pour sauvegarder, libérer le verrou et fermer l\'application. '
+                'En cas de fermeture forcée, la session suivante proposera de récupérer vos données '
                 'si la base est toujours verrouillée.'
             : 'La cave sera verrouillée pendant toute votre session. '
                 'Le verrou sera automatiquement libéré et vos modifications '

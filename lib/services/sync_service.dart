@@ -472,7 +472,11 @@ class SyncService extends StateNotifier<SyncState> {
     state = const SyncExiting();
     await releaseIfNeeded();
     if (_isDisposed) return;
-    await ServicesBinding.instance.exitApplication(AppExitType.required);
+    try {
+      await ServicesBinding.instance.exitApplication(AppExitType.required);
+    } catch (_) {}
+    // Fallback : exitApplication ne ferme pas toujours le process sur Android.
+    exit(0);
   }
 
   /// Upload + unlock si on détient le lock. Appelé à la fermeture ou best-effort Android.
