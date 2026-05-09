@@ -27,8 +27,18 @@ Color couleurVin(String couleur) {
 class BouteilleListTile extends StatelessWidget {
   final Bouteille bouteille;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final bool isSelectMode;
+  final bool isSelected;
 
-  const BouteilleListTile({super.key, required this.bouteille, this.onTap});
+  const BouteilleListTile({
+    super.key,
+    required this.bouteille,
+    this.onTap,
+    this.onLongPress,
+    this.isSelectMode = false,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +56,19 @@ class BouteilleListTile extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      leading: Icon(
-        Icons.wine_bar,
-        color: couleurVin(bouteille.couleur),
-        size: 28,
-      ),
+      onLongPress: onLongPress,
+      selected: isSelected,
+      selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.3),
+      leading: isSelectMode
+          ? Checkbox(
+              value: isSelected,
+              onChanged: (_) => onTap?.call(),
+            )
+          : Icon(
+              Icons.wine_bar,
+              color: couleurVin(bouteille.couleur),
+              size: 28,
+            ),
       title: Text(
         bouteille.domaine,
         style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),

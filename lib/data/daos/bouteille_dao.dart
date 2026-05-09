@@ -130,6 +130,16 @@ class BouteilleDao {
     );
   }
 
+  Future<void> deplacerBouteilles(List<String> ids, String emplacement) {
+    return _db.transaction(() async {
+      for (final id in ids) {
+        await (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
+          BouteillesCompanion(emplacement: Value(emplacement)),
+        );
+      }
+    });
+  }
+
   Future<void> consommerBouteille(
     String id, {
     required String dateSortie,
@@ -145,6 +155,28 @@ class BouteilleDao {
             : const Value.absent(),
       ),
     );
+  }
+
+  Future<void> consommerBouteilles(
+    List<String> ids, {
+    required String dateSortie,
+    double? noteDegus,
+    String? commentaireDegus,
+  }) {
+    return _db.transaction(() async {
+      for (final id in ids) {
+        await (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
+          BouteillesCompanion(
+            dateSortie: Value(dateSortie),
+            noteDegus:
+                noteDegus != null ? Value(noteDegus) : const Value.absent(),
+            commentaireDegus: commentaireDegus != null
+                ? Value(commentaireDegus)
+                : const Value.absent(),
+          ),
+        );
+      }
+    });
   }
 
   Future<List<String>> getDistinctEmplacements() async {

@@ -10,9 +10,13 @@ import '../../core/maturity/maturity_service.dart';
 import '../../services/sync_service.dart';
 import '../../shared/adaptive_layout.dart' show isDesktop;
 import '../bottle_actions/bottle_actions_sheet.dart';
+import 'selection_controller.dart';
 import 'stock_controller.dart';
 import 'bouteille_list_tile.dart';
 import 'stock_table.dart';
+import 'widgets/bulk_action_bar.dart';
+import 'widgets/consommer_batch_sheet.dart';
+import 'widgets/deplacer_batch_sheet.dart';
 
 class StockScreen extends ConsumerStatefulWidget {
   const StockScreen({super.key});
@@ -31,6 +35,18 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     _searchController.dispose();
     _couleurScrollCtrl.dispose();
     super.dispose();
+  }
+
+  void _enterSelectMode(String id) {
+    ref.read(selectionProvider.notifier).enterSelectMode(id);
+  }
+
+  void _toggleSelect(String id) {
+    ref.read(selectionProvider.notifier).toggleId(id);
+  }
+
+  void _cancelSelect() {
+    ref.read(selectionProvider.notifier).reset();
   }
 
   void _reset() {
@@ -52,6 +68,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final couleursAsync = ref.watch(couleursProvider);
     final appellationsAsync = ref.watch(appellationsProvider);
     final millesimesAsync = ref.watch(millesimesProvider);
+    final selection = ref.watch(selectionProvider);
 
 
     // isDesktop() est basé sur la largeur (≥600dp). Un téléphone en paysage
@@ -361,21 +378,50 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       sortColumn: filters.sortColumn,
                       sortAscending: filters.sortAscending,
                       onSort: ctrl.setSort,
+                      isSelectMode: selection.isSelectMode,
+                      selectedIds: selection.selectedIds,
+                      onToggleSelect: _toggleSelect,
+                      onLongPressRow: _enterSelectMode,
                     );
                   }
                   return ListView.builder(
                     itemCount: bouteilles.length,
-                    itemBuilder: (context, i) => BouteilleListTile(
-                      bouteille: bouteilles[i],
-                      onTap: () =>
-                          showBottleActionsSheet(context, bouteilles[i]),
-                    ),
+                    itemBuilder: (context, i) {
+                      final b = bouteilles[i];
+                      final isSelected = selection.selectedIds.contains(b.id);
+                      return BouteilleListTile(
+                        bouteille: b,
+                        isSelectMode: selection.isSelectMode,
+                        isSelected: isSelected,
+                        onTap: selection.isSelectMode
+                            ? () => _toggleSelect(b.id)
+                            : () => showBottleActionsSheet(context, b),
+                        onLongPress: selection.isSelectMode
+                            ? null
+                            : () => _enterSelectMode(b.id),
+                      );
+                    },
                   );
                 },
               );
             },
           ),
         ),
+        if (selection.isSelectMode)
+          BulkActionBar(
+            count: selection.count,
+            onDeplacer: () => showDeplacerBatchSheet(
+              context,
+              List.of(selection.selectedIds),
+              onDone: _cancelSelect,
+            ),
+            onConsommer: () => showConsommerBatchSheet(
+              context,
+              List.of(selection.selectedIds),
+              onDone: _cancelSelect,
+            ),
+            onCancel: _cancelSelect,
+          ),
       ],
     );
   }
