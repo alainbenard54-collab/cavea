@@ -123,17 +123,12 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ? syncService.acquireLock
                   : syncService.sync,
               // wasAcquiringLock : état déjà SyncReadOnly, fermeture suffit.
-              // sync() failure : lock toujours détenu → resetToIdle conserve le mode écriture.
-              onClose: wasAcquiringLock ? null : syncService.resetToIdle,
+              // sync() failure : "Fermer" laisse l'état SyncError (icône rouge visible,
+              // sauvegarde possible via _SaveIconBtn, lock toujours détenu).
+              onClose: null,
               closeLabel: wasAcquiringLock ? 'Rester en lecture seule' : null,
             ),
-          ).then((_) {
-            // Filet de sécurité : si le dialog est fermé via back/barrier sans cliquer
-            // "Fermer" ou "Réessayer", l'état reste SyncError. On reset ici.
-            if (!wasAcquiringLock && syncService.state is SyncError) {
-              syncService.resetToIdle();
-            }
-          });
+          );
         case SyncNeedsCrashRecovery():
           _showCrashRecoveryDialog(context, syncService);
         case SyncNeedsLockChoice(:final lockedBy):
@@ -152,9 +147,9 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     final isReadOnly = syncState is SyncReadOnly;
 
-    // Le bouton Sync n'est visible qu'en mode écriture
-    final showSyncButton =
-        syncService.isActive && (syncState is SyncIdle || syncState is SyncSyncing);
+    // Le bouton Sync est visible en mode écriture, y compris après une erreur (retry).
+    final showSyncButton = syncService.isActive &&
+        (syncState is SyncIdle || syncState is SyncSyncing || syncState is SyncError);
 
     final isAndroid = Platform.isAndroid;
     // Sur Android (portrait ET paysage), on utilise toujours la BottomNavigationBar :

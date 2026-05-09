@@ -113,9 +113,10 @@ class SyncService extends StateNotifier<SyncState> {
   bool get isActive => _adapter != null;
 
   /// Vrai si cet appareil détient le lock et peut écrire sur Drive.
+  /// SyncError inclus : la sauvegarde a échoué mais le lock est toujours détenu.
   bool get isWriteMode {
     final s = state;
-    return s is SyncIdle || s is SyncSyncing;
+    return s is SyncIdle || s is SyncSyncing || s is SyncError;
   }
 
   /// Vrai si on est en lecture seule (lock appartient à un autre appareil).
@@ -316,10 +317,6 @@ class SyncService extends StateNotifier<SyncState> {
     if (!_isDisposed) state = const SyncReadOnly();
   }
 
-  /// Retour en mode écriture depuis SyncError — après échec de sync() (lock toujours détenu).
-  void resetToIdle() {
-    if (!_isDisposed) state = const SyncIdle();
-  }
 
   /// Abandon du mode écriture sans sauvegarder : unlock → download Drive → SyncReadOnly.
   Future<void> abandonWrite() async {
