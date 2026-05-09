@@ -465,7 +465,8 @@ class _MobileBar extends StatelessWidget {
                       _AcquireLockIconBtn(syncService: syncService),
                     if (!isReadOnly && isAndroid) ...[
                       _AbandonWriteIconBtn(syncService: syncService),
-                      _SaveReleaseIconBtn(syncService: syncService),
+                      _SaveIconBtn(syncService: syncService),
+                      _QuitIconBtn(syncService: syncService),
                     ],
                     if (!isAndroid && showSyncButton)
                       _SyncIconBtn(syncService: syncService),
@@ -718,22 +719,65 @@ class _AbandonWriteIconBtn extends StatelessWidget {
   }
 }
 
-class _SaveReleaseIconBtn extends StatelessWidget {
+class _SaveIconBtn extends StatelessWidget {
   final SyncService syncService;
-  const _SaveReleaseIconBtn({required this.syncService});
+  const _SaveIconBtn({required this.syncService});
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Sauvegarder et libérer',
+      message: 'Sauvegarder',
       preferBelow: false,
       child: IconButton(
-        icon: const Icon(Icons.cloud_done, size: 20, color: Colors.green),
-        onPressed: syncService.releaseManual,
+        icon: const Icon(Icons.save, size: 20, color: Colors.green),
+        onPressed: syncService.sync,
         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
       ),
     );
+  }
+}
+
+class _QuitIconBtn extends StatelessWidget {
+  final SyncService syncService;
+  const _QuitIconBtn({required this.syncService});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Quitter',
+      preferBelow: false,
+      child: IconButton(
+        icon: const Icon(Icons.exit_to_app, size: 20, color: Colors.red),
+        onPressed: () => _showQuitDialog(context),
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  void _showQuitDialog(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sauvegarder et quitter ?'),
+        content: const Text(
+          'Vos modifications seront envoyées sur Drive et le verrou libéré.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Quitter'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) syncService.releaseAndExit();
+    });
   }
 }
 
