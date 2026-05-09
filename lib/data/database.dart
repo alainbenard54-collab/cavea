@@ -13,6 +13,8 @@ part 'database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(String dbPath) : super(NativeDatabase(File(dbPath)));
 
+  AppDatabase.memory() : super(NativeDatabase.memory());
+
   @override
   int get schemaVersion => 1;
 

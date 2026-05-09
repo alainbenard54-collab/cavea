@@ -198,11 +198,13 @@ lib/
 │   └── tables/
 │       └── bouteilles.dart      # définition table drift
 ├── features/
-│   ├── bottle_actions/          # BottomSheet actions bouteille (Déplacer, Consommer)
+│   ├── bottle_actions/          # BottomSheet actions bouteille (Déplacer, Consommer, Modifier)
 │   │   ├── bottle_actions_sheet.dart
 │   │   └── widgets/
 │   │       ├── deplacer_form.dart
 │   │       └── consommer_form.dart
+│   ├── bottle_edit/             # Écran d'édition complète d'une bouteille (V1)
+│   │   └── bottle_edit_screen.dart
 │   ├── bulk_add/                # formulaire ajout en lot
 │   │   ├── bulk_add_screen.dart
 │   │   ├── bulk_add_controller.dart
@@ -236,15 +238,18 @@ lib/
 
 ## Responsive layout
 
-Un seul widget shell qui adapte la navigation selon la largeur d'écran :
+Un seul widget shell qui adapte la navigation selon la plateforme et la largeur :
 
 ```dart
-// Seuil : 600px (convention Flutter Material)
-// < 600px  → BottomNavigationBar  (mobile)
-// ≥ 600px  → NavigationRail       (desktop/tablette)
+// Android (toujours)   → _MobileBar (barre en bas, 3 zones)
+// Windows ≥ 600px      → _DesktopRail (NavigationRail côté gauche)
+// Windows < 600px      → _MobileBar
+final useRail = isDesktop(context) && !Platform.isAndroid;
 ```
 
-Les vues elles-mêmes sont les mêmes — seule la navigation change. Certaines actions (import CSV, ajout en lot, statistiques avancées) peuvent être masquées sur mobile jusqu'au mode 3.
+**Android utilise toujours `_MobileBar`**, quel que soit l'orientation. En paysage Android la largeur dépasse 600 dp, mais `NavigationRail` ne tient pas en hauteur avec le clavier ouvert. La détection par `Platform.isAndroid` est donc préférable à la détection par largeur seule.
+
+Les vues elles-mêmes sont les mêmes — seule la navigation change.
 
 ---
 
@@ -327,8 +332,8 @@ Afficher à la fin : X insérées · Y mises à jour · Z ignorées.
 4. ✅ Actions bouteille — BottomSheet avec Déplacer (autocomplétion emplacement), Consommer (date + note + commentaire), stub Modifier
 5. ✅ Ajout en lot — formulaire multi-champs, répartition dynamique, autocomplétion domaine/appellation/cru/contenance/fournisseur, validation garde
 6. ~~Changement d'emplacement~~ → fusionné dans étape 4 (BottomSheet)
-7. Mécanisme sync (lock / download / upload)
-8. Settings (chemin dossier partagé, mode)
+7. ✅ Mécanisme sync (lock / download / upload)
+8. ✅ Settings (chemin dossier partagé, mode)
 
 ---
 

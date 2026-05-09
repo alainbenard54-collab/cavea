@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/database.dart';
 import '../../services/sync_service.dart';
 import 'widgets/deplacer_form.dart';
@@ -42,14 +43,15 @@ class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Handle
           Center(
             child: Container(
@@ -86,10 +88,10 @@ class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
                   onConsommer: () =>
                       setState(() => _view = _SheetView.consommer),
                   onModifierFiche: () {
+                    final router = GoRouter.of(context);
+                    final id = widget.bouteille.id;
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fonctionnalité à venir')),
-                    );
+                    router.push('/bottle-edit/$id');
                   },
                   onAnnuler: () => Navigator.of(context).pop(),
                 ),
@@ -109,8 +111,9 @@ class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
           ),
           const SizedBox(height: 8),
         ],
-      ),
-    );
+        ),  // fin Column
+      ),    // fin Padding
+    );      // fin SingleChildScrollView
   }
 }
 

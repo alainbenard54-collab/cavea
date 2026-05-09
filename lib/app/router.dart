@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/config_service.dart';
+import '../features/bottle_edit/bottle_edit_screen.dart';
 import '../features/bulk_add/bulk_add_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -27,6 +28,11 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
         builder: (context, state) => SetupScreen(
           onComplete: (_) => onSetupComplete(),
         ),
+      ),
+      GoRoute(
+        path: '/bottle-edit/:id',
+        builder: (context, state) =>
+            BottleEditScreen(id: state.pathParameters['id']!),
       ),
       ShellRoute(
         builder: (context, state, child) {

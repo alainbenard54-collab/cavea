@@ -23,11 +23,13 @@ class StockScreen extends ConsumerStatefulWidget {
 
 class _StockScreenState extends ConsumerState<StockScreen> {
   final _searchController = SearchController();
+  final _couleurScrollCtrl = ScrollController();
   bool _filtersExpanded = false;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _couleurScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -63,6 +65,14 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // En paysage avec filtres étendus, le header peut dépasser la hauteur disponible.
+        // Flexible + SingleChildScrollView permettent de scroller le header sans overflow.
+        Flexible(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
         // Barre de recherche (toujours visible)
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
@@ -108,34 +118,54 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           ),
         ),
 
-        // En paysage mobile : toggle compact pour les filtres
+        // En paysage mobile : toggle compact pour les filtres + reset inline
         if (isLandscapeMobile)
-          InkWell(
-            onTap: () => setState(() => _filtersExpanded = !_filtersExpanded),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    _filtersExpanded ? Icons.expand_less : Icons.expand_more,
-                    size: 18,
-                    color: filters.hasActiveFilters
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outline,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    filters.hasActiveFilters ? 'Filtres actifs' : 'Filtres',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: filters.hasActiveFilters
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
-                      fontWeight: filters.hasActiveFilters ? FontWeight.w600 : FontWeight.normal,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () => setState(() => _filtersExpanded = !_filtersExpanded),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _filtersExpanded ? Icons.expand_less : Icons.expand_more,
+                          size: 18,
+                          color: filters.hasActiveFilters
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outline,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          filters.hasActiveFilters ? 'Filtres actifs' : 'Filtres',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: filters.hasActiveFilters
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline,
+                            fontWeight: filters.hasActiveFilters ? FontWeight.w600 : FontWeight.normal,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+                if (filters.hasActiveFilters) ...[
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.filter_alt_off, size: 16,
+                        color: Theme.of(context).colorScheme.primary),
+                    onPressed: _reset,
+                    tooltip: 'Réinitialiser les filtres',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
 
@@ -145,21 +175,50 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: couleurs.map((c) {
-                        final selected = filters.couleurs.contains(c);
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: FilterChip(
-                            label: Text(c),
-                            selected: selected,
-                            onSelected: (_) => ctrl.toggleCouleur(c),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        );
-                      }).toList(),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Colors.white, Colors.white, Colors.transparent],
+                      stops: [0.0, 0.80, 1.0],
+                    ).createShader(bounds),
+                    blendMode: BlendMode.dstIn,
+                    child: SingleChildScrollView(
+                      controller: _couleurScrollCtrl,
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        // Couleurs sélectionnées en premier pour un accès visuel immédiat.
+                        children: [
+                          ...couleurs.where((c) => filters.couleurs.contains(c)),
+                          ...couleurs.where((c) => !filters.couleurs.contains(c)),
+                        ].map((c) {
+                          final selected = filters.couleurs.contains(c);
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: FilterChip(
+                              label: Text(c),
+                              selected: selected,
+                              onSelected: (_) {
+                                ctrl.toggleCouleur(c);
+                                // Si on sélectionne (pas déselectionne), scroll vers la gauche
+                                // pour voir les couleurs actives.
+                                if (!selected) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    if (_couleurScrollCtrl.hasClients) {
+                                      _couleurScrollCtrl.animateTo(
+                                        0,
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeOut,
+                                      );
+                                    }
+                                  });
+                                }
+                              },
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
                 ),
@@ -253,7 +312,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: Row(
             children: [
-              if (filters.hasActiveFilters)
+              if (filters.hasActiveFilters && !isLandscapeMobile)
                 TextButton.icon(
                   icon: const Icon(Icons.filter_alt_off, size: 16),
                   label: const Text('Réinitialiser'),
@@ -276,6 +335,11 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             ],
           ),
         ),
+
+              ], // fin inner Column children
+            ),   // fin inner Column
+          ),     // fin SingleChildScrollView
+        ),       // fin Flexible
 
         // Liste ou tableau
         Expanded(
@@ -363,6 +427,7 @@ class _CascadeDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
       key: ValueKey(value),
+      isExpanded: true,
       initialValue: value,
       decoration: InputDecoration(
         labelText: hint,

@@ -107,7 +107,7 @@ Clic sur une ligne du stock → `BottomSheet` modal avec :
 
 1. **Déplacer** : saisie libre de l'emplacement avec autocomplétion sur les emplacements existants en base → `UPDATE emplacement` uniquement, pas de `date_sortie`
 2. **Consommer** : date de consommation (défaut = aujourd'hui, modifiable via DatePicker pour déclaration tardive), note /10 optionnelle, commentaire de dégustation optionnel → `UPDATE date_sortie + note_degus + commentaire_degus`
-3. **Modifier la fiche** : pointe vers un écran d'édition complète — **interface prête en MVP, implémentation V1**. Affiche "Fonctionnalité à venir" en MVP. Champs protégés exclus (voir ci-dessus).
+3. **Modifier la fiche** : navigue vers `BottleEditScreen` via la route `/bottle-edit/:id` — implémenté en V1. Champs protégés exclus (voir ci-dessus).
 4. **Annuler** : ferme le BottomSheet
 
 **Mode lecture seule** : quand `SyncReadOnly` est actif (lock détenu par un autre appareil), le BottomSheet affiche uniquement un message "Mode lecture seule — modifications indisponibles" et un bouton "Fermer". Les actions Déplacer, Consommer, Modifier la fiche sont cachées.
@@ -146,6 +146,12 @@ Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre
 | Onglet Paramètres | Accessible (peut changer de mode) |
 
 ---
+
+## Android — barre de navigation
+
+Sur Android, l'app utilise **toujours** `_MobileBar` (barre en bas), quel que soit l'orientation. `_DesktopRail` (NavigationRail) est strictement réservé à Windows. Règle dans `adaptive_layout.dart` : `final useRail = isDesktop(context) && !Platform.isAndroid;`. **Ne pas revenir à la détection par largeur seule** : en paysage un téléphone Android dépasse 600 dp, ce qui déclencherait `_DesktopRail` par erreur.
+
+`_MobileBar` est organisée en 3 zones : gauche (icônes sync contextuelles Mode 2), centre (Stock + Ajouter), droite (Import + Paramètres). Les icônes Ajouter et Import affichent un badge cadenas orange 11px quand `SyncReadOnly` ; le tap déclenche toujours la snackbar "Indisponible".
 
 ## Android — layout landscape
 
@@ -193,7 +199,7 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 
 ## V1 features (post-MVP — do not implement before MVP complete)
 
-- **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" (l'entrée de navigation est déjà en place en MVP).
+- ✅ **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" via `/bottle-edit/:id`. DropdownMenu filtrable pour couleur/cru/contenance, DatePicker pour date_entree, autocomplétion RawAutocomplete, bouton restore ↩.
 - **Fiche lecture seule** d'une bouteille (détail complet)
 - **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → Déplacer (même emplacement pour toutes) ou Consommer (même date/note/commentaire pour toutes). Voir ARCHITECTURE.md section "Multi-sélection".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".

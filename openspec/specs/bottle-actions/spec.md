@@ -48,7 +48,7 @@ L'application SHALL permettre de sortir une bouteille du stock en enregistrant u
 ---
 
 ### Requirement: Action Modifier la fiche (interface prête, MVP stub)
-L'application SHALL exposer une entrée "Modifier la fiche" dans le BottomSheet. En MVP, cette entrée SHALL afficher un message "Fonctionnalité à venir". L'implémentation complète est prévue en V1.
+L'application SHALL exposer une entrée "Modifier la fiche" dans le BottomSheet. En V1, cette entrée SHALL naviguer vers l'écran d'édition complète `BottleEditScreen` via la route `/bottle-edit/:id`. Le stub "Fonctionnalité à venir" est supprimé.
 
 **Champs protégés — jamais exposés dans le formulaire d'édition :**
 - `id` (clé primaire)
@@ -57,10 +57,6 @@ L'application SHALL exposer une entrée "Modifier la fiche" dans le BottomSheet.
 - `note_degus` (uniquement via action Consommer)
 - `commentaire_degus` (uniquement via action Consommer)
 
-#### Scenario: Clic sur Modifier la fiche (MVP)
-- **WHEN** l'utilisateur appuie sur "Modifier la fiche" en MVP
-- **THEN** un message "Fonctionnalité à venir" est affiché (SnackBar ou dialog)
-
 #### Scenario: Clic sur Modifier la fiche (V1)
-- **WHEN** l'utilisateur appuie sur "Modifier la fiche" en V1
-- **THEN** l'écran d'édition complète s'ouvre avec tous les champs non protégés éditables
+- **WHEN** l'utilisateur appuie sur "Modifier la fiche" dans le BottomSheet
+- **THEN** le BottomSheet se ferme et `BottleEditScreen` s'ouvre avec les données actuelles de la bouteille
