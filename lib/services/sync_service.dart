@@ -316,6 +316,11 @@ class SyncService extends StateNotifier<SyncState> {
     if (!_isDisposed) state = const SyncReadOnly();
   }
 
+  /// Retour en mode écriture depuis SyncError — après échec de sync() (lock toujours détenu).
+  void resetToIdle() {
+    if (!_isDisposed) state = const SyncIdle();
+  }
+
   /// Abandon du mode écriture sans sauvegarder : unlock → download Drive → SyncReadOnly.
   Future<void> abandonWrite() async {
     final adapter = _adapter;

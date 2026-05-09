@@ -121,11 +121,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                   : message,
               onRetry: wasAcquiringLock
                   ? syncService.acquireLock
-                  : (Platform.isAndroid ? null : syncService.sync),
+                  : syncService.sync,
               // wasAcquiringLock : état déjà SyncReadOnly, fermeture suffit.
-              onClose: wasAcquiringLock
-                  ? null
-                  : (Platform.isAndroid ? syncService.resetToReadOnly : null),
+              // sync() failure : lock toujours détenu → resetToIdle conserve le mode écriture.
+              onClose: wasAcquiringLock ? null : syncService.resetToIdle,
               closeLabel: wasAcquiringLock ? 'Rester en lecture seule' : null,
             ),
           );
