@@ -201,8 +201,8 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 ## V1 features (post-MVP — do not implement before MVP complete)
 
 - ✅ **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" via `/bottle-edit/:id`. DropdownMenu filtrable pour couleur/cru/contenance, DatePicker pour date_entree, autocomplétion RawAutocomplete, bouton restore ↩.
-- **Fiche lecture seule** d'une bouteille (détail complet)
-- **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → Déplacer (même emplacement pour toutes) ou Consommer (même date/note/commentaire pour toutes). Voir ARCHITECTURE.md section "Multi-sélection".
+- ✅ **Fiche lecture seule** d'une bouteille : `BottleDetailScreen` via route `/bottle/:id`, même présentation que `BottleEditScreen` (OutlineInputBorder, IgnorePointer), badge maturité coloré, section Consommation masquée si bouteille en stock. Accessible depuis le BottomSheet ("Consulter la fiche") en mode normal ET SyncReadOnly. Fix associé : `garde_min=0` désormais valeur légitime (buvable dès le millésime).
+- **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Voir ARCHITECTURE.md section "Multi-sélection".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
 - **Filtres avancés** : multi-critères, filtres sauvegardés (ex : "blanc à boire")
 - **Navigation par emplacement** : regroupement hiérarchique, comptage par zone
