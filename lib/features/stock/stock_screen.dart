@@ -69,7 +69,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final appellationsAsync = ref.watch(appellationsProvider);
     final millesimesAsync = ref.watch(millesimesProvider);
     final selection = ref.watch(selectionProvider);
-
+    final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
 
     // isDesktop() est basé sur la largeur (≥600dp). Un téléphone en paysage
     // dépasse ce seuil, donc !isDesktop() serait faux → on utilise Platform.isAndroid.
@@ -381,7 +381,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       isSelectMode: selection.isSelectMode,
                       selectedIds: selection.selectedIds,
                       onToggleSelect: _toggleSelect,
-                      onLongPressRow: _enterSelectMode,
+                      onLongPressRow: isReadOnly ? null : _enterSelectMode,
                     );
                   }
                   return ListView.builder(
@@ -396,7 +396,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                         onTap: selection.isSelectMode
                             ? () => _toggleSelect(b.id)
                             : () => showBottleActionsSheet(context, b),
-                        onLongPress: selection.isSelectMode
+                        onLongPress: selection.isSelectMode || isReadOnly
                             ? null
                             : () => _enterSelectMode(b.id),
                       );

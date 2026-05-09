@@ -36,11 +36,11 @@
 
 ## 8. Tests manuels
 
-- [ ] 8.1 Tester appui long → entrée en mode sélection, checkbox cochée sur la bouteille cible (PC + Android)
-- [ ] 8.2 Tester tap en mode sélection → bascule coche/décoche, compteur mis à jour (PC + Android)
-- [ ] 8.3 Tester Annuler → sortie mode sélection, disparition checkboxes, retour au comportement tap normal (PC + Android)
-- [ ] 8.4 Tester Déplacer en lot : formulaire s'ouvre, validation emplacement, toutes les bouteilles déplacées, mode sélection désactivé après confirmation (PC + Android)
-- [ ] 8.5 Tester Consommer en lot : formulaire s'ouvre, date modifiable, bouteilles consommées disparaissent du stock, mode sélection désactivé (PC + Android)
-- [ ] 8.6 Tester mode lecture seule (SyncReadOnly) : boutons Déplacer et Consommer grisés, Annuler fonctionnel (Mode 2 uniquement)
+- [x] 8.1 Tester appui long → entrée en mode sélection, checkbox cochée sur la bouteille cible (PC + Android)
+- [x] 8.2 Tester tap en mode sélection → bascule coche/décoche, compteur mis à jour (PC + Android)
+- [x] 8.3 Tester Annuler → sortie mode sélection, disparition checkboxes, retour au comportement tap normal (PC + Android)
+- [x] 8.4 Tester Déplacer en lot : formulaire s'ouvre, validation emplacement, toutes les bouteilles déplacées, mode sélection désactivé après confirmation (PC + Android)
+- [x] 8.5 Tester Consommer en lot : formulaire s'ouvre, date modifiable, bouteilles consommées disparaissent du stock, mode sélection désactivé (PC + Android)
+- [x] 8.6 Tester mode lecture seule (SyncReadOnly) : appui long désactivé (pas d'entrée en mode sélection), comportement vérifié (Mode 2 uniquement)
 
 <!-- Tests manuels à effectuer après lancement de l'application -->
