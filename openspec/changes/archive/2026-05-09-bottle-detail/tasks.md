@@ -26,8 +26,8 @@
 
 ## 5. Tests manuels
 
-- [ ] 5.1 Tester l'ouverture de la fiche depuis le BottomSheet en mode normal — vérifier l'affichage de tous les champs d'une bouteille en stock (sections Consommation absentes) (PC)
-- [ ] 5.2 Tester la fiche d'une bouteille consommée — vérifier l'apparition de la section Consommation avec date_sortie, note et commentaire (PC)
-- [ ] 5.3 Tester le BottomSheet en mode `SyncReadOnly` — vérifier que seules "Consulter la fiche" et "Fermer" sont visibles, et que "Consulter la fiche" ouvre correctement `BottleDetailScreen` (PC + Android)
-- [ ] 5.4 Tester avec un `id` invalide dans la route — vérifier l'affichage du message "Bouteille introuvable" et le bouton Retour (PC)
-- [ ] 5.5 Tester le badge maturité sur la fiche : bouteille trop jeune (bleu), optimale (vert), à boire (rouge), sans données de garde (gris) (PC)
+- [x] 5.1 Tester l'ouverture de la fiche depuis le BottomSheet en mode normal — vérifier l'affichage de tous les champs d'une bouteille en stock (sections Consommation absentes) (PC)
+- [ ] 5.2 Tester la fiche d'une bouteille consommée — vérifier l'apparition de la section Consommation avec date_sortie, note et commentaire (PC) — DIFFÉRÉ : bouteilles consommées inaccessibles depuis l'UI avant l'historique V1
+- [x] 5.3 Tester le BottomSheet en mode `SyncReadOnly` — vérifier que seules "Consulter la fiche" et "Fermer" sont visibles, et que "Consulter la fiche" ouvre correctement `BottleDetailScreen` (PC + Android)
+- [ ] 5.4 Tester avec un `id` invalide dans la route — vérifier l'affichage du message "Bouteille introuvable" et le bouton Retour (PC) — DIFFÉRÉ : aucun chemin UI pour y accéder
+- [x] 5.5 Tester le badge maturité sur la fiche : bouteille trop jeune (bleu), optimale (vert), à boire (rouge), sans données de garde (gris) (PC)
