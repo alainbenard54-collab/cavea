@@ -127,7 +127,13 @@ class _AppShellState extends ConsumerState<AppShell> {
               onClose: wasAcquiringLock ? null : syncService.resetToIdle,
               closeLabel: wasAcquiringLock ? 'Rester en lecture seule' : null,
             ),
-          );
+          ).then((_) {
+            // Filet de sécurité : si le dialog est fermé via back/barrier sans cliquer
+            // "Fermer" ou "Réessayer", l'état reste SyncError. On reset ici.
+            if (!wasAcquiringLock && syncService.state is SyncError) {
+              syncService.resetToIdle();
+            }
+          });
         case SyncNeedsCrashRecovery():
           _showCrashRecoveryDialog(context, syncService);
         case SyncNeedsLockChoice(:final lockedBy):
