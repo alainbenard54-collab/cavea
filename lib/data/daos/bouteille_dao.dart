@@ -235,4 +235,9 @@ class BouteilleDao {
     return (_db.select(_db.bouteilles)..where((b) => b.id.equals(id)))
         .getSingleOrNull();
   }
+
+  Stream<Bouteille?> watchBottleById(String id) {
+    return (_db.select(_db.bouteilles)..where((b) => b.id.equals(id)))
+        .watchSingleOrNull();
+  }
 }

@@ -105,12 +105,13 @@ Do not implement V1 or V2 features before the MVP is complete.
 
 Clic sur une ligne du stock → `BottomSheet` modal avec :
 
-1. **Déplacer** : saisie libre de l'emplacement avec autocomplétion sur les emplacements existants en base → `UPDATE emplacement` uniquement, pas de `date_sortie`
-2. **Consommer** : date de consommation (défaut = aujourd'hui, modifiable via DatePicker pour déclaration tardive), note /10 optionnelle, commentaire de dégustation optionnel → `UPDATE date_sortie + note_degus + commentaire_degus`
-3. **Modifier la fiche** : navigue vers `BottleEditScreen` via la route `/bottle-edit/:id` — implémenté en V1. Champs protégés exclus (voir ci-dessus).
-4. **Annuler** : ferme le BottomSheet
+1. **Consommer** : date de consommation (défaut = aujourd'hui, modifiable via DatePicker pour déclaration tardive), note /10 optionnelle, commentaire de dégustation optionnel → `UPDATE date_sortie + note_degus + commentaire_degus`
+2. **Consulter la fiche** : navigue vers `BottleDetailScreen` (lecture seule) via la route `/bottle/:id` — accessible en mode normal ET en mode lecture seule. Champs `note_degus` / `commentaire_degus` masqués si la bouteille est encore en stock (`date_sortie` vide).
+3. **Déplacer** : saisie libre de l'emplacement avec autocomplétion sur les emplacements existants en base → `UPDATE emplacement` uniquement, pas de `date_sortie`
+4. **Modifier la fiche** : navigue vers `BottleEditScreen` via la route `/bottle-edit/:id` — implémenté en V1. Champs protégés exclus (voir ci-dessus).
+5. **Annuler** : ferme le BottomSheet
 
-**Mode lecture seule** : quand `SyncReadOnly` est actif (lock détenu par un autre appareil), le BottomSheet affiche uniquement un message "Mode lecture seule — modifications indisponibles" et un bouton "Fermer". Les actions Déplacer, Consommer, Modifier la fiche sont cachées.
+**Mode lecture seule** : quand `SyncReadOnly` est actif (lock détenu par un autre appareil), le BottomSheet affiche un message "Mode lecture seule — modifications indisponibles", l'action **Consulter la fiche** (accessible) et un bouton **Fermer**. Les actions Consommer, Déplacer, Modifier la fiche sont cachées.
 
 ---
 

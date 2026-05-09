@@ -84,6 +84,12 @@ class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
               _SheetView.menu => _Menu(
                   key: const ValueKey('menu'),
                   isReadOnly: ref.watch(syncServiceProvider) is SyncReadOnly,
+                  onConsulterFiche: () {
+                    final router = GoRouter.of(context);
+                    final id = widget.bouteille.id;
+                    Navigator.of(context).pop();
+                    router.push('/bottle/$id');
+                  },
                   onDeplacer: () => setState(() => _view = _SheetView.deplacer),
                   onConsommer: () =>
                       setState(() => _view = _SheetView.consommer),
@@ -119,6 +125,7 @@ class _BottleActionsSheetState extends ConsumerState<_BottleActionsSheet> {
 
 class _Menu extends StatelessWidget {
   final bool isReadOnly;
+  final VoidCallback onConsulterFiche;
   final VoidCallback onDeplacer;
   final VoidCallback onConsommer;
   final VoidCallback onModifierFiche;
@@ -127,6 +134,7 @@ class _Menu extends StatelessWidget {
   const _Menu({
     super.key,
     required this.isReadOnly,
+    required this.onConsulterFiche,
     required this.onDeplacer,
     required this.onConsommer,
     required this.onModifierFiche,
@@ -145,14 +153,21 @@ class _Menu extends StatelessWidget {
               children: [
                 Icon(Icons.lock_outline, size: 18, color: Theme.of(context).colorScheme.outline),
                 const SizedBox(width: 8),
-                Text(
-                  'Mode lecture seule — modifications indisponibles',
-                  style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13),
+                Expanded(
+                  child: Text(
+                    'Mode lecture seule — modifications indisponibles',
+                    style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13),
+                  ),
                 ),
               ],
             ),
           ),
           const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Consulter la fiche'),
+            onTap: onConsulterFiche,
+          ),
           ListTile(
             leading: const Icon(Icons.close),
             title: const Text('Fermer'),
@@ -166,14 +181,19 @@ class _Menu extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          leading: const Icon(Icons.move_down),
-          title: const Text('Déplacer'),
-          onTap: onDeplacer,
-        ),
-        ListTile(
           leading: const Icon(Icons.local_bar),
           title: const Text('Consommer'),
           onTap: onConsommer,
+        ),
+        ListTile(
+          leading: const Icon(Icons.info_outline),
+          title: const Text('Consulter la fiche'),
+          onTap: onConsulterFiche,
+        ),
+        ListTile(
+          leading: const Icon(Icons.move_down),
+          title: const Text('Déplacer'),
+          onTap: onDeplacer,
         ),
         ListTile(
           leading: const Icon(Icons.edit_outlined),

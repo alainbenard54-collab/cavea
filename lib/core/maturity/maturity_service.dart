@@ -9,11 +9,7 @@ MaturityLevel computeMaturity({
   required int? gardeMax,
   int? annee,
 }) {
-  if (millesime <= 0 ||
-      gardeMin == null ||
-      gardeMax == null ||
-      gardeMin == 0 ||
-      gardeMax == 0) {
+  if (millesime <= 0 || gardeMin == null || gardeMax == null) {
     return MaturityLevel.sansDonnee;
   }
   final age = (annee ?? DateTime.now().year) - millesime;

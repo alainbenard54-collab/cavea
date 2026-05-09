@@ -15,3 +15,7 @@ final appDatabaseProvider = Provider<AppDatabase>(
 final bouteillesDaoProvider = Provider<BouteilleDao>(
   (ref) => ref.watch(appDatabaseProvider).bouteilleDao,
 );
+
+final bottleByIdProvider = StreamProvider.family<Bouteille?, String>((ref, id) {
+  return ref.watch(bouteillesDaoProvider).watchBottleById(id);
+});
