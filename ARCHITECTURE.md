@@ -219,11 +219,16 @@ lib/
 │   ├── setup/                   # wizard premier lancement
 │   │   ├── setup_screen.dart
 │   │   └── setup_controller.dart
-│   └── stock/                   # liste stock + filtres + maturité
+│   └── stock/                   # liste stock + filtres + maturité + multi-sélection
 │       ├── stock_screen.dart
 │       ├── stock_controller.dart
-│       ├── stock_table.dart     # table triable desktop (≥ 640px)
-│       └── bouteille_list_tile.dart
+│       ├── stock_table.dart         # table triable desktop (≥ 640px)
+│       ├── bouteille_list_tile.dart
+│       ├── selection_controller.dart  # SelectionState + SelectionController (autoDispose)
+│       └── widgets/
+│           ├── bulk_action_bar.dart      # barre contextuelle mode sélection
+│           ├── deplacer_batch_sheet.dart # BottomSheet Déplacer en lot
+│           └── consommer_batch_sheet.dart # BottomSheet Consommer en lot
 ├── services/                    # couche cloud / sync (Mode 2)
 │   ├── storage_adapter.dart     # interface abstraite StorageAdapter
 │   ├── drive_storage_adapter.dart  # impl. Google Drive (drive.file scope, dossier Cavea)
@@ -373,15 +378,42 @@ lib/l10n/
 
 ---
 
-## Multi-sélection de bouteilles (V1)
+## Multi-sélection de bouteilles (V1 ✅)
 
-Sélection multiple depuis la vue stock via appui long (entrée dans le mode sélection) ou cases à cocher. Barre d'actions contextuelle en bas d'écran :
+Sélection multiple depuis la vue stock via appui long → cases à cocher apparaissent. Barre d'actions contextuelle (`BulkActionBar`) fixée en bas d'écran.
 
-- **Déplacer** : bottom sheet avec un seul champ emplacement + autocomplétion → `UPDATE emplacement` sur toutes les bouteilles sélectionnées
-- **Consommer** : bottom sheet identique au formulaire Consommer unitaire → `UPDATE date_sortie + note_degus + commentaire_degus` sur toutes
-- **Annuler** : désélection totale, retour en mode normal
+**État** : `SelectionController extends StateNotifier<SelectionState>` (`.autoDispose`) dans `lib/features/stock/selection_controller.dart`. `SelectionState` = `{bool isSelectMode, Set<String> selectedIds}`.
 
-Champs protégés et règles identiques à l'action unitaire.
+**Entrée/sortie :**
+- Appui long sur une ligne → `enterSelectMode(id)` : isSelectMode=true, ligne cochée
+- Tap en mode sélection → `toggleId(id)` : bascule coche
+- Annuler ou après action → `reset()` : isSelectMode=false, Set vidé
+- Navigation hors stock → autoDispose réinitialise automatiquement
+
+**SyncReadOnly** : appui long désactivé (`onLongPress: null`) — Déplacer et Consommer étant bloqués en lecture seule, autoriser le mode sélection créerait une impasse UX.
+
+**Actions batch** — transactions drift atomiques (`BouteilleDao`) :
+- **Déplacer** : `DeplacerBatchSheet` → `deplacerBouteilles(List<String> ids, String emplacement)`
+- **Consommer** : `ConsommerBatchSheet` → `consommerBouteilles(List<String> ids, {dateSortie, noteDegus, commentaireDegus})`
+
+Les BottomSheets batch utilisent `UncontrolledProviderScope(container: ProviderScope.containerOf(context))` pour accéder aux providers Riverpod depuis le contexte modal.
+
+Fichiers : `selection_controller.dart`, `widgets/bulk_action_bar.dart`, `widgets/deplacer_batch_sheet.dart`, `widgets/consommer_batch_sheet.dart`.
+
+---
+
+## Quitter Android en mode écriture (V1)
+
+Sur Android en Mode 2 (partagé), l'OS tue le process quelques ms après `AppLifecycleState.paused`, avant la fin des requêtes HTTP. La libération du lock à la fermeture est donc non fiable (voir section "Android — libération du lock à la fermeture" dans CLAUDE.md).
+
+**Feature V1** : quand `_MobileBar` affiche le bouton "Sauvegarder et libérer" (`!isReadOnly && isAndroid && syncService.isActive`), afficher également un bouton **Quitter** (icône `exit_to_app`) qui :
+1. Déclenche `syncService.releaseManual()` (upload Drive + suppression lock)
+2. Attend la fin de l'opération (état `SyncIdle` ou `SyncReadOnly`)
+3. Appelle `exit(0)` pour fermer le process proprement
+
+Ce bouton remplace le pattern "ferme l'app → session interrompue → récupération au prochain démarrage" par une sortie propre explicite. Il ne s'affiche qu'en mode écriture actif (pas en lecture seule, pas en Mode 1).
+
+Emplacement dans `_MobileBar` : dans la zone sync (gauche), aux côtés de `_AbandonWriteIconBtn` et `_SaveReleaseIconBtn`.
 
 ---
 

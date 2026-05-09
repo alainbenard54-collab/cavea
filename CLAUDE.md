@@ -133,6 +133,23 @@ Formulaire d'ajout en lot : champs communs + quantité totale + section "Répart
 
 ---
 
+## multi-sélection — spec implémentée (V1 ✅)
+
+Appui long sur une ligne de la vue stock → **mode sélection**.
+
+- Appui long désactivé quand `SyncReadOnly` (les deux actions disponibles — Déplacer, Consommer — sont bloquées en lecture seule, inutile d'entrer dans le mode)
+- En mode sélection : tap bascule la coche, leading devient `Checkbox`, fond coloré sur les lignes sélectionnées
+- `StockTable` (desktop ≥ 640px) : colonne checkbox en première position
+- `BulkActionBar` (barre fixée en bas du Column) : compteur "N bouteille(s) sélectionnée(s)", boutons **Déplacer** / **Consommer** / ✕ Annuler
+- **Déplacer** → `DeplacerBatchSheet` (emplacement + autocomplétion → `deplacerBouteilles` en transaction)
+- **Consommer** → `ConsommerBatchSheet` (date + note + commentaire → `consommerBouteilles` en transaction)
+- Annuler ou après action → `selectionProvider.reset()`, retour au mode normal
+- `selectionProvider` est `.autoDispose` → sélection vidée automatiquement à la navigation
+
+Fichiers : `lib/features/stock/selection_controller.dart`, `lib/features/stock/widgets/bulk_action_bar.dart`, `lib/features/stock/widgets/deplacer_batch_sheet.dart`, `lib/features/stock/widgets/consommer_batch_sheet.dart`.
+
+---
+
 ## Mode lecture seule — règles UI (Mode 2)
 
 Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre appareil) :
@@ -143,6 +160,7 @@ Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre
 | Navigation "Import CSV" | Grisée — tap bloqué avec snackbar |
 | BottomSheet bouteille | Affiche uniquement "Mode lecture seule" + bouton Fermer |
 | Bouton "Synchroniser" | Caché (déjà absent quand `!isWriteMode`) |
+| Multi-sélection (appui long) | Désactivé — `onLongPress: null` passé aux widgets |
 | Onglet Stock | Entièrement accessible en lecture |
 | Onglet Paramètres | Accessible (peut changer de mode) |
 
@@ -202,7 +220,8 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 
 - ✅ **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" via `/bottle-edit/:id`. DropdownMenu filtrable pour couleur/cru/contenance, DatePicker pour date_entree, autocomplétion RawAutocomplete, bouton restore ↩.
 - ✅ **Fiche lecture seule** d'une bouteille : `BottleDetailScreen` via route `/bottle/:id`, même présentation que `BottleEditScreen` (OutlineInputBorder, IgnorePointer), badge maturité coloré, section Consommation masquée si bouteille en stock. Accessible depuis le BottomSheet ("Consulter la fiche") en mode normal ET SyncReadOnly. Fix associé : `garde_min=0` désormais valeur légitime (buvable dès le millésime).
-- **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Voir ARCHITECTURE.md section "Multi-sélection".
+- ✅ **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Désactivé en SyncReadOnly (appui long ignoré). Voir section ci-dessous et ARCHITECTURE.md "Multi-sélection".
+- **Bouton quitter Android (Mode 2, mode écriture)** : quand l'app Android est en mode écriture (bouton "Sauvegarder et libérer" visible dans `_MobileBar`), afficher un bouton "Quitter" qui propose de sauvegarder les modifications en cours (upload Drive + libération du lock) avant de fermer le process. En Mode 1 / Mode 3 (pas de lock), ce bouton n'existe pas. Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
 - **Filtres avancés** : multi-critères, filtres sauvegardés (ex : "blanc à boire")
 - **Navigation par emplacement** : regroupement hiérarchique, comptage par zone
