@@ -6,19 +6,17 @@ import 'location_node.dart';
 
 class LocationNodeTile extends StatelessWidget {
   final LocationNode node;
-  final bool includeSublocations;
   final VoidCallback onTap;
 
   const LocationNodeTile({
     super.key,
     required this.node,
-    required this.includeSublocations,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final (count, sumPrix) = nodeStats(node, includeSublocations);
+    final (count, sumPrix) = nodeStats(node, true); // toujours agréger
     final statsLabel = _statsLabel(count, sumPrix);
     final hasChildren = !node.isLeaf;
 

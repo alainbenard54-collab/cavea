@@ -16,19 +16,14 @@ import 'location_provider.dart';
 class LocationBottleListScreen extends ConsumerWidget {
   final LocationNode node;
 
-  /// true = match préfixe (nœud parent avec toggle activé)
-  final bool includeSublocations;
-
   const LocationBottleListScreen({
     super.key,
     required this.node,
-    this.includeSublocations = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bottlesAsync =
-        ref.watch(locationBottleListProvider((node.fullPath, includeSublocations)));
+    final bottlesAsync = ref.watch(locationBottleListProvider(node.fullPath));
     final selection = ref.watch(selectionProvider);
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
 

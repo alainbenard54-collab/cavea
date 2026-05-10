@@ -10,14 +10,8 @@ final locationLeavesProvider = StreamProvider<List<LocationLeaf>>((ref) {
   return ref.watch(bouteillesDaoProvider).watchLocationStats();
 });
 
-// autoDispose : réinitialisé à false quand l'utilisateur quitte l'onglet Emplacements.
-final includeSublocationsProvider = StateProvider.autoDispose<bool>((ref) => false);
-
+// Toujours match exact — les stats agrègent les enfants en Dart (pas en SQL).
 final locationBottleListProvider =
-    StreamProvider.family<List<Bouteille>, (String, bool)>((ref, params) {
-  final (emplacement, includeSublocations) = params;
-  return ref.watch(bouteillesDaoProvider).watchBouteillesParEmplacement(
-        emplacement,
-        includeSublocations: includeSublocations,
-      );
+    StreamProvider.family<List<Bouteille>, String>((ref, emplacement) {
+  return ref.watch(bouteillesDaoProvider).watchBouteillesParEmplacement(emplacement);
 });

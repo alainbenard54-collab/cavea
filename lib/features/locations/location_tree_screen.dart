@@ -15,72 +15,42 @@ class LocationTreeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leavesAsync = ref.watch(locationLeavesProvider);
-    final includeSublocations = ref.watch(includeSublocationsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Emplacements')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SwitchListTile(
-            title: const Text('Inclure les sous-emplacements'),
-            value: includeSublocations,
-            onChanged: (v) =>
-                ref.read(includeSublocationsProvider.notifier).state = v,
-            dense: true,
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: leavesAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) =>
-                  Center(child: Text('Erreur : $e')),
-              data: (leaves) {
-                if (leaves.isEmpty) {
-                  return const Center(
-                    child: Text('Aucun emplacement trouvé.'),
-                  );
-                }
-                final roots = buildTree(leaves);
-                return ListView.builder(
-                  itemCount: roots.length,
-                  itemBuilder: (context, i) => LocationNodeTile(
-                    node: roots[i],
-                    includeSublocations: includeSublocations,
-                    onTap: () => _onNodeTap(context, ref, roots[i], includeSublocations),
-                  ),
-                );
-              },
+      body: leavesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Erreur : $e')),
+        data: (leaves) {
+          if (leaves.isEmpty) {
+            return const Center(child: Text('Aucun emplacement trouvé.'));
+          }
+          final roots = buildTree(leaves);
+          return ListView.builder(
+            itemCount: roots.length,
+            itemBuilder: (context, i) => LocationNodeTile(
+              node: roots[i],
+              onTap: () => _navigateTo(context, roots[i]),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
-void _onNodeTap(
-  BuildContext context,
-  WidgetRef ref,
-  LocationNode node,
-  bool includeSublocations,
-) {
-  if (!includeSublocations && !node.isLeaf) {
+void _navigateTo(BuildContext context, LocationNode node) {
+  if (node.isLeaf) {
     Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute<void>(
-        builder: (_) => LocationNodeScreen(node: node),
+        builder: (_) => LocationBottleListScreen(node: node),
       ),
     );
   } else {
     Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute<void>(
-        builder: (_) => LocationBottleListScreen(
-          node: node,
-          includeSublocations: includeSublocations && !node.isLeaf,
-        ),
+        builder: (_) => LocationNodeScreen(node: node),
       ),
     );
   }
 }
-
