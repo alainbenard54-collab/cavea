@@ -9,6 +9,7 @@ class LocationNode {
   final List<LocationNode> children;
   final int directCount;
   final double? directSumPrix;
+  final int directNullPrixCount;
 
   const LocationNode({
     required this.label,
@@ -16,23 +17,26 @@ class LocationNode {
     required this.children,
     required this.directCount,
     this.directSumPrix,
+    this.directNullPrixCount = 0,
   });
 
   bool get isLeaf => children.isEmpty;
 }
 
-/// Stats d'un nœud selon le toggle "Inclure sous-emplacements".
-(int count, double? sumPrix) nodeStats(LocationNode node, bool includeChildren) {
-  if (!includeChildren) return (node.directCount, node.directSumPrix);
+/// Stats agrégées d'un nœud (inclut toujours les sous-emplacements).
+(int count, double? sumPrix, int nullPrixCount) nodeStats(LocationNode node, bool includeChildren) {
+  if (!includeChildren) return (node.directCount, node.directSumPrix, node.directNullPrixCount);
   var count = node.directCount;
   double? sum = node.directSumPrix;
+  var nullCount = node.directNullPrixCount;
   for (final child in node.children) {
     final cs = nodeStats(child, true);
     count += cs.$1;
     final childSum = cs.$2;
     if (childSum != null) sum = (sum ?? 0) + childSum;
+    nullCount += cs.$3;
   }
-  return (count, sum);
+  return (count, sum, nullCount);
 }
 
 class _NodeBuilder {
@@ -40,6 +44,7 @@ class _NodeBuilder {
   final String fullPath;
   int directCount = 0;
   double? directSumPrix;
+  int directNullPrixCount = 0;
   final List<_NodeBuilder> children = [];
 
   _NodeBuilder(this.label, this.fullPath);
@@ -52,6 +57,7 @@ class _NodeBuilder {
       children: children.map((c) => c.build()).toList(),
       directCount: directCount,
       directSumPrix: directSumPrix,
+      directNullPrixCount: directNullPrixCount,
     );
   }
 }
@@ -68,7 +74,8 @@ List<LocationNode> buildTree(List<LocationLeaf> leaves) {
     }
     all[leaf.emplacement]!
       ..directCount = leaf.count
-      ..directSumPrix = leaf.sumPrix;
+      ..directSumPrix = leaf.sumPrix
+      ..directNullPrixCount = leaf.nullPrixCount;
   }
 
   // Câbler les enfants

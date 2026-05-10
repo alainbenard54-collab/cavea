@@ -16,8 +16,8 @@ class LocationNodeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (count, sumPrix) = nodeStats(node, true); // toujours agréger
-    final statsLabel = _statsLabel(count, sumPrix);
+    final (count, sumPrix, nullPrixCount) = nodeStats(node, true); // toujours agréger
+    final statsLabel = _statsLabel(count, sumPrix, nullPrixCount);
     final hasChildren = !node.isLeaf;
 
     return ListTile(
@@ -33,10 +33,13 @@ class LocationNodeTile extends StatelessWidget {
   }
 }
 
-String locationStatsLabel(int count, double? sumPrix) => _statsLabel(count, sumPrix);
+String locationStatsLabel(int count, double? sumPrix, [int nullPrixCount = 0]) =>
+    _statsLabel(count, sumPrix, nullPrixCount);
 
-String _statsLabel(int count, double? sumPrix) {
+String _statsLabel(int count, double? sumPrix, [int nullPrixCount = 0]) {
   final bottles = '$count bouteille${count > 1 ? 's' : ''}';
   if (sumPrix == null || sumPrix <= 0) return bottles;
-  return '$bottles (${sumPrix.round()} €)';
+  final label = '$bottles (${sumPrix.round()} €)';
+  if (nullPrixCount > 0) return '$label + $nullPrixCount sans prix';
+  return label;
 }

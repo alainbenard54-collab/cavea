@@ -8,11 +8,13 @@ class LocationLeaf {
   final String emplacement;
   final int count;
   final double? sumPrix;
+  final int nullPrixCount;
 
   const LocationLeaf({
     required this.emplacement,
     required this.count,
     this.sumPrix,
+    this.nullPrixCount = 0,
   });
 }
 
@@ -193,7 +195,8 @@ class BouteilleDao {
 
   Stream<List<LocationLeaf>> watchLocationStats() {
     return _db.customSelect(
-      'SELECT emplacement, COUNT(*) AS cnt, SUM(prix_achat) AS total '
+      'SELECT emplacement, COUNT(*) AS cnt, SUM(prix_achat) AS total, '
+      'SUM(CASE WHEN prix_achat IS NULL THEN 1 ELSE 0 END) AS null_cnt '
       "FROM bouteilles WHERE date_sortie IS NULL OR date_sortie = '' "
       'GROUP BY emplacement ORDER BY emplacement',
       readsFrom: {_db.bouteilles},
@@ -202,6 +205,7 @@ class BouteilleDao {
               emplacement: row.read<String>('emplacement'),
               count: row.read<int>('cnt'),
               sumPrix: row.read<double?>('total'),
+              nullPrixCount: row.read<int>('null_cnt'),
             ))
         .toList());
   }

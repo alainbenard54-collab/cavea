@@ -32,7 +32,17 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
 
   bool get _canGoBack => _path.isNotEmpty || _showingBottleList;
 
-  String get _title => _path.isEmpty ? 'Emplacements' : _path.join(' > ');
+  void _navigateToRoot() => setState(() {
+        _path.clear();
+        _showingBottleList = false;
+        _directOnly = false;
+      });
+
+  void _navigateToLevel(int index) => setState(() {
+        _path.removeRange(index + 1, _path.length);
+        _showingBottleList = false;
+        _directOnly = false;
+      });
 
   void _goBack() {
     setState(() {
@@ -100,11 +110,7 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           leading: _canGoBack ? BackButton(onPressed: _goBack) : null,
-          title: Text(
-            _title,
-            style: const TextStyle(fontSize: 13),
-            overflow: TextOverflow.ellipsis,
-          ),
+          title: _buildBreadcrumb(context),
         ),
         body: leavesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -112,6 +118,42 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
           data: (leaves) => _buildContent(leaves),
         ),
       ),
+    );
+  }
+
+  Widget _buildBreadcrumb(BuildContext context) {
+    final mutedColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55);
+    const style = TextStyle(fontSize: 13);
+    const sep = Text(' › ', style: TextStyle(fontSize: 13));
+
+    Widget crumb(String label, VoidCallback? onTap) {
+      final text = Text(
+        label,
+        style: style.copyWith(color: onTap != null ? mutedColor : null),
+        overflow: TextOverflow.ellipsis,
+      );
+      if (onTap == null) return text;
+      return GestureDetector(onTap: onTap, child: text);
+    }
+
+    final items = <Widget>[];
+    if (_path.isEmpty) {
+      items.add(crumb('Emplacements', null));
+    } else {
+      items.add(crumb('Emplacements', _navigateToRoot));
+      for (int i = 0; i < _path.length; i++) {
+        items.add(sep);
+        final isLast = i == _path.length - 1;
+        items.add(crumb(
+          _path[i],
+          isLast ? null : () => _navigateToLevel(i),
+        ));
+      }
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(mainAxisSize: MainAxisSize.min, children: items),
     );
   }
 
@@ -134,6 +176,7 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
     final children = currentNode?.children ?? tree;
     final directCount = currentNode?.directCount ?? 0;
     final directSumPrix = currentNode?.directSumPrix;
+    final directNullPrixCount = currentNode?.directNullPrixCount ?? 0;
 
     if (children.isEmpty && directCount == 0) {
       return const Center(child: Text('Aucune bouteille.'));
@@ -151,6 +194,7 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
           _DirectBottlesTile(
             count: directCount,
             sumPrix: directSumPrix,
+            nullPrixCount: directNullPrixCount,
             onTap: _enterDirect,
           ),
         ],
@@ -164,11 +208,13 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
 class _DirectBottlesTile extends StatelessWidget {
   final int count;
   final double? sumPrix;
+  final int nullPrixCount;
   final VoidCallback onTap;
 
   const _DirectBottlesTile({
     required this.count,
     this.sumPrix,
+    this.nullPrixCount = 0,
     required this.onTap,
   });
 
@@ -180,7 +226,7 @@ class _DirectBottlesTile extends StatelessWidget {
         color: Theme.of(context).colorScheme.secondary,
       ),
       title: const Text('Directement dans cet emplacement'),
-      subtitle: Text(locationStatsLabel(count, sumPrix)),
+      subtitle: Text(locationStatsLabel(count, sumPrix, nullPrixCount)),
       onTap: onTap,
     );
   }
@@ -219,6 +265,7 @@ class _BottleListBody extends ConsumerWidget {
                   final isSelected = selection.selectedIds.contains(b.id);
                   return BouteilleListTile(
                     bouteille: b,
+                    showEmplacement: false,
                     isSelectMode: selection.isSelectMode,
                     isSelected: isSelected,
                     onTap: selection.isSelectMode

@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter/material.dart';
+import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
 
 Color couleurVin(String couleur) {
@@ -30,6 +31,7 @@ class BouteilleListTile extends StatelessWidget {
   final VoidCallback? onLongPress;
   final bool isSelectMode;
   final bool isSelected;
+  final bool showEmplacement;
 
   const BouteilleListTile({
     super.key,
@@ -38,6 +40,7 @@ class BouteilleListTile extends StatelessWidget {
     this.onLongPress,
     this.isSelectMode = false,
     this.isSelected = false,
+    this.showEmplacement = true,
   });
 
   @override
@@ -82,16 +85,50 @@ class BouteilleListTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             )
           : null,
-      trailing: emplacement.isNotEmpty
-          ? Text(
-              emplacement,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+      trailing: showEmplacement
+          ? (emplacement.isNotEmpty
+              ? Text(
+                  emplacement,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              : null)
+          : _MaturityBadge(bouteille: bouteille),
+    );
+  }
+}
+
+class _MaturityBadge extends StatelessWidget {
+  final Bouteille bouteille;
+  const _MaturityBadge({required this.bouteille});
+
+  @override
+  Widget build(BuildContext context) {
+    final level = computeMaturity(
+      millesime: bouteille.millesime,
+      gardeMin: bouteille.gardeMin,
+      gardeMax: bouteille.gardeMax,
+    );
+    final (bgColor, textColor, label) = switch (level) {
+      MaturityLevel.tropJeune => (Colors.blue.shade50, Colors.blue.shade800, 'Trop jeune'),
+      MaturityLevel.optimal => (Colors.green.shade50, Colors.green.shade800, 'Optimal'),
+      MaturityLevel.aBoireUrgent => (Colors.red.shade50, Colors.red.shade800, 'À boire !'),
+      MaturityLevel.sansDonnee => (null, null, ''),
+    };
+    if (bgColor == null) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w500),
+      ),
     );
   }
 }
