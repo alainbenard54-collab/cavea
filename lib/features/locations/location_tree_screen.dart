@@ -3,54 +3,254 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/sync_service.dart';
+import '../bottle_actions/bottle_actions_sheet.dart';
+import '../stock/bouteille_list_tile.dart';
+import '../stock/selection_controller.dart';
+import '../stock/widgets/bulk_action_bar.dart';
+import '../stock/widgets/consommer_batch_sheet.dart' show showConsommerBatchSheet;
+import '../stock/widgets/deplacer_batch_sheet.dart' show showDeplacerBatchSheet;
 import 'location_node.dart';
 import 'location_node_tile.dart';
 import 'location_provider.dart';
-import 'location_node_screen.dart';
-import 'location_bottle_list_screen.dart';
 
-class LocationTreeScreen extends ConsumerWidget {
+class LocationTreeScreen extends ConsumerStatefulWidget {
   const LocationTreeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LocationTreeScreen> createState() => _LocationTreeScreenState();
+}
+
+class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
+  // Chemin de navigation : liste de labels depuis la racine vers le nœud courant.
+  final List<String> _path = [];
+  // Affichage de la liste de bouteilles (feuille ou bouteilles directes d'un parent).
+  bool _showingBottleList = false;
+  // true = liste bouteilles directes d'un nœud parent (chemin inchangé au retour).
+  bool _directOnly = false;
+
+  bool get _canGoBack => _path.isNotEmpty || _showingBottleList;
+
+  String get _title => _path.isEmpty ? 'Emplacements' : _path.join(' > ');
+
+  void _goBack() {
+    setState(() {
+      if (_showingBottleList) {
+        final wasDirectOnly = _directOnly;
+        _showingBottleList = false;
+        _directOnly = false;
+        // Leaf : le label avait été ajouté au chemin → le retirer.
+        if (!wasDirectOnly && _path.isNotEmpty) _path.removeLast();
+      } else if (_path.isNotEmpty) {
+        _path.removeLast();
+      }
+    });
+  }
+
+  void _enterNode(LocationNode node) =>
+      setState(() {
+        _path.add(node.label);
+        _showingBottleList = false;
+      });
+
+  void _enterLeaf(LocationNode node) =>
+      setState(() {
+        _path.add(node.label);
+        _showingBottleList = true;
+        _directOnly = false;
+      });
+
+  void _enterDirect() =>
+      setState(() {
+        _showingBottleList = true;
+        _directOnly = true;
+      });
+
+  /// Retrouve le nœud courant dans l'arbre reconstruit (données fraîches du stream).
+  LocationNode? _findCurrentNode(List<LocationNode> roots) {
+    if (_path.isEmpty) return null;
+    var nodes = roots;
+    LocationNode? current;
+    for (final label in _path) {
+      LocationNode? found;
+      for (final n in nodes) {
+        if (n.label == label) {
+          found = n;
+          break;
+        }
+      }
+      if (found == null) return null;
+      current = found;
+      nodes = found.children;
+    }
+    return current;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final leavesAsync = ref.watch(locationLeavesProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Emplacements')),
-      body: leavesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erreur : $e')),
-        data: (leaves) {
-          if (leaves.isEmpty) {
-            return const Center(child: Text('Aucun emplacement trouvé.'));
-          }
-          final roots = buildTree(leaves);
-          return ListView.builder(
-            itemCount: roots.length,
-            itemBuilder: (context, i) => LocationNodeTile(
-              node: roots[i],
-              onTap: () => _navigateTo(context, roots[i]),
-            ),
-          );
-        },
+    return PopScope(
+      canPop: !_canGoBack,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _canGoBack) _goBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: _canGoBack ? BackButton(onPressed: _goBack) : null,
+          title: Text(
+            _title,
+            style: const TextStyle(fontSize: 13),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        body: leavesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Erreur : $e')),
+          data: (leaves) => _buildContent(leaves),
+        ),
       ),
+    );
+  }
+
+  Widget _buildContent(List<LocationLeaf> leaves) {
+    final tree = buildTree(leaves);
+    final currentNode = _findCurrentNode(tree);
+
+    // Le nœud a disparu (déplacement total) → retour à la racine.
+    if (_path.isNotEmpty && currentNode == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() { _path.clear(); _showingBottleList = false; });
+      });
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_showingBottleList) {
+      return _BottleListBody(emplacement: currentNode?.fullPath ?? '');
+    }
+
+    final children = currentNode?.children ?? tree;
+    final directCount = currentNode?.directCount ?? 0;
+    final directSumPrix = currentNode?.directSumPrix;
+
+    if (children.isEmpty && directCount == 0) {
+      return const Center(child: Text('Aucune bouteille.'));
+    }
+
+    return ListView(
+      children: [
+        for (final child in children)
+          LocationNodeTile(
+            node: child,
+            onTap: () => child.isLeaf ? _enterLeaf(child) : _enterNode(child),
+          ),
+        if (directCount > 0) ...[
+          if (children.isNotEmpty) const Divider(height: 1),
+          _DirectBottlesTile(
+            count: directCount,
+            sumPrix: directSumPrix,
+            onTap: _enterDirect,
+          ),
+        ],
+      ],
     );
   }
 }
 
-void _navigateTo(BuildContext context, LocationNode node) {
-  if (node.isLeaf) {
-    Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LocationBottleListScreen(node: node),
+// ── Tuile "Bouteilles directement dans ce nœud" ───────────────────────────────
+
+class _DirectBottlesTile extends StatelessWidget {
+  final int count;
+  final double? sumPrix;
+  final VoidCallback onTap;
+
+  const _DirectBottlesTile({
+    required this.count,
+    this.sumPrix,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        Icons.wine_bar_outlined,
+        color: Theme.of(context).colorScheme.secondary,
       ),
+      title: const Text('Directement dans cet emplacement'),
+      subtitle: Text(locationStatsLabel(count, sumPrix)),
+      onTap: onTap,
     );
-  } else {
-    Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LocationNodeScreen(node: node),
-      ),
+  }
+}
+
+// ── Corps de la liste de bouteilles (inline, pas d'écran séparé) ─────────────
+
+class _BottleListBody extends ConsumerWidget {
+  final String emplacement;
+
+  const _BottleListBody({required this.emplacement});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bottlesAsync = ref.watch(locationBottleListProvider(emplacement));
+    final selection = ref.watch(selectionProvider);
+    final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
+
+    return Column(
+      children: [
+        Expanded(
+          child: bottlesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Erreur : $e')),
+            data: (bottles) {
+              if (bottles.isEmpty) {
+                return const Center(
+                  child: Text('Aucune bouteille dans cet emplacement.'),
+                );
+              }
+              return ListView.separated(
+                itemCount: bottles.length,
+                separatorBuilder: (_, __) => const Divider(height: 1, indent: 16),
+                itemBuilder: (context, i) {
+                  final b = bottles[i];
+                  final isSelected = selection.selectedIds.contains(b.id);
+                  return BouteilleListTile(
+                    bouteille: b,
+                    isSelectMode: selection.isSelectMode,
+                    isSelected: isSelected,
+                    onTap: selection.isSelectMode
+                        ? () =>
+                            ref.read(selectionProvider.notifier).toggleId(b.id)
+                        : () => showBottleActionsSheet(context, b),
+                    onLongPress: isReadOnly
+                        ? null
+                        : () => ref
+                            .read(selectionProvider.notifier)
+                            .enterSelectMode(b.id),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        if (selection.isSelectMode)
+          BulkActionBar(
+            count: selection.count,
+            onDeplacer: () => showDeplacerBatchSheet(
+              context,
+              List.of(selection.selectedIds),
+              onDone: () => ref.read(selectionProvider.notifier).reset(),
+            ),
+            onConsommer: () => showConsommerBatchSheet(
+              context,
+              List.of(selection.selectedIds),
+              onDone: () => ref.read(selectionProvider.notifier).reset(),
+            ),
+            onCancel: () => ref.read(selectionProvider.notifier).reset(),
+          ),
+      ],
     );
   }
 }
