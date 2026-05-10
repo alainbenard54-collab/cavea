@@ -725,7 +725,7 @@ class _AcquireLockIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Passer en écriture',
+      message: 'Prendre la main',
       preferBelow: false,
       child: IconButton(
         icon: const Icon(Icons.lock_open, size: 20, color: Colors.green),
