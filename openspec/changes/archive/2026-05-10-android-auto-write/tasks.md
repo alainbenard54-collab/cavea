@@ -27,10 +27,10 @@
 
 ## 6. Tests manuels (Android, Mode 2)
 
-- [ ] 6.1 Démarrage Android lock absent : vérifier que l'app s'ouvre directement en mode écriture (icône verte) sans "Prendre la main"
-- [ ] 6.2 Démarrage Android lock absent (premier lancement Drive vide) : vérifier que la base locale est uploadée et l'app s'ouvre en mode écriture
-- [ ] 6.3 Dialog onboarding : vérifier qu'il s'affiche au premier démarrage en mode écriture, que "OK" sans coche le fait réapparaître au suivant, et que "OK" avec coche le supprime définitivement
-- [ ] 6.4 Vérifier que la zone sync Android mode écriture affiche bien uniquement `SyncStatusIndicator` + Sauvegarder + Quitter (sans "Retour lecture seule")
-- [ ] 6.5 Crash recovery Android : vérifier que les deux choix (upload local / download Drive) aboutissent en SyncIdle (mode écriture) et non en SyncReadOnly
-- [ ] 6.6 Lock tiers sur Android : vérifier que le dialog existant "Cave utilisée sur un autre appareil" fonctionne toujours correctement (lecture seule ou quitter)
-- [ ] 6.7 Comportement Windows inchangé : vérifier que le démarrage PC en Mode 2 (lock absent, lock tiers, crash recovery) se comporte exactement comme avant
+- [x] 6.1 Démarrage Android lock absent : vérifier que l'app s'ouvre directement en mode écriture (icône verte) sans "Prendre la main"
+- [x] 6.2 Démarrage Android lock absent (premier lancement Drive vide) : vérifier que la base locale est uploadée et l'app s'ouvre en mode écriture
+- [x] 6.3 Dialog onboarding : vérifier qu'il s'affiche au premier démarrage en mode écriture, que "OK" sans coche le fait réapparaît au suivant, et que "OK" avec coche le supprime définitivement
+- [x] 6.4 Vérifier que la zone sync Android mode écriture affiche bien uniquement `SyncStatusIndicator` + Sauvegarder + Quitter (sans "Retour lecture seule")
+- [x] 6.5 Crash recovery Android : vérifier que les deux choix (upload local / download Drive) aboutissent en SyncIdle (mode écriture) et non en SyncReadOnly
+- [x] 6.6 Lock tiers sur Android : vérifier que le dialog existant "Cave utilisée sur un autre appareil" fonctionne toujours correctement (lecture seule ou quitter)
+- [x] 6.7 Comportement Windows inchangé : vérifier que le démarrage PC en Mode 2 (lock absent, lock tiers, crash recovery) se comporte exactement comme avant
