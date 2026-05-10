@@ -775,8 +775,42 @@ class _QuitIconBtn extends StatelessWidget {
           ),
         ],
       ),
-    ).then((confirmed) {
-      if (confirmed == true) syncService.releaseAndExit();
+    ).then((confirmed) async {
+      if (confirmed != true) return;
+      try {
+        await syncService.tryRelease();
+        exit(0);
+      } catch (_) {
+        if (!context.mounted) {
+          exit(0);
+          return;
+        }
+        final forceQuit = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx2) => AlertDialog(
+            title: const Text('Impossible de sauvegarder'),
+            content: const Text(
+              'Les données n\'ont pas pu être envoyées sur Drive '
+              'et le verrou n\'a pas été libéré.\n\n'
+              'Si vous quittez maintenant, vos modifications seront perdues '
+              'et l\'accès en écriture depuis un autre appareil restera bloqué.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx2).pop(false),
+                child: const Text('Annuler'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.of(ctx2).pop(true),
+                child: const Text('Quitter quand même'),
+              ),
+            ],
+          ),
+        );
+        if (forceQuit == true) exit(0);
+      }
     });
   }
 }

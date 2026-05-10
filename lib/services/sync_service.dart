@@ -491,6 +491,22 @@ class SyncService extends StateNotifier<SyncState> {
       _lockHeldByUs = false;
     } catch (_) {}
   }
+
+  /// Upload + unlock si on détient le lock. Lève une exception en cas d'échec et
+  /// passe en SyncError — utilisé par le bouton "Quitter" Android pour que l'UI
+  /// puisse afficher un avertissement avant de laisser l'utilisateur décider.
+  Future<void> tryRelease() async {
+    final adapter = _adapter;
+    if (adapter == null || !_lockHeldByUs) return;
+    try {
+      await adapter.uploadDb(File(configService.config!.dbPath));
+      await adapter.unlock();
+      _lockHeldByUs = false;
+    } catch (e) {
+      if (!_isDisposed) state = SyncError(e.toString());
+      rethrow;
+    }
+  }
 }
 
 // ── Providers ─────────────────────────────────────────────────────────────────
