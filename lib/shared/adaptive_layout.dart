@@ -542,6 +542,7 @@ class _MobileBar extends StatelessWidget {
               selectedIcon: Icons.shelves,
               selected: selectedIndex == 2,
               onTap: () => onDestinationSelected(2),
+              compact: true,
             ),
             const Spacer(),
             // ── Navigation secondaire ──────────────────────────────────
