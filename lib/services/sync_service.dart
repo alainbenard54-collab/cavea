@@ -148,29 +148,7 @@ class SyncService extends StateNotifier<SyncState> {
         return;
       }
 
-      if (Platform.isAndroid) {
-        // Android : pas de lock automatique — lecture seule par défaut.
-        // L'utilisateur prend la main explicitement via "Prendre la main".
-        final remoteExists = await adapter.remoteDbExists();
-        if (remoteExists) {
-          _startAsReadOnly = true;
-          if (_closeDbCallback != null) await _closeDbCallback!();
-          await adapter.downloadDb(configService.config!.dbPath);
-          if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
-          if (_isDisposed) return;
-          _startAsReadOnly = false;
-        } else {
-          // Drive vide : initialiser la cave partagée avec la base locale.
-          // Pas de lock — on reste en lecture seule ; la prise de main est explicite.
-          await adapter.uploadDb(File(configService.config!.dbPath));
-        }
-        _lockHeldByUs = false;
-        if (_isDisposed) return;
-        state = const SyncReadOnly();
-        return;
-      }
-
-      // PC : lock libre — acquérir et synchroniser
+      // Lock libre — acquérir et synchroniser (Android et PC)
       await adapter.lock();
       _lockHeldByUs = true;
 
@@ -206,7 +184,7 @@ class SyncService extends StateNotifier<SyncState> {
 
   // ── Résolution crash recovery ─────────────────────────────────────────────
 
-  /// Choix "Envoyer mes données locales" : upload local → PC garde le lock, Android libère.
+  /// Choix "Envoyer mes données locales" : upload local → garde le lock → SyncIdle.
   Future<void> resolveOwnLockWithUpload() async {
     final adapter = _adapter;
     if (adapter == null) return;
@@ -214,24 +192,16 @@ class SyncService extends StateNotifier<SyncState> {
     state = const SyncSyncing();
     try {
       await adapter.uploadDb(File(configService.config!.dbPath));
-      if (Platform.isAndroid) {
-        // Android : libère le lock après upload → retour en lecture seule.
-        await adapter.unlock();
-        _lockHeldByUs = false;
-        if (_isDisposed) return;
-        state = const SyncReadOnly();
-      } else {
-        _lockHeldByUs = true;
-        if (_isDisposed) return;
-        state = const SyncIdle();
-      }
+      _lockHeldByUs = true;
+      if (_isDisposed) return;
+      state = const SyncIdle();
     } catch (e) {
       if (_isDisposed) return;
       state = SyncError(e.toString());
     }
   }
 
-  /// Choix "Repartir depuis Google Drive" : download Drive → PC garde le lock, Android libère.
+  /// Choix "Repartir depuis Google Drive" : download Drive → garde le lock → SyncIdle.
   Future<void> resolveOwnLockWithDownload() async {
     final adapter = _adapter;
     if (adapter == null) return;
@@ -239,36 +209,19 @@ class SyncService extends StateNotifier<SyncState> {
     state = const SyncSyncing();
     bool dbWasClosed = false;
     try {
-      if (Platform.isAndroid) {
-        // Android : unlock d'abord, puis download → lecture seule.
-        await adapter.unlock();
-        _lockHeldByUs = false;
-        _startAsReadOnly = true;
-        if (_closeDbCallback != null) {
-          await _closeDbCallback!();
-          dbWasClosed = true;
-        }
-        await adapter.downloadDb(configService.config!.dbPath);
-        if (_reopenDbCallback != null) await _reopenDbCallback!(message: 'Cave synchronisée depuis Drive');
-        if (_isDisposed) return;
-        _startAsReadOnly = false;
-        state = const SyncReadOnly();
-      } else {
-        _startWithLock = true;
-        if (_closeDbCallback != null) {
-          await _closeDbCallback!();
-          dbWasClosed = true;
-        }
-        await adapter.downloadDb(configService.config!.dbPath);
-        if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
-        if (_isDisposed) return;
-        _lockHeldByUs = true;
-        _startWithLock = false;
-        state = const SyncIdle();
+      _startWithLock = true;
+      if (_closeDbCallback != null) {
+        await _closeDbCallback!();
+        dbWasClosed = true;
       }
+      await adapter.downloadDb(configService.config!.dbPath);
+      if (_reopenDbCallback != null) await _reopenDbCallback!(message: null);
+      if (_isDisposed) return;
+      _lockHeldByUs = true;
+      _startWithLock = false;
+      state = const SyncIdle();
     } catch (e) {
       _startWithLock = false;
-      _startAsReadOnly = false;
       if (dbWasClosed && _reopenDbCallback != null) {
         try { await _reopenDbCallback!(message: null); } catch (_) {}
       }

@@ -21,6 +21,7 @@ class ConfigService {
   static const _keyRefCouleurs = 'ref_couleurs';
   static const _keyRefContenances = 'ref_contenances';
   static const _keyRefCrus = 'ref_crus';
+  static const _keyAndroidWriteWarningSeen = 'android_write_warning_seen';
 
   static const builtinCouleurs = [
     'Blanc',
@@ -154,6 +155,16 @@ class ConfigService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_keyRefCrus, values);
     _refCrus = values;
+  }
+
+  Future<bool> getAndroidWriteWarningSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyAndroidWriteWarningSeen) ?? false;
+  }
+
+  Future<void> setAndroidWriteWarningSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyAndroidWriteWarningSeen, true);
   }
 }
 
