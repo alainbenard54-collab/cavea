@@ -793,8 +793,12 @@ class _QuitIconBtn extends StatelessWidget {
             content: const Text(
               'Les données n\'ont pas pu être envoyées sur Drive '
               'et le verrou n\'a pas été libéré.\n\n'
-              'Si vous quittez maintenant, vos modifications seront perdues '
-              'et l\'accès en écriture depuis un autre appareil restera bloqué.',
+              'Vos modifications restent disponibles localement sur cet appareil. '
+              'Elles pourront être synchronisées lors d\'une prochaine connexion à Drive, '
+              'sauf si le verrou a été libéré manuellement depuis un autre appareil '
+              'entre-temps.\n\n'
+              'Tant que le verrou reste actif, l\'accès en écriture depuis d\'autres '
+              'appareils sera bloqué.',
             ),
             actions: [
               TextButton(
