@@ -47,6 +47,12 @@ const _destinations = [
     route: '/bulk-add',
   ),
   _AppDestination(
+    label: 'Emplacements',
+    icon: Icons.shelves,
+    selectedIcon: Icons.shelves,
+    route: '/locations',
+  ),
+  _AppDestination(
     label: 'Import CSV',
     icon: Icons.upload_file_outlined,
     selectedIcon: Icons.upload_file,
@@ -71,8 +77,8 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=2).
-  static const _writeOnlyIndices = {1, 2};
+  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=3).
+  static const _writeOnlyIndices = {1, 3};
 
   @override
   void initState() {
@@ -530,6 +536,13 @@ class _MobileBar extends StatelessWidget {
               enabled: !isReadOnly,
               onTap: () => onDestinationSelected(1),
             ),
+            _NavBtn(
+              tooltip: 'Emplacements',
+              icon: Icons.shelves,
+              selectedIcon: Icons.shelves,
+              selected: selectedIndex == 2,
+              onTap: () => onDestinationSelected(2),
+            ),
             const Spacer(),
             // ── Navigation secondaire ──────────────────────────────────
             _NavBtn(
@@ -538,17 +551,17 @@ class _MobileBar extends StatelessWidget {
                   : 'Import CSV',
               icon: Icons.upload_file_outlined,
               selectedIcon: Icons.upload_file,
-              selected: selectedIndex == 2,
+              selected: selectedIndex == 3,
               enabled: !isReadOnly,
-              onTap: () => onDestinationSelected(2),
+              onTap: () => onDestinationSelected(3),
               compact: true,
             ),
             _NavBtn(
               tooltip: 'Paramètres',
               icon: Icons.settings_outlined,
               selectedIcon: Icons.settings,
-              selected: selectedIndex == 3,
-              onTap: () => onDestinationSelected(3),
+              selected: selectedIndex == 4,
+              onTap: () => onDestinationSelected(4),
               compact: true,
             ),
             const SizedBox(width: 4),

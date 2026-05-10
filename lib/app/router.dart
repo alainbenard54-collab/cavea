@@ -8,6 +8,7 @@ import '../features/bottle_detail/bottle_detail_screen.dart';
 import '../features/bottle_edit/bottle_edit_screen.dart';
 import '../features/bulk_add/bulk_add_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
+import '../features/locations/location_tree_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/setup/setup_screen.dart';
 import '../features/stock/stock_screen.dart';
@@ -45,11 +46,13 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
           final location = state.matchedLocation;
           final index = location == '/bulk-add'
               ? 1
-              : location == '/import-csv'
+              : location == '/locations'
                   ? 2
-                  : location == '/settings'
+                  : location == '/import-csv'
                       ? 3
-                      : 0;
+                      : location == '/settings'
+                          ? 4
+                          : 0;
           return AppShell(selectedIndex: index, child: child);
         },
         routes: [
@@ -60,6 +63,10 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
           GoRoute(
             path: '/bulk-add',
             builder: (context, state) => const BulkAddScreen(),
+          ),
+          GoRoute(
+            path: '/locations',
+            builder: (context, state) => const LocationTreeScreen(),
           ),
           GoRoute(
             path: '/import-csv',

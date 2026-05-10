@@ -4,6 +4,18 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
 
+class LocationLeaf {
+  final String emplacement;
+  final int count;
+  final double? sumPrix;
+
+  const LocationLeaf({
+    required this.emplacement,
+    required this.count,
+    this.sumPrix,
+  });
+}
+
 class BouteilleDao {
   final AppDatabase _db;
 
@@ -177,6 +189,44 @@ class BouteilleDao {
         );
       }
     });
+  }
+
+  Stream<List<LocationLeaf>> watchLocationStats() {
+    return _db.customSelect(
+      'SELECT emplacement, COUNT(*) AS cnt, SUM(prix_achat) AS total '
+      "FROM bouteilles WHERE date_sortie IS NULL OR date_sortie = '' "
+      'GROUP BY emplacement ORDER BY emplacement',
+      readsFrom: {_db.bouteilles},
+    ).watch().map((rows) => rows
+        .map((row) => LocationLeaf(
+              emplacement: row.read<String>('emplacement'),
+              count: row.read<int>('cnt'),
+              sumPrix: row.read<double?>('total'),
+            ))
+        .toList());
+  }
+
+  Stream<List<Bouteille>> watchBouteillesParEmplacement(
+    String emplacement, {
+    bool includeSublocations = false,
+  }) {
+    return (_db.select(_db.bouteilles)
+          ..where((b) {
+            var cond = b.dateSortie.isNull() | b.dateSortie.equals('');
+            if (includeSublocations) {
+              cond = cond &
+                  (b.emplacement.equals(emplacement) |
+                      b.emplacement.like('$emplacement > %'));
+            } else {
+              cond = cond & b.emplacement.equals(emplacement);
+            }
+            return cond;
+          })
+          ..orderBy([
+            (b) => OrderingTerm.asc(b.domaine),
+            (b) => OrderingTerm.asc(b.millesime),
+          ]))
+        .watch();
   }
 
   Future<List<String>> getDistinctEmplacements() async {
