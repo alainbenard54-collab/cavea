@@ -40,6 +40,6 @@ String _statsLabel(int count, double? sumPrix, [int nullPrixCount = 0]) {
   final bottles = '$count bouteille${count > 1 ? 's' : ''}';
   if (sumPrix == null || sumPrix <= 0) return bottles;
   final label = '$bottles (${sumPrix.round()} €)';
-  if (nullPrixCount > 0) return '$label + $nullPrixCount sans prix';
+  if (nullPrixCount > 0) return '$label dont $nullPrixCount sans prix';
   return label;
 }

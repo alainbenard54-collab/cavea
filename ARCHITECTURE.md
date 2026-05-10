@@ -203,6 +203,8 @@ lib/
 │   │   └── widgets/
 │   │       ├── deplacer_form.dart
 │   │       └── consommer_form.dart
+│   ├── bottle_detail/           # Fiche lecture seule d'une bouteille (V1)
+│   │   └── bottle_detail_screen.dart
 │   ├── bottle_edit/             # Écran d'édition complète d'une bouteille (V1)
 │   │   └── bottle_edit_screen.dart
 │   ├── bulk_add/                # formulaire ajout en lot
@@ -210,6 +212,11 @@ lib/
 │   │   ├── bulk_add_controller.dart
 │   │   └── widgets/
 │   │       └── repartition_row.dart
+│   ├── locations/               # Navigation par emplacement — arbre hiérarchique (V1)
+│   │   ├── location_tree_screen.dart  # écran unique avec nav interne (pas de Navigator.push)
+│   │   ├── location_node.dart         # LocationNode, buildTree(), nodeStats()
+│   │   ├── location_node_tile.dart    # LocationNodeTile + locationStatsLabel()
+│   │   └── location_provider.dart     # locationLeavesProvider, locationBottleListProvider
 │   ├── import_csv/              # parsing et import CSV
 │   │   ├── import_csv_screen.dart
 │   │   ├── import_service.dart
@@ -255,6 +262,8 @@ final useRail = isDesktop(context) && !Platform.isAndroid;
 **Android utilise toujours `_MobileBar`**, quel que soit l'orientation. En paysage Android la largeur dépasse 600 dp, mais `NavigationRail` ne tient pas en hauteur avec le clavier ouvert. La détection par `Platform.isAndroid` est donc préférable à la détection par largeur seule.
 
 Les vues elles-mêmes sont les mêmes — seule la navigation change.
+
+**Destinations** (index 0→4) : Stock, Ajouter, Emplacements, Import CSV, Paramètres. `_writeOnlyIndices = {1, 3}` (Ajouter et Import CSV grisés en SyncReadOnly). Emplacements (index 2) est toujours accessible.
 
 ---
 
@@ -399,6 +408,26 @@ Sélection multiple depuis la vue stock via appui long → cases à cocher appar
 Les BottomSheets batch utilisent `UncontrolledProviderScope(container: ProviderScope.containerOf(context))` pour accéder aux providers Riverpod depuis le contexte modal.
 
 Fichiers : `selection_controller.dart`, `widgets/bulk_action_bar.dart`, `widgets/deplacer_batch_sheet.dart`, `widgets/consommer_batch_sheet.dart`.
+
+---
+
+## Navigation par emplacement (V1 ✅)
+
+Onglet dédié (`Icons.shelves`, index 2) donnant accès à l'arbre hiérarchique des emplacements.
+
+**Architecture — widget unique** : `LocationTreeScreen` (ConsumerStatefulWidget) gère toute la navigation en interne via `List<String> _path` + deux booléens (`_showingBottleList`, `_directOnly`). Aucun `Navigator.push` — la NavigationRail/BottomBar reste donc toujours visible.
+
+**Données** : `watchLocationStats()` dans `BouteilleDao` — `SELECT emplacement, COUNT(*), SUM(prix_achat), SUM(CASE WHEN prix_achat IS NULL…)` groupé par emplacement. Retourne `Stream<List<LocationLeaf>>`. `buildTree(List<LocationLeaf>)` divise sur ` > ` et construit récursivement l'arbre trié alphabétiquement.
+
+**`LocationNode`** : `{label, fullPath, children, directCount, directSumPrix, directNullPrixCount}`. `nodeStats(node, true)` agrège récursivement count + sumPrix + nullPrixCount des enfants.
+
+**Fraîcheur des données** : `_findCurrentNode(tree, _path)` parcourt l'arbre reconstruit depuis le stream drift à chaque rebuild. Après un Déplacer ou Consommer, les stats se mettent à jour instantanément.
+
+**Fil d'ariane** : "Emplacements" toujours visible en racine, segments intermédiaires cliquables (`_navigateToLevel(i)` ou `_navigateToRoot()`), dernier segment non-cliquable.
+
+**Liste bouteilles** : `locationBottleListProvider(emplacement)` — match exact sur `emplacement`. Badge maturité compact en trailing (pas l'emplacement, redondant avec le fil d'ariane). Multi-sélection et actions BottomSheet identiques à la vue Stock.
+
+Fichiers : `lib/features/locations/` (4 fichiers). DAO : `watchLocationStats()`, `watchBouteillesParEmplacement()`.
 
 ---
 

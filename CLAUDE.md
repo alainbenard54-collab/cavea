@@ -150,6 +150,28 @@ Fichiers : `lib/features/stock/selection_controller.dart`, `lib/features/stock/w
 
 ---
 
+## navigation-emplacement — spec implémentée (V1 ✅)
+
+Onglet "Emplacements" (`Icons.shelves`, index 2) ajouté à `_DesktopRail` (Windows) et `_MobileBar` (Android). `_writeOnlyIndices = {1, 3}` (Ajouter=1, Import CSV=3 — Emplacements=2 toujours accessible même en SyncReadOnly).
+
+**Architecture** : `LocationTreeScreen` est un seul `ConsumerStatefulWidget` qui gère toute la navigation en interne (pas de `Navigator.push`). La NavigationRail/BottomBar reste donc toujours visible à tous les niveaux de l'arbre.
+
+**État interne** : `List<String> _path` (labels du chemin depuis la racine), `bool _showingBottleList`, `bool _directOnly`. `_findCurrentNode(tree, _path)` reconstruit le nœud courant à chaque rebuild depuis le stream drift → données toujours fraîches après Déplacer/Consommer.
+
+**Fil d'ariane cliquable** : AppBar title = `_buildBreadcrumb()` — "Emplacements" toujours présent en racine, segments intermédiaires cliquables (sautent directement à ce niveau), dernier segment non-cliquable (niveau courant).
+
+**Statistiques** : agrégation Dart récursive depuis `buildTree(List<LocationLeaf>)` — toujours inclut les sous-emplacements. Format : `"N bouteille(s) (NN €)"` ou `"N bouteille(s) (NN €) dont K sans prix"` quand la somme est partielle.
+
+**Mix nœuds + bouteilles directes** : si un nœud parent contient à la fois des sous-emplacements ET des bouteilles rattachées directement, les deux sont affichés — sous-nœuds d'abord, puis tuile "Directement dans cet emplacement".
+
+**Liste de bouteilles** (`_BottleListBody`) : trailing = badge maturité compact ("Optimal" vert / "Trop jeune" bleu / "À boire !" rouge) — l'emplacement n'est pas affiché (redondant avec le fil d'ariane). Multi-sélection (Déplacer/Consommer en lot) et BottomSheet d'actions, désactivés en SyncReadOnly.
+
+**Back Android** : `PopScope(canPop: !_canGoBack)` intercepte le bouton back système pour naviguer dans l'arbre avant de remonter à la navigation principale.
+
+Fichiers : `lib/features/locations/location_tree_screen.dart`, `location_node.dart`, `location_node_tile.dart`, `location_provider.dart`. DAO : `watchLocationStats()` + `watchBouteillesParEmplacement()` dans `bouteille_dao.dart`.
+
+---
+
 ## Mode lecture seule — règles UI (Mode 2)
 
 Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre appareil) :
@@ -221,10 +243,9 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 - ✅ **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" via `/bottle-edit/:id`. DropdownMenu filtrable pour couleur/cru/contenance, DatePicker pour date_entree, autocomplétion RawAutocomplete, bouton restore ↩.
 - ✅ **Fiche lecture seule** d'une bouteille : `BottleDetailScreen` via route `/bottle/:id`, même présentation que `BottleEditScreen` (OutlineInputBorder, IgnorePointer), badge maturité coloré, section Consommation masquée si bouteille en stock. Accessible depuis le BottomSheet ("Consulter la fiche") en mode normal ET SyncReadOnly. Fix associé : `garde_min=0` désormais valeur légitime (buvable dès le millésime).
 - ✅ **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Désactivé en SyncReadOnly (appui long ignoré). Voir section ci-dessous et ARCHITECTURE.md "Multi-sélection".
-- **Bouton quitter Android (Mode 2, mode écriture)** : quand l'app Android est en mode écriture (bouton "Sauvegarder et libérer" visible dans `_MobileBar`), afficher un bouton "Quitter" qui propose de sauvegarder les modifications en cours (upload Drive + libération du lock) avant de fermer le process. En Mode 1 / Mode 3 (pas de lock), ce bouton n'existe pas. Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
+- ✅ **Bouton quitter Android (Mode 2, mode écriture)** : quand `_MobileBar` est en mode écriture, bouton "Quitter" qui déclenche `releaseManual()` puis `exit(0)`. Dialogue de confirmation avec option "Sauvegarder et quitter" / "Annuler". Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
+- ✅ **Navigation par emplacement** : onglet "Emplacements" (`Icons.shelves`, index 2) dans `_DesktopRail` et `_MobileBar`. Voir ARCHITECTURE.md section "Navigation par emplacement".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
-- **Filtres avancés** : multi-critères, filtres sauvegardés (ex : "blanc à boire")
-- **Navigation par emplacement** : regroupement hiérarchique, comptage par zone
 - **Historique des consommations** : liste bouteilles consommées, tri par date
 - **Export CSV** : même format que l'import
 - **Support Dropbox** : `DropboxStorageAdapter` + sélecteur fournisseur dans Settings
