@@ -71,6 +71,23 @@ class _AppShellState extends ConsumerState<AppShell> {
   // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=2).
   static const _writeOnlyIndices = {1, 2};
 
+  @override
+  void initState() {
+    super.initState();
+    // Cas ProviderScope recréé (Drive download) : le SyncService démarre directement
+    // en SyncIdle via _startWithLock. Le ref.listen ne voit jamais SyncStarting → SyncIdle.
+    // On détecte via pendingWriteOnboarding positionné avant le download.
+    if (Platform.isAndroid) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!pendingWriteOnboarding || !mounted) return;
+        pendingWriteOnboarding = false;
+        final seen = await configService.getAndroidWriteWarningSeen();
+        if (seen || !mounted) return;
+        showDialog<void>(context: context, builder: (_) => const _WriteOnboardingDialog());
+      });
+    }
+  }
+
   void _onDestinationSelected(BuildContext context, int index) {
     final syncState = ref.read(syncServiceProvider);
     if (syncState is SyncReadOnly && _writeOnlyIndices.contains(index)) {
@@ -100,8 +117,10 @@ class _AppShellState extends ConsumerState<AppShell> {
               const SnackBar(content: Text('Cave sauvegardée sur Drive')),
             );
           }
-          // Warning one-time Android : premier passage en mode écriture
-          if (Platform.isAndroid && previous is SyncStarting) {
+          // Cas Drive vide (pas de ProviderScope recréé) : le flag a été posé dans
+          // syncOnStartup() et la transition SyncStarting → SyncIdle est observable.
+          if (Platform.isAndroid && pendingWriteOnboarding) {
+            pendingWriteOnboarding = false;
             configService.getAndroidWriteWarningSeen().then((seen) {
               if (!seen && context.mounted) {
                 showDialog<void>(
@@ -473,6 +492,8 @@ class _MobileBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SyncStatusIndicator(),
+                    if (isReadOnly && isAndroid)
+                      _AcquireLockIconBtn(syncService: syncService),
                     if (!isReadOnly && isAndroid) ...[
                       _SaveIconBtn(syncService: syncService),
                       _QuitIconBtn(syncService: syncService),
@@ -606,16 +627,24 @@ class _NavBtn extends StatelessWidget {
 
 // ── Dialogue partagé : prise de verrou ───────────────────────────────────────
 
-void _showAcquireLockDialog(BuildContext context, SyncService syncService) {
+void _showAcquireLockDialog(
+  BuildContext context,
+  SyncService syncService, {
+  bool isAndroid = false,
+}) {
   showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Passer en mode écriture ?'),
-      content: const Text(
-        'La cave sera verrouillée pendant toute votre session. '
-        'Le verrou sera automatiquement libéré et vos modifications '
-        'sauvegardées sur Google Drive à la fermeture de l\'application '
-        'ou via le bouton "Synchroniser".',
+      content: Text(
+        isAndroid
+            ? 'La cave sera verrouillée pendant votre session. '
+                'Utilisez le bouton Quitter pour sauvegarder vos modifications '
+                'et libérer le verrou avant de fermer l\'application.'
+            : 'La cave sera verrouillée pendant toute votre session. '
+                'Le verrou sera automatiquement libéré et vos modifications '
+                'sauvegardées sur Google Drive à la fermeture de l\'application '
+                'ou via le bouton "Sauvegarder".',
       ),
       actions: [
         TextButton(
@@ -680,6 +709,27 @@ class _WriteOnboardingDialogState extends State<_WriteOnboardingDialog> {
           child: const Text('OK'),
         ),
       ],
+    );
+  }
+}
+
+// ── Boutons icône compacts pour la barre Android ─────────────────────────────
+
+class _AcquireLockIconBtn extends StatelessWidget {
+  final SyncService syncService;
+  const _AcquireLockIconBtn({required this.syncService});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Passer en écriture',
+      preferBelow: false,
+      child: IconButton(
+        icon: const Icon(Icons.lock_open, size: 20, color: Colors.green),
+        onPressed: () => _showAcquireLockDialog(context, syncService, isAndroid: true),
+        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+        padding: EdgeInsets.zero,
+      ),
     );
   }
 }
@@ -811,10 +861,10 @@ class _SyncIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Synchroniser',
+      message: 'Sauvegarder',
       preferBelow: false,
       child: IconButton(
-        icon: const Icon(Icons.sync, size: 20),
+        icon: const Icon(Icons.save, size: 20),
         onPressed: syncService.sync,
         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
@@ -823,7 +873,7 @@ class _SyncIconBtn extends StatelessWidget {
   }
 }
 
-// ── Bouton Synchroniser ───────────────────────────────────────────────────────
+// ── Bouton Sauvegarder ────────────────────────────────────────────────────────
 
 class _SyncButton extends StatelessWidget {
   final SyncService syncService;
@@ -834,8 +884,8 @@ class _SyncButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: syncService.sync,
-      icon: const Icon(Icons.sync, size: 16),
-      label: const Text('Synchroniser'),
+      icon: const Icon(Icons.save, size: 16),
+      label: const Text('Sauvegarder'),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         textStyle: const TextStyle(fontSize: 12),

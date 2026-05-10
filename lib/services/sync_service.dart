@@ -81,6 +81,11 @@ void registerSyncDbCallbacks({
 bool _startWithLock = false;
 bool _startAsReadOnly = false;
 
+/// Signale au prochain _AppShellState qu'un dialog onboarding Android doit
+/// être affiché (premier passage en mode écriture). Survit à la recréation du
+/// ProviderScope comme _startWithLock.
+bool pendingWriteOnboarding = false;
+
 /// À appeler juste avant de basculer storageModeProvider vers 'drive' après
 /// une migration (Settings). Le prochain SyncService démarrera avec le lock.
 void primeNextSyncWithLock() => _startWithLock = true;
@@ -149,6 +154,7 @@ class SyncService extends StateNotifier<SyncState> {
       }
 
       // Lock libre — acquérir et synchroniser (Android et PC)
+      if (Platform.isAndroid) pendingWriteOnboarding = true;
       await adapter.lock();
       _lockHeldByUs = true;
 
