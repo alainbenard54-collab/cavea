@@ -13,6 +13,9 @@ import '../widgets/sync_status_indicator.dart';
 
 const kDesktopBreakpoint = 600.0;
 
+// Couleur commune à toutes les icônes/boutons "Sauvegarder" (Android + Windows).
+const _kSaveColor = Colors.green;
+
 bool isDesktop(BuildContext context) =>
     MediaQuery.of(context).size.width >= kDesktopBreakpoint;
 
@@ -764,7 +767,7 @@ class _SaveIconBtn extends StatelessWidget {
       message: 'Sauvegarder',
       preferBelow: false,
       child: IconButton(
-        icon: const Icon(Icons.save, size: 20, color: Colors.green),
+        icon: const Icon(Icons.save, size: 20, color: _kSaveColor),
         onPressed: syncService.sync,
         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
@@ -864,7 +867,7 @@ class _SyncIconBtn extends StatelessWidget {
       message: 'Sauvegarder',
       preferBelow: false,
       child: IconButton(
-        icon: const Icon(Icons.save, size: 20),
+        icon: const Icon(Icons.save, size: 20, color: _kSaveColor),
         onPressed: syncService.sync,
         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
@@ -884,7 +887,7 @@ class _SyncButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: syncService.sync,
-      icon: const Icon(Icons.save, size: 16),
+      icon: const Icon(Icons.save, size: 16, color: _kSaveColor),
       label: const Text('Sauvegarder'),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
