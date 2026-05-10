@@ -42,6 +42,6 @@
 - [x] 7.3 Windows + Android : vérifier que les stats des nœuds parents agrègent bien les sous-emplacements (ex. Cave = somme de tous les casiers/rangées)
 - [x] 7.4 Windows : vérifier la liste bouteilles d'un nœud feuille — tap ouvre le BottomSheet d'actions (Consommer, Déplacer, etc.)
 - [x] 7.5 Android : vérifier que l'onglet Emplacements est accessible dans la barre du bas et fonctionne identiquement
-- [ ] 7.6 Mode 2 SyncReadOnly : vérifier que le BottomSheet dans la liste bouteilles affiche "Mode lecture seule" uniquement
-- [ ] 7.7 Mode écriture : effectuer une action "Déplacer" depuis la liste bouteilles d'un emplacement — vérifier que les stats de l'arbre se mettent à jour en temps réel (stream drift)
-- [ ] 7.8 Vérifier l'affichage quand certaines bouteilles n'ont pas de prix_achat : le format doit être `N bouteilles (NN €)` avec la somme partielle, pas d'erreur
+- [x] 7.6 Mode 2 SyncReadOnly : vérifier que le BottomSheet dans la liste bouteilles affiche "Mode lecture seule" uniquement
+- [x] 7.7 Mode écriture : effectuer une action "Déplacer" depuis la liste bouteilles d'un emplacement — vérifier que les stats de l'arbre se mettent à jour en temps réel (stream drift)
+- [x] 7.8 Vérifier l'affichage quand certaines bouteilles n'ont pas de prix_achat : le format doit être `N bouteilles (NN €)` avec la somme partielle, pas d'erreur
