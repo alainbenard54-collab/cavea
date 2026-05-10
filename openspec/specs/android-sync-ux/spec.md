@@ -35,12 +35,12 @@ En mode lecture seule sur Android (Mode 2), l'application SHALL afficher un bout
 ---
 
 ### Requirement: Libération manuelle sur Android
-En mode écriture sur Android (Mode 2), l'application SHALL afficher un bouton proéminent "Sauvegarder et libérer" permettant d'uploader `cave.db` sur Drive, de supprimer le lock, et de revenir en lecture seule.
+En mode écriture sur Android (Mode 2), l'application SHALL afficher un bouton "Sauvegarder" permettant d'uploader `cave.db` sur Drive **sans** relâcher le lock ni quitter le mode écriture. L'utilisateur reste en SyncIdle et peut continuer à modifier la cave.
 
-#### Scenario: Tap sur "Sauvegarder et libérer"
-- **WHEN** l'utilisateur tape "Sauvegarder et libérer" en mode écriture sur Android
-- **THEN** l'app uploade `cave.db` sur Drive, supprime le lock, repasse en SyncReadOnly, et affiche une snackbar "Cave sauvegardée et verrou libéré"
+#### Scenario: Tap sur "Sauvegarder"
+- **WHEN** l'utilisateur tape "Sauvegarder" en mode écriture sur Android
+- **THEN** l'app uploade `cave.db` sur Drive, conserve le lock, reste en SyncIdle, et affiche une snackbar "Cave sauvegardée sur Drive"
 
-#### Scenario: Échec de la libération
-- **WHEN** l'upload ou la suppression du lock échoue (perte réseau)
-- **THEN** l'app affiche un message d'erreur et conserve le mode écriture (lock toujours détenu)
+#### Scenario: Échec de la sauvegarde
+- **WHEN** l'upload échoue (perte réseau)
+- **THEN** l'app affiche un message d'erreur et reste en mode écriture (lock toujours détenu, SyncError puis retour SyncIdle)
