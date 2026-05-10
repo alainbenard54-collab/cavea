@@ -10,6 +10,7 @@ import '../stock/selection_controller.dart';
 import '../stock/widgets/bulk_action_bar.dart';
 import '../stock/widgets/consommer_batch_sheet.dart' show showConsommerBatchSheet;
 import '../stock/widgets/deplacer_batch_sheet.dart' show showDeplacerBatchSheet;
+import '../../data/daos/bouteille_dao.dart' show LocationLeaf;
 import 'location_node.dart';
 import 'location_node_tile.dart';
 import 'location_provider.dart';
