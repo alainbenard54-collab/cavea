@@ -246,7 +246,7 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 - ✅ **Bouton quitter Android (Mode 2, mode écriture)** : quand `_MobileBar` est en mode écriture, bouton "Quitter" qui déclenche `releaseManual()` puis `exit(0)`. Dialogue de confirmation avec option "Sauvegarder et quitter" / "Annuler". Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
 - ✅ **Navigation par emplacement** : onglet "Emplacements" (`Icons.shelves`, index 2) dans `_DesktopRail` et `_MobileBar`. Voir ARCHITECTURE.md section "Navigation par emplacement".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
-- **Historique des consommations** : liste bouteilles consommées, tri par date
+- ✅ **Historique des consommations** : liste bouteilles consommées, tri par date, recherche texte, BottomSheet détail + Réhabiliter, badge maturité masqué sur bouteilles consommées
 - **Export CSV** : même format que l'import
 - **Support Dropbox** : `DropboxStorageAdapter` + sélecteur fournisseur dans Settings
 - **Support Linux** : Mode 1 sans changement majeur, Mode 2 via OAuth desktop, packaging AppImage/.deb

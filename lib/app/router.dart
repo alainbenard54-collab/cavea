@@ -8,6 +8,7 @@ import '../features/bottle_detail/bottle_detail_screen.dart';
 import '../features/bottle_edit/bottle_edit_screen.dart';
 import '../features/bulk_add/bulk_add_screen.dart';
 import '../features/import_csv/import_csv_screen.dart';
+import '../features/history/history_screen.dart';
 import '../features/locations/location_tree_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/setup/setup_screen.dart';
@@ -48,11 +49,13 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
               ? 1
               : location == '/locations'
                   ? 2
-                  : location == '/import-csv'
+                  : location == '/history'
                       ? 3
-                      : location == '/settings'
+                      : location == '/import-csv'
                           ? 4
-                          : 0;
+                          : location == '/settings'
+                              ? 5
+                              : 0;
           return AppShell(selectedIndex: index, child: child);
         },
         routes: [
@@ -67,6 +70,10 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
           GoRoute(
             path: '/locations',
             builder: (context, state) => const LocationTreeScreen(),
+          ),
+          GoRoute(
+            path: '/history',
+            builder: (context, state) => const HistoryScreen(),
           ),
           GoRoute(
             path: '/import-csv',

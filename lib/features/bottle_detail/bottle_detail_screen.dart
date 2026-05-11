@@ -133,8 +133,11 @@ class _DetailView extends StatelessWidget {
             ),
           ]),
           const SizedBox(height: 10),
-          _MaturityBadge(bouteille: b),
-          const SizedBox(height: 16),
+          if (b.dateSortie == null || b.dateSortie!.isEmpty) ...[
+            _MaturityBadge(bouteille: b),
+            const SizedBox(height: 16),
+          ] else
+            const SizedBox(height: 6),
 
           _SectionHeader('Fournisseur'),
           _ReadField(label: 'Nom fournisseur', value: b.fournisseurNom ?? ''),

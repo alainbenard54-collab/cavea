@@ -53,6 +53,12 @@ const _destinations = [
     route: '/locations',
   ),
   _AppDestination(
+    label: 'Historique',
+    icon: Icons.history,
+    selectedIcon: Icons.history,
+    route: '/history',
+  ),
+  _AppDestination(
     label: 'Import CSV',
     icon: Icons.upload_file_outlined,
     selectedIcon: Icons.upload_file,
@@ -77,8 +83,8 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=3).
-  static const _writeOnlyIndices = {1, 3};
+  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=4).
+  static const _writeOnlyIndices = {1, 4};
 
   @override
   void initState() {
@@ -98,6 +104,11 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   void _onDestinationSelected(BuildContext context, int index) {
+    // Sur Android, l'index 4 (Plus) ouvre le menu complémentaire.
+    if (Platform.isAndroid && index == 4) {
+      _showMoreMenuSheet(context);
+      return;
+    }
     final syncState = ref.read(syncServiceProvider);
     if (syncState is SyncReadOnly && _writeOnlyIndices.contains(index)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +117,30 @@ class _AppShellState extends ConsumerState<AppShell> {
       return;
     }
     context.go(_destinations[index].route);
+  }
+
+  void _showMoreMenuSheet(BuildContext context) {
+    final isReadOnly = ref.read(syncServiceProvider) is SyncReadOnly;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => _MoreMenuSheet(
+        isReadOnly: isReadOnly,
+        onImportCsv: () {
+          Navigator.of(ctx).pop();
+          if (isReadOnly) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Indisponible en mode lecture seule')),
+            );
+          } else {
+            context.go('/import-csv');
+          }
+        },
+        onSettings: () {
+          Navigator.of(ctx).pop();
+          context.go('/settings');
+        },
+      ),
+    );
   }
 
   @override
@@ -544,24 +579,21 @@ class _MobileBar extends StatelessWidget {
               onTap: () => onDestinationSelected(2),
               compact: true,
             ),
-            const Spacer(),
-            // ── Navigation secondaire ──────────────────────────────────
             _NavBtn(
-              tooltip: isReadOnly
-                  ? 'Import CSV (indisponible en lecture seule)'
-                  : 'Import CSV',
-              icon: Icons.upload_file_outlined,
-              selectedIcon: Icons.upload_file,
+              tooltip: 'Historique',
+              icon: Icons.history,
+              selectedIcon: Icons.history,
               selected: selectedIndex == 3,
-              enabled: !isReadOnly,
               onTap: () => onDestinationSelected(3),
               compact: true,
             ),
+            const Spacer(),
+            // ── Menu Plus (Import CSV, Paramètres, futures fonctions) ──
             _NavBtn(
-              tooltip: 'Paramètres',
-              icon: Icons.settings_outlined,
-              selectedIcon: Icons.settings,
-              selected: selectedIndex == 4,
+              tooltip: 'Plus',
+              icon: Icons.more_horiz,
+              selectedIcon: Icons.more_horiz,
+              selected: selectedIndex >= 4,
               onTap: () => onDestinationSelected(4),
               compact: true,
             ),
@@ -906,6 +938,51 @@ class _SyncButton extends StatelessWidget {
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         textStyle: const TextStyle(fontSize: 12),
+      ),
+    );
+  }
+}
+
+// ── Menu Plus (Android) ───────────────────────────────────────────────────────
+
+class _MoreMenuSheet extends StatelessWidget {
+  final bool isReadOnly;
+  final VoidCallback onImportCsv;
+  final VoidCallback onSettings;
+
+  const _MoreMenuSheet({
+    required this.isReadOnly,
+    required this.onImportCsv,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(
+              Icons.upload_file_outlined,
+              color: isReadOnly ? cs.outline : null,
+            ),
+            title: Text(
+              'Import CSV',
+              style: TextStyle(color: isReadOnly ? cs.outline : null),
+            ),
+            trailing: isReadOnly
+                ? Icon(Icons.lock, size: 14, color: Colors.orange.shade700)
+                : null,
+            onTap: onImportCsv,
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('Paramètres'),
+            onTap: onSettings,
+          ),
+        ],
       ),
     );
   }

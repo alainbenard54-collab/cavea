@@ -326,4 +326,22 @@ class BouteilleDao {
     return (_db.select(_db.bouteilles)..where((b) => b.id.equals(id)))
         .watchSingleOrNull();
   }
+
+  Stream<List<Bouteille>> watchHistorique() {
+    return (_db.select(_db.bouteilles)
+          ..where((b) => b.dateSortie.isNotNull() & b.dateSortie.isNotValue(''))
+          ..orderBy([(b) => OrderingTerm.desc(b.dateSortie)]))
+        .watch();
+  }
+
+  Future<void> rehabiliterBouteille(String id) async {
+    await (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
+      BouteillesCompanion(
+        dateSortie: const Value(null),
+        noteDegus: const Value(null),
+        commentaireDegus: const Value(null),
+        updatedAt: Value(DateTime.now().toIso8601String()),
+      ),
+    );
+  }
 }
