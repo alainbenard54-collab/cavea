@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Sélection du fichier CSV via file picker
 L'utilisateur SHALL pouvoir choisir son fichier CSV via un file picker natif (pas de chemin codé en dur). Le fichier doit être au format UTF-8, avec une ligne d'en-tête correspondant aux colonnes du modèle `bouteilles`. Le séparateur SHALL être sélectionnable dans l'interface via un `SegmentedButton` : `;` (défaut), `,`, `Tabulation`. Le séparateur choisi est transmis au parseur avant l'import.
@@ -26,7 +26,7 @@ L'utilisateur SHALL pouvoir choisir son fichier CSV via un file picker natif (pa
 ---
 
 ### Requirement: Parsing et validation du CSV
-L'application SHALL parser le fichier CSV ligne par ligne avec le séparateur choisi par l'utilisateur. La première ligne SHALL être traitée comme en-tête. Les colonnes SHALL être identifiées par leur nom (insensible à la casse, tolérance aux espaces). Les lignes mal formées SHALL être comptées comme erreurs et ignorées sans bloquer l'import. Le BOM UTF-8 éventuel en début de fichier SHALL être retiré automatiquement.
+L'application SHALL parser le fichier CSV ligne par ligne avec le séparateur choisi par l'utilisateur. La première ligne SHALL être traitée comme en-tête. Les colonnes SHALL être identifiées par leur nom (insensible à la casse, tolérance aux espaces). Les lignes mal formées SHALL être comptées comme erreurs et ignorées sans bloquer l'import.
 
 #### Scenario: Fichier valide
 - **WHEN** le fichier contient des lignes avec toutes les colonnes attendues
@@ -38,45 +38,13 @@ L'application SHALL parser le fichier CSV ligne par ligne avec le séparateur ch
 
 ---
 
-### Requirement: Gestion des UUIDs à l'import
-L'application SHALL gérer trois cas selon la valeur de la colonne `id` dans le CSV.
-
-#### Scenario: Colonne id vide
-- **WHEN** la colonne `id` d'une ligne est vide ou absente
-- **THEN** un UUID v4 est généré pour cette bouteille et elle est insérée
-
-#### Scenario: UUID présent, absent de la base
-- **WHEN** la colonne `id` contient un UUID qui n'existe pas encore dans `bouteilles`
-- **THEN** la bouteille est insérée avec cet UUID
-
-#### Scenario: UUID présent, déjà en base, case "écraser" non cochée
-- **WHEN** la colonne `id` contient un UUID déjà présent et la case "Écraser les existants" est décochée
-- **THEN** la ligne est comptée comme ignorée (SKIP) sans modifier la base
-
-#### Scenario: UUID présent, déjà en base, case "écraser" cochée
-- **WHEN** la colonne `id` contient un UUID déjà présent et la case "Écraser les existants" est cochée
-- **THEN** la bouteille existante est mise à jour avec les valeurs du CSV (UPDATE)
-
----
-
-### Requirement: Rapport d'import
-À la fin de l'import, l'application SHALL afficher un résumé : nombre de lignes insérées, mises à jour, ignorées, et en erreur.
-
-#### Scenario: Import terminé avec succès
-- **WHEN** le parsing et l'insertion sont terminés sans erreur fatale
-- **THEN** l'interface affiche "X insérées · Y mises à jour · Z ignorées · W erreurs"
-
-#### Scenario: Fichier illisible ou format invalide
-- **WHEN** le fichier sélectionné ne peut pas être parsé (encodage, format)
-- **THEN** un message d'erreur clair est affiché et aucune donnée n'est modifiée
-
----
+## ADDED Requirements
 
 ### Requirement: Préservation de updated_at à l'import
 Lors d'un import, si la colonne `updated_at` est présente dans le fichier CSV et contient une valeur ISO8601 valide, l'application SHALL utiliser cette valeur (et non `DateTime.now()`). Si la colonne est absente, vide, ou contient une valeur non-ISO8601, l'application SHALL générer `DateTime.now()` comme valeur par défaut.
 
 #### Scenario: updated_at valide dans le CSV
-- **WHEN** une ligne contient `updated_at` avec une valeur ISO8601 valide
+- **WHEN** une ligne contient `updated_at: "2026-04-15T10:30:00.000Z"` (valeur ISO8601 valide)
 - **THEN** la bouteille insérée ou mise à jour conserve cette valeur de `updated_at`
 
 #### Scenario: updated_at absent du CSV
@@ -84,5 +52,5 @@ Lors d'un import, si la colonne `updated_at` est présente dans le fichier CSV e
 - **THEN** `updated_at` est initialisé à `DateTime.now()` pour chaque bouteille importée
 
 #### Scenario: updated_at invalide dans le CSV
-- **WHEN** une ligne contient `updated_at` avec une valeur non-ISO8601
-- **THEN** `updated_at` est initialisé à `DateTime.now()` (comportement silencieux, pas d'erreur)
+- **WHEN** une ligne contient `updated_at: "pas-une-date"` (valeur non-ISO8601)
+- **THEN** `updated_at` est initialisé à `DateTime.now()` (pas d'erreur, comportement silencieux)
