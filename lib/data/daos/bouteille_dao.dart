@@ -334,6 +334,18 @@ class BouteilleDao {
         .watch();
   }
 
+  Future<List<Bouteille>> getBouteillesForExport({required bool stockOnly}) {
+    final query = _db.select(_db.bouteilles)
+      ..orderBy([
+        (b) => OrderingTerm.asc(b.domaine),
+        (b) => OrderingTerm.asc(b.millesime),
+      ]);
+    if (stockOnly) {
+      query.where((b) => b.dateSortie.isNull() | b.dateSortie.equals(''));
+    }
+    return query.get();
+  }
+
   Future<void> rehabiliterBouteille(String id) async {
     await (_db.update(_db.bouteilles)..where((b) => b.id.equals(id))).write(
       BouteillesCompanion(

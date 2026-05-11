@@ -263,7 +263,7 @@ final useRail = isDesktop(context) && !Platform.isAndroid;
 
 Les vues elles-mêmes sont les mêmes — seule la navigation change.
 
-**Destinations** (index 0→4) : Stock, Ajouter, Emplacements, Import CSV, Paramètres. `_writeOnlyIndices = {1, 3}` (Ajouter et Import CSV grisés en SyncReadOnly). Emplacements (index 2) est toujours accessible.
+**Destinations** (index 0→5) : Stock, Ajouter, Emplacements, Historique, Données, Paramètres. `_writeOnlyIndices = {1}` (Ajouter uniquement). Emplacements (2), Historique (3) et Données (4) sont toujours accessibles même en SyncReadOnly.
 
 ---
 
@@ -317,13 +317,15 @@ Voir `.env.example` à la racine du projet. Variables utilisées en Mode 1 : `ST
 
 ---
 
-## Import CSV
+## Import / Export CSV
 
-### Accès au fichier
+Onglet "Données" (index 4, route `/data`), accessible en SyncReadOnly. Deux sections dans `ImportExportScreen` : Import (désactivée en SyncReadOnly) et Export (toujours active).
 
-L'utilisateur choisit son fichier via un **file picker** (aucun chemin codé en dur). Format attendu : CSV UTF-8, séparateur `;`, colonnes identiques à `cave_clean.csv`.
+### Import CSV
 
-### Comportement par ligne
+L'utilisateur choisit son fichier via un **file picker**. Format attendu : CSV UTF-8, séparateur configurable (`;` par défaut, `,`, tabulation). Le BOM UTF-8 éventuel est retiré automatiquement.
+
+**Comportement par ligne :**
 
 | Cas | Action |
 |---|---|
@@ -332,9 +334,24 @@ L'utilisateur choisit son fichier via un **file picker** (aucun chemin codé en 
 | `id` présent, déjà en base, case "écraser" cochée | UPDATE |
 | `id` présent, déjà en base, case "écraser" non cochée | SKIP |
 
-### Rapport d'import
+Colonne `updated_at` : conservée si valeur ISO8601 valide, sinon `DateTime.now()`.
 
-Afficher à la fin : X insérées · Y mises à jour · Z ignorées.
+Rapport d'import : X insérées · Y mises à jour · Z ignorées · W erreurs.
+
+### Export CSV
+
+Génère un CSV UTF-8 avec BOM (compatible Excel/LibreOffice). Tous les champs de la table `bouteilles` sont exportés, y compris `updated_at` — ce qui permet un round-trip fidèle (export → import = restauration exacte).
+
+**Options :**
+- **Scope** : Stock uniquement (`date_sortie` null) ou Tout (stock + consommées)
+- **Séparateur** : `;` (défaut), `,`, tabulation
+
+**Destinations :**
+- Windows : `FilePicker.platform.saveFile()` → `dart:io File.writeAsBytes()`
+- Android "Enregistrer" : `FilePicker.platform.saveFile(bytes: ...)` — le picker écrit lui-même le fichier (Android Storage Access Framework)
+- Android "Partager…" : fichier temporaire dans `getTemporaryDirectory()` → `SharePlus.instance.share(ShareParams(files: [...]))`
+
+**Fichiers :** `lib/features/export_csv/csv_export_service.dart`, `export_csv_screen.dart`, `import_export_screen.dart`.
 
 ---
 
@@ -433,7 +450,7 @@ Fichiers : `lib/features/locations/` (4 fichiers). DAO : `watchLocationStats()`,
 
 ## Quitter Android en mode écriture (V1)
 
-Sur Android en Mode 2 (partagé), l'OS tue le process quelques ms après `AppLifecycleState.paused`, avant la fin des requêtes HTTP. La libération du lock à la fermeture est donc non fiable (voir section "Android — libération du lock à la fermeture" dans CLAUDE.md).
+Sur Android en Mode 2, le verrou n'est **jamais libéré automatiquement** sur les événements de cycle de vie (`paused`, `resumed`). Deux raisons : l'OS tue le process avant la fin des requêtes HTTP, et des sous-activités (FilePicker, share sheet) déclenchent aussi `paused`/`resumed` — libérer le lock dans ces cas causait des faux positifs "Cave utilisée par un autre appareil". Voir section dédiée dans CLAUDE.md.
 
 **Feature V1** : quand `_MobileBar` affiche le bouton "Sauvegarder et libérer" (`!isReadOnly && isAndroid && syncService.isActive`), afficher également un bouton **Quitter** (icône `exit_to_app`) qui :
 1. Déclenche `syncService.releaseManual()` (upload Drive + suppression lock)

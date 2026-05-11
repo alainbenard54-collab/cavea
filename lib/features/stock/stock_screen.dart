@@ -520,7 +520,7 @@ class _EmptyState extends StatelessWidget {
             FilledButton.icon(
               icon: const Icon(Icons.upload_file),
               label: const Text('Importer un CSV'),
-              onPressed: () => context.go('/import-csv'),
+              onPressed: () => context.go('/data'),
             ),
           ],
         ],

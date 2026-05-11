@@ -59,10 +59,10 @@ const _destinations = [
     route: '/history',
   ),
   _AppDestination(
-    label: 'Import CSV',
-    icon: Icons.upload_file_outlined,
-    selectedIcon: Icons.upload_file,
-    route: '/import-csv',
+    label: 'Données',
+    icon: Icons.import_export,
+    selectedIcon: Icons.import_export,
+    route: '/data',
   ),
   _AppDestination(
     label: 'Paramètres',
@@ -83,8 +83,9 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  // Indices des destinations réservées à l'écriture (Ajouter=1, Import CSV=4).
-  static const _writeOnlyIndices = {1, 4};
+  // Indices des destinations réservées à l'écriture (Ajouter=1).
+  // L'onglet Données (4) est accessible en lecture seule — seul le bouton Import interne est bloqué.
+  static const _writeOnlyIndices = {1};
 
   @override
   void initState() {
@@ -120,20 +121,12 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   void _showMoreMenuSheet(BuildContext context) {
-    final isReadOnly = ref.read(syncServiceProvider) is SyncReadOnly;
     showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => _MoreMenuSheet(
-        isReadOnly: isReadOnly,
         onImportCsv: () {
           Navigator.of(ctx).pop();
-          if (isReadOnly) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Indisponible en mode lecture seule')),
-            );
-          } else {
-            context.go('/import-csv');
-          }
+          context.go('/data');
         },
         onSettings: () {
           Navigator.of(ctx).pop();
@@ -946,35 +939,23 @@ class _SyncButton extends StatelessWidget {
 // ── Menu Plus (Android) ───────────────────────────────────────────────────────
 
 class _MoreMenuSheet extends StatelessWidget {
-  final bool isReadOnly;
   final VoidCallback onImportCsv;
   final VoidCallback onSettings;
 
   const _MoreMenuSheet({
-    required this.isReadOnly,
     required this.onImportCsv,
     required this.onSettings,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: Icon(
-              Icons.upload_file_outlined,
-              color: isReadOnly ? cs.outline : null,
-            ),
-            title: Text(
-              'Import CSV',
-              style: TextStyle(color: isReadOnly ? cs.outline : null),
-            ),
-            trailing: isReadOnly
-                ? Icon(Icons.lock, size: 14, color: Colors.orange.shade700)
-                : null,
+            leading: const Icon(Icons.import_export),
+            title: const Text('Données'),
             onTap: onImportCsv,
           ),
           ListTile(

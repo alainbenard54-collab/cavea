@@ -26,14 +26,18 @@ class ParseResult {
   const ParseResult({required this.companions, required this.errors});
 }
 
-ParseResult parseCsv(String content) {
+ParseResult parseCsv(String content, {String separator = ';'}) {
   // Normalise les fins de ligne Windows/Unix
   final lines = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
   if (lines.isEmpty) return const ParseResult(companions: [], errors: []);
 
-  final headers = lines.first
+  // Retire le BOM UTF-8 éventuel
+  final firstLine = lines.first.startsWith('﻿')
+      ? lines.first.substring(1)
+      : lines.first;
+  final headers = firstLine
       .trim()
-      .split(';')
+      .split(separator)
       .map((h) => h.trim().toLowerCase())
       .toList();
 
@@ -45,7 +49,7 @@ ParseResult parseCsv(String content) {
     if (line.isEmpty) continue;
 
     try {
-      final values = _splitLine(line);
+      final values = _splitLine(line, separator);
       final row = <String, String>{};
       for (var j = 0; j < headers.length && j < values.length; j++) {
         row[headers[j]] = values[j].trim();
@@ -73,22 +77,31 @@ ParseResult parseCsv(String content) {
   return ParseResult(companions: companions, errors: errors);
 }
 
-// Respecte les champs entre guillemets contenant des ";"
-List<String> _splitLine(String line) {
+// Respecte les champs entre guillemets contenant le séparateur
+List<String> _splitLine(String line, String separator) {
   final result = <String>[];
   final current = StringBuffer();
   var inQuotes = false;
+  var i = 0;
 
-  for (var i = 0; i < line.length; i++) {
+  while (i < line.length) {
     final char = line[i];
     if (char == '"') {
+      if (inQuotes && i + 1 < line.length && line[i + 1] == '"') {
+        current.write('"');
+        i += 2;
+        continue;
+      }
       inQuotes = !inQuotes;
-    } else if (char == ';' && !inQuotes) {
+    } else if (!inQuotes && line.startsWith(separator, i)) {
       result.add(current.toString());
       current.clear();
+      i += separator.length;
+      continue;
     } else {
       current.write(char);
     }
+    i++;
   }
   result.add(current.toString());
   return result;
@@ -132,10 +145,15 @@ List<String> _splitLine(String line) {
       fournisseurNom: Value(_nullIfEmpty(row['fournisseur_nom'])),
       fournisseurInfos: Value(_nullIfEmpty(row['fournisseur_infos'])),
       producteur: Value(_nullIfEmpty(row['producteur'])),
-      updatedAt: Value(DateTime.now().toIso8601String()),
+      updatedAt: Value(_parseUpdatedAt(row['updated_at'])),
     ),
     null
   );
+}
+
+String _parseUpdatedAt(String? value) {
+  if (value == null || value.isEmpty) return DateTime.now().toIso8601String();
+  return DateTime.tryParse(value)?.toIso8601String() ?? DateTime.now().toIso8601String();
 }
 
 String? _nullIfEmpty(String? value) =>

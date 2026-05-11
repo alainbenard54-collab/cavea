@@ -37,8 +37,6 @@ class AppWrapper extends StatefulWidget {
 class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   AppDatabase? _db;
   String? _pendingSnackbarMessage;
-  bool _releasedOnPause = false;
-
   @override
   void initState() {
     super.initState();
@@ -74,25 +72,15 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (Platform.isAndroid) {
-      // Sur Android, 'detached' arrive trop tard (OS tue le process avant la fin
-      // des requêtes HTTP). On release sur 'paused' où l'app a encore du temps.
-      // Sur 'resumed', on re-pose le lock sans re-télécharger.
-      if (state == AppLifecycleState.paused) {
-        final svc = activeSyncService;
-        if (svc != null && svc.isWriteMode) {
-          _releasedOnPause = true;
-          unawaited(svc.releaseIfNeeded());
-        }
-      } else if (state == AppLifecycleState.resumed && _releasedOnPause) {
-        _releasedOnPause = false;
-        unawaited(activeSyncService?.reacquireLock() ?? Future.value());
-      }
-    } else if (state == AppLifecycleState.detached) {
+    if (!Platform.isAndroid && state == AppLifecycleState.detached) {
       // Desktop : didRequestAppExit gère la fermeture propre ;
       // detached est un filet de sécurité si l'app est tuée autrement.
       activeSyncService?.releaseIfNeeded();
     }
+    // Android : le verrou n'est jamais libéré sur paused/resumed car l'app peut
+    // passer en background pour une sous-activité (FilePicker, partage…).
+    // Le bouton "Quitter" est le seul chemin de sortie propre sur Android.
+    // Si l'OS tue le process, le crash recovery au prochain démarrage gère le lock.
   }
 
   // ── Callbacks drift close/reopen ─────────────────────────────────────────

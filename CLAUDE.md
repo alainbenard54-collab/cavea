@@ -152,7 +152,7 @@ Fichiers : `lib/features/stock/selection_controller.dart`, `lib/features/stock/w
 
 ## navigation-emplacement — spec implémentée (V1 ✅)
 
-Onglet "Emplacements" (`Icons.shelves`, index 2) ajouté à `_DesktopRail` (Windows) et `_MobileBar` (Android). `_writeOnlyIndices = {1, 3}` (Ajouter=1, Import CSV=3 — Emplacements=2 toujours accessible même en SyncReadOnly).
+Onglet "Emplacements" (`Icons.shelves`, index 2) ajouté à `_DesktopRail` (Windows) et `_MobileBar` (Android). `_writeOnlyIndices = {1}` (Ajouter=1 uniquement — Emplacements=2, Historique=3, Données=4 toujours accessibles même en SyncReadOnly).
 
 **Architecture** : `LocationTreeScreen` est un seul `ConsumerStatefulWidget` qui gère toute la navigation en interne (pas de `Navigator.push`). La NavigationRail/BottomBar reste donc toujours visible à tous les niveaux de l'arbre.
 
@@ -179,7 +179,7 @@ Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre
 | Élément | Comportement |
 |---|---|
 | Navigation "Ajouter" | Grisée — tap bloqué avec snackbar "Indisponible en mode lecture seule" |
-| Navigation "Import CSV" | Grisée — tap bloqué avec snackbar |
+| Navigation "Données" | Accessible — seul le bouton "Importer" interne est grisé |
 | BottomSheet bouteille | Affiche uniquement "Mode lecture seule" + bouton Fermer |
 | Bouton "Synchroniser" | Caché (déjà absent quand `!isWriteMode`) |
 | Multi-sélection (appui long) | Désactivé — `onLongPress: null` passé aux widgets |
@@ -202,9 +202,15 @@ Détection dans `stock_screen.dart` : `Platform.isAndroid && MediaQuery.of(conte
 
 ## Android — libération du lock à la fermeture
 
-L'OS Android tue le process quelques ms après `AppLifecycleState.paused`, avant que les requêtes HTTP (upload + delete lock) aient le temps de terminer. Le lock reste donc toujours présent sur Drive après une fermeture Android.
+Le verrou n'est **jamais libéré sur les événements de cycle de vie Android** (`paused`, `resumed`, `detached`). Raisons :
 
-Comportement retenu : au prochain démarrage, si le lock appartient à notre appareil, on résout silencieusement (upload local → lock conservé) sans dialog "Session interrompue". Le dialog crash recovery reste affiché uniquement sur PC (Windows), où la fermeture est interceptée via `didRequestAppExit()` et les requêtes ont le temps de terminer.
+1. L'OS tue le process quelques ms après `paused` — les requêtes HTTP (upload + delete lock) n'ont pas le temps de terminer.
+2. Des sous-activités système (FilePicker, feuille de partage, basculement d'app) envoient aussi `paused` puis `resumed` : libérer/reprendre le lock à ces moments créait un yoyo inutile et des faux positifs "Cave utilisée par un autre appareil".
+
+**Comportement retenu :**
+- Le lock reste sur Drive après toute fermeture Android (bouton Home, task switcher, kill OS).
+- **Bouton "Quitter"** dans `_MobileBar` (mode écriture) = seul chemin de sortie propre sur Android : upload + unlock + `exit(0)`.
+- Au prochain démarrage, si le lock appartient à notre appareil, résolution silencieuse (upload local → lock conservé) sans dialog "Session interrompue". Le dialog crash recovery reste affiché uniquement sur PC (Windows), où `didRequestAppExit()` intercepte la fermeture et les requêtes ont le temps de terminer.
 
 ---
 
@@ -247,7 +253,7 @@ Comportement retenu : au prochain démarrage, si le lock appartient à notre app
 - ✅ **Navigation par emplacement** : onglet "Emplacements" (`Icons.shelves`, index 2) dans `_DesktopRail` et `_MobileBar`. Voir ARCHITECTURE.md section "Navigation par emplacement".
 - **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
 - ✅ **Historique des consommations** : liste bouteilles consommées, tri par date, recherche texte, BottomSheet détail + Réhabiliter, badge maturité masqué sur bouteilles consommées
-- **Export CSV** : même format que l'import
+- ✅ **Export CSV** : onglet "Données" (index 4, accessible en SyncReadOnly) — export CSV UTF-8 BOM, tous les champs dont `updated_at`, séparateur configurable (`;` / `,` / tabulation), scope stock seul ou tout. Windows : FilePicker `saveFile()`. Android : FilePicker save + `share_plus` partage. Import mis à jour : séparateur configurable, `updated_at` préservé si présent. Fix Android : le verrou n'est plus libéré sur `AppLifecycleState.paused` (évitait le yoyo lock/unlock lors de FilePicker ou basculement d'app).
 - **Support Dropbox** : `DropboxStorageAdapter` + sélecteur fournisseur dans Settings
 - **Support Linux** : Mode 1 sans changement majeur, Mode 2 via OAuth desktop, packaging AppImage/.deb
 - **Mise à jour Flutter** vers la version stable courante au démarrage V1

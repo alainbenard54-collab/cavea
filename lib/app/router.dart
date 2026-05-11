@@ -7,7 +7,7 @@ import '../core/config_service.dart';
 import '../features/bottle_detail/bottle_detail_screen.dart';
 import '../features/bottle_edit/bottle_edit_screen.dart';
 import '../features/bulk_add/bulk_add_screen.dart';
-import '../features/import_csv/import_csv_screen.dart';
+import '../features/export_csv/import_export_screen.dart';
 import '../features/history/history_screen.dart';
 import '../features/locations/location_tree_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -51,7 +51,7 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
                   ? 2
                   : location == '/history'
                       ? 3
-                      : location == '/import-csv'
+                      : location == '/data'
                           ? 4
                           : location == '/settings'
                               ? 5
@@ -76,8 +76,8 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
             builder: (context, state) => const HistoryScreen(),
           ),
           GoRoute(
-            path: '/import-csv',
-            builder: (context, state) => const ImportCsvScreen(),
+            path: '/data',
+            builder: (context, state) => const ImportExportScreen(),
           ),
           GoRoute(
             path: '/settings',
