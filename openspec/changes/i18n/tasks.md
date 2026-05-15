@@ -27,7 +27,7 @@
 - [x] 4.3 Remplacer les formats date hardcodés dans `lib/features/history/` par `formatDate()`
 - [x] 4.4 Remplacer les formats date hardcodés dans `lib/features/bottle_detail/` et `bottle_edit/` par `formatDate()`
 - [x] 4.5 Remplacer les formats nombre/prix hardcodés (toStringAsFixed, etc.) par `formatNumber()` / `formatCurrency()` dans tous les écrans
-- [ ] 4.6 Tester : basculer fr↔en → dates et prix s'affichent avec le bon séparateur décimal
+- [x] 4.6 Tester : basculer fr↔en → dates et prix s'affichent avec le bon séparateur décimal
 
 ## 5. Mapping couleurs builtin (PC + Android)
 
@@ -36,7 +36,7 @@
 - [x] 5.3 Remplacer l'affichage brut de `couleur` dans `lib/features/bottle_detail/`, `bottle_edit/`, `history/`, `locations/`
 - [x] 5.4 Remplacer les libellés du dropdown couleur dans `bulk_add/` et `bottle_edit/` par `displayCouleur()` (valeur soumise = clé DB française)
 - [x] 5.5 Remplacer les chips de filtre couleur dans `lib/features/stock/` par `displayCouleur()`
-- [ ] 5.6 Tester : locale en → les couleurs affichent "Red", "White", etc. ; les valeurs en base restent en français
+- [x] 5.6 Tester : locale en → les couleurs affichent "Red", "White", etc. ; les valeurs en base restent en français
 
 ## 6. Extraction des strings — écran Stock et filtres (PC + Android)
 
@@ -71,19 +71,29 @@
 - [x] 10.2 Modifier la signature de `CsvExportService.buildCsv()` pour accepter `AppLocalizations l10n`
 - [x] 10.3 Remplacer les headers hardcodés français dans `buildCsv()` par les clés `l10n.csvHeader*`
 - [x] 10.4 Passer `context.l10n` depuis `ExportCsvScreen` à `buildCsv()`
-- [ ] 10.5 Tester : exporter en fr → headers en français ; basculer en anglais et exporter → headers en anglais
+- [x] 10.5 Tester : exporter en fr → headers en français ; basculer en anglais et exporter → headers en anglais
 
 ## 11. Politique de confidentialité bilingue (PC + Android)
 
-- [ ] 11.1 Créer `docs/privacy/fr.md` (politique de confidentialité en français)
-- [ ] 11.2 Créer `docs/privacy/en.md` (politique de confidentialité en anglais)
-- [ ] 11.3 Modifier le lien dans `AboutDialog` : URL dynamique `docs/privacy/{locale.languageCode}.md` sur GitHub, fallback `fr` si langue non couverte
+- [x] 11.1 Créer `docs/privacy/fr.html` (politique de confidentialité en français)
+- [x] 11.2 Créer `docs/privacy/en.html` (politique de confidentialité en anglais)
+- [x] 11.3 Modifier le lien dans `AboutDialog` : URL dynamique `privacy/{fr|en}.html` sur GitHub Pages, `docs/privacy.html` redirige vers `fr.html`
 
 ## 12. Tests manuels de bout en bout (PC + Android)
 
-- [ ] 12.1 Tester tous les écrans en français : aucun string manquant, formats date/nombre corrects
-- [ ] 12.2 Tester tous les écrans en anglais : aucun string manquant, formats date/nombre corrects
-- [ ] 12.3 Tester le basculement fr↔en en cours de session : rebuild immédiat, pas de crash
-- [ ] 12.4 Tester la persistance de la langue après redémarrage (fr, en, automatique)
-- [ ] 12.5 Tester l'export CSV en fr et en anglais : vérifier les en-têtes de colonnes
-- [ ] 12.6 Tester sur Android : mêmes vérifications qu'en 12.1 à 12.5
+- [x] 12.1 Tester tous les écrans en français : aucun string manquant, formats date/nombre corrects
+- [x] 12.2 Tester tous les écrans en anglais : aucun string manquant, formats date/nombre corrects
+- [x] 12.3 Tester le basculement fr↔en en cours de session : rebuild immédiat, pas de crash
+- [x] 12.4 Tester la persistance de la langue après redémarrage (fr, en, automatique)
+- [x] 12.5 Tester l'export CSV en fr et en anglais : vérifier les en-têtes de colonnes
+- [x] 12.6 Tester sur Android : mêmes vérifications qu'en 12.1 à 12.5
+
+## 13. Corrections post-tests (hors spec initiale)
+
+- [x] 13.1 `formatNumberForEdit()` dans `locale_formatting.dart` — prix d'achat en édition affichait `12.0` au lieu de `12,00` en français (pattern `0.00` sans séparateur de milliers)
+- [x] 13.2 `sync_status_indicator.dart` — tooltips sync codés en dur en français (`const Tooltip`) → traduits via `l10n`
+- [x] 13.3 Clés opaques dans `sync_service.dart` (`syncVerrouPose`, `syncModificationsAbandonnees`) → traduits dans `main.dart` via `_scaffoldMessengerKey.currentContext`
+- [x] 13.4 `main.dart` — regression snackbar : `AppLocalizations.of(context)` depuis `_AppWrapperState` (ancêtre de MaterialApp) → corrigé avec `_scaffoldMessengerKey.currentContext`
+- [x] 13.5 `acquireLock()` — `pendingWriteOnboarding` non positionné → dialog onboarding absent lors de "Prendre la main"
+- [x] 13.6 Dialog onboarding Android — déplacé de `initState.postFrameCallback` vers `build()` (_onboardingCheckDone) pour éviter race avec `endOfFrame`
+- [x] 13.7 Settings — SwitchListTile (ON = avertissement actif) remplace le bouton Reset ; `_DriveActiveTile` converti en `ConsumerStatefulWidget`
