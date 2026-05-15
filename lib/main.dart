@@ -131,7 +131,9 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
       final msgKey = _pendingSnackbarMessage!;
       _pendingSnackbarMessage = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final l10n = AppLocalizations.of(context);
+        final messengerCtx = _scaffoldMessengerKey.currentContext;
+        if (messengerCtx == null) return;
+        final l10n = AppLocalizations.of(messengerCtx);
         final text = switch (msgKey) {
           'syncVerrouPose' => l10n.syncVerrouPose,
           'syncModificationsAbandonnees' => l10n.syncModificationsAbandonnees,
