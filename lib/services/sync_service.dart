@@ -359,6 +359,7 @@ class SyncService extends StateNotifier<SyncState> {
       }
       await adapter.lock();
       _lockHeldByUs = true;
+      if (Platform.isAndroid) pendingWriteOnboarding = true;
       final remoteExists = await adapter.remoteDbExists();
       if (remoteExists) {
         // Télécharge la version Drive (peut avoir évolué depuis le démarrage en lecture seule).
