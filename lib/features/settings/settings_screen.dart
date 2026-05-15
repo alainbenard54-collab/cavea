@@ -69,7 +69,7 @@ class SettingsScreen extends ConsumerWidget {
           if (!isMode2)
             _DriveActivationTile(ref: ref)
           else
-            _DriveActiveTile(ref: ref),
+            const _DriveActiveTile(),
           const Divider(height: 32),
 
           // ── À propos ──────────────────────────────────────────────────────
@@ -615,12 +615,29 @@ class _DriveActivationTile extends ConsumerWidget {
 
 // ── Mode 2 actif ──────────────────────────────────────────────────────────────
 
-class _DriveActiveTile extends ConsumerWidget {
-  final WidgetRef ref;
-  const _DriveActiveTile({required this.ref});
+class _DriveActiveTile extends ConsumerStatefulWidget {
+  const _DriveActiveTile();
 
   @override
-  Widget build(BuildContext context, WidgetRef widgetRef) {
+  ConsumerState<_DriveActiveTile> createState() => _DriveActiveTileState();
+}
+
+class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
+  bool _warningEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWarningState();
+  }
+
+  Future<void> _loadWarningState() async {
+    final seen = await configService.getAndroidWriteWarningSeen();
+    if (mounted) setState(() => _warningEnabled = !seen);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Column(
       children: [
@@ -631,31 +648,29 @@ class _DriveActiveTile extends ConsumerWidget {
           trailing: Platform.isAndroid
               ? null
               : OutlinedButton(
-                  onPressed: () => _deactivateDrive(context, widgetRef),
+                  onPressed: () => _deactivateDrive(context),
                   child: Text(l10n.settingsRevenirLocal),
                 ),
         ),
         if (Platform.isAndroid)
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined),
+          SwitchListTile(
+            secondary: const Icon(Icons.notifications_outlined),
             title: Text(l10n.settingsResetWriteWarning),
-            subtitle: Text(l10n.settingsResetWriteWarningSubtitle),
-            trailing: OutlinedButton(
-              onPressed: () async {
+            value: _warningEnabled,
+            onChanged: (v) async {
+              setState(() => _warningEnabled = v);
+              if (v) {
                 await configService.resetAndroidWriteWarningSeen();
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.settingsResetWriteWarningDone)),
-                );
-              },
-              child: Text(l10n.actionReinitialiser),
-            ),
+              } else {
+                await configService.setAndroidWriteWarningSeen();
+              }
+            },
           ),
       ],
     );
   }
 
-  Future<void> _deactivateDrive(BuildContext context, WidgetRef ref) async {
+  Future<void> _deactivateDrive(BuildContext context) async {
     final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,

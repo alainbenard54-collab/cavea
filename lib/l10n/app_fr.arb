@@ -140,8 +140,6 @@
   "settingsModeSyncCurrent": "Mode actuel : synchronisation activée",
   "settingsRevenirLocal": "Revenir en local",
   "settingsResetWriteWarning": "Avertissement mode écriture Android",
-  "settingsResetWriteWarningSubtitle": "Réafficher l'avertissement \"Utilisez le bouton Quitter\"",
-  "settingsResetWriteWarningDone": "Avertissement réinitialisé",
   "settingsRestartTitle": "Redémarrage requis",
   "settingsRestartBody": "Le dossier de la cave a été modifié.\n\nL'application doit redémarrer pour utiliser le nouveau chemin.",
   "settingsQuitApp": "Quitter l'application",

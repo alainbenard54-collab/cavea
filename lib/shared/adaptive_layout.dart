@@ -85,19 +85,16 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   static const _writeOnlyIndices = {1};
+  bool _onboardingCheckDone = false;
 
-  @override
-  void initState() {
-    super.initState();
-    if (Platform.isAndroid) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!pendingWriteOnboarding || !mounted) return;
-        pendingWriteOnboarding = false;
-        final seen = await configService.getAndroidWriteWarningSeen();
-        if (seen || !mounted) return;
-        showDialog<void>(context: context, builder: (_) => const _WriteOnboardingDialog());
-      });
-    }
+  void _triggerWriteOnboarding(BuildContext context) {
+    pendingWriteOnboarding = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final seen = await configService.getAndroidWriteWarningSeen();
+      if (seen || !mounted) return;
+      showDialog<void>(context: context, builder: (_) => const _WriteOnboardingDialog());
+    });
   }
 
   void _onDestinationSelected(BuildContext context, int index) {
@@ -148,15 +145,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             );
           }
           if (Platform.isAndroid && pendingWriteOnboarding) {
-            pendingWriteOnboarding = false;
-            configService.getAndroidWriteWarningSeen().then((seen) {
-              if (!seen && context.mounted) {
-                showDialog<void>(
-                  context: context,
-                  builder: (_) => const _WriteOnboardingDialog(),
-                );
-              }
-            });
+            _triggerWriteOnboarding(context);
           }
         case SyncReadOnly():
           if (previous is SyncSyncing) {
@@ -185,6 +174,13 @@ class _AppShellState extends ConsumerState<AppShell> {
           break;
       }
     });
+
+    // Déclenchement onboarding écriture Android sur le premier build de cette
+    // instance — couvre le cas ProviderScope recréé après download Drive.
+    if (Platform.isAndroid && !_onboardingCheckDone) {
+      _onboardingCheckDone = true;
+      if (pendingWriteOnboarding) _triggerWriteOnboarding(context);
+    }
 
     final isBlocking = syncState is SyncSyncing ||
         syncState is SyncStarting ||
