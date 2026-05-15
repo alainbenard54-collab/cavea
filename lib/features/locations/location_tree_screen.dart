@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import '../bottle_actions/bottle_actions_sheet.dart';
 import '../stock/bouteille_list_tile.dart';
@@ -114,7 +115,7 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
         ),
         body: leavesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Erreur : $e')),
+          error: (e, _) => Center(child: Text(context.l10n.errorGeneric(e.toString()))),
           data: (leaves) => _buildContent(leaves),
         ),
       ),
@@ -136,11 +137,12 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
       return GestureDetector(onTap: onTap, child: text);
     }
 
+    final emplacementsLabel = context.l10n.navEmplacements;
     final items = <Widget>[];
     if (_path.isEmpty) {
-      items.add(crumb('Emplacements', null));
+      items.add(crumb(emplacementsLabel, null));
     } else {
-      items.add(crumb('Emplacements', _navigateToRoot));
+      items.add(crumb(emplacementsLabel, _navigateToRoot));
       for (int i = 0; i < _path.length; i++) {
         items.add(sep);
         final isLast = i == _path.length - 1;
@@ -179,7 +181,7 @@ class _LocationTreeScreenState extends ConsumerState<LocationTreeScreen> {
     final directNullPrixCount = currentNode?.directNullPrixCount ?? 0;
 
     if (children.isEmpty && directCount == 0) {
-      return const Center(child: Text('Aucune bouteille.'));
+      return Center(child: Text(context.l10n.locationsEmpty));
     }
 
     return ListView(
@@ -225,8 +227,8 @@ class _DirectBottlesTile extends StatelessWidget {
         Icons.wine_bar_outlined,
         color: Theme.of(context).colorScheme.secondary,
       ),
-      title: const Text('Directement dans cet emplacement'),
-      subtitle: Text(locationStatsLabel(count, sumPrix, nullPrixCount)),
+      title: Text(context.l10n.locationsDirect),
+      subtitle: Text(locationStatsLabel(context, count, sumPrix, nullPrixCount)),
       onTap: onTap,
     );
   }
@@ -250,12 +252,10 @@ class _BottleListBody extends ConsumerWidget {
         Expanded(
           child: bottlesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Erreur : $e')),
+            error: (e, _) => Center(child: Text(context.l10n.errorGeneric(e.toString()))),
             data: (bottles) {
               if (bottles.isEmpty) {
-                return const Center(
-                  child: Text('Aucune bouteille dans cet emplacement.'),
-                );
+                return Center(child: Text(context.l10n.locationsEmpty));
               }
               return ListView.separated(
                 itemCount: bottles.length,

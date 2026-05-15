@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/locale_formatting.dart';
 import '../../data/database.dart';
+import '../../l10n/l10n.dart';
 import 'history_actions_sheet.dart';
 import 'history_provider.dart';
 
@@ -25,13 +27,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final historyAsync = ref.watch(historyProvider);
     final query = ref.watch(historySearchProvider);
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Historique'),
+        title: Text(l10n.historyTitle),
       ),
       body: Column(
         children: [
@@ -39,7 +42,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: SearchBar(
               controller: _searchController,
-              hintText: 'Rechercher domaine ou appellation…',
+              hintText: l10n.historySearchHint,
               leading: const Icon(Icons.search),
               trailing: [
                 if (query.isNotEmpty)
@@ -58,7 +61,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           Expanded(
             child: historyAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erreur : $e')),
+              error: (e, _) => Center(child: Text(l10n.errorGeneric(e.toString()))),
               data: (bottles) {
                 final filtered = query.isEmpty
                     ? bottles
@@ -72,8 +75,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   return Center(
                     child: Text(
                       query.isEmpty
-                          ? 'Aucune bouteille consommée.'
-                          : 'Aucun résultat pour "$query".',
+                          ? l10n.historyEmpty
+                          : l10n.historyEmptySearch(query),
                     ),
                   );
                 }
@@ -108,17 +111,8 @@ class _HistoryTile extends StatelessWidget {
       if (b.millesime > 0) b.millesime.toString(),
     ];
 
-    String? trailingText;
-    final dateSortie = b.dateSortie;
-    if (dateSortie != null && dateSortie.isNotEmpty) {
-      try {
-        final d = DateTime.parse(dateSortie);
-        trailingText =
-            '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-      } catch (_) {
-        trailingText = dateSortie;
-      }
-    }
+    final dateStr = formatDateFromString(b.dateSortie, context);
+    final trailingText = dateStr.isNotEmpty ? dateStr : null;
 
     return ListTile(
       leading: Icon(

@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/l10n.dart';
 import '../../../services/sync_service.dart';
 
 class BulkActionBar extends ConsumerWidget {
@@ -21,6 +22,7 @@ class BulkActionBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
 
@@ -36,7 +38,7 @@ class BulkActionBar extends ConsumerWidget {
               if (isReadOnly)
                 Expanded(
                   child: Text(
-                    'Mode lecture seule',
+                    l10n.bulkReadOnly,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.outline,
                       fontStyle: FontStyle.italic,
@@ -46,7 +48,7 @@ class BulkActionBar extends ConsumerWidget {
               else
                 Expanded(
                   child: Text(
-                    '$count bouteille${count > 1 ? 's' : ''} sélectionnée${count > 1 ? 's' : ''}',
+                    l10n.bulkSelectionCount(count),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -54,19 +56,19 @@ class BulkActionBar extends ConsumerWidget {
                 ),
               TextButton.icon(
                 icon: const Icon(Icons.place_outlined, size: 18),
-                label: const Text('Déplacer'),
+                label: Text(l10n.actionsDeplacer),
                 onPressed: isReadOnly ? null : onDeplacer,
               ),
               const SizedBox(width: 4),
               TextButton.icon(
                 icon: const Icon(Icons.wine_bar_outlined, size: 18),
-                label: const Text('Consommer'),
+                label: Text(l10n.actionsConsommer),
                 onPressed: isReadOnly ? null : onConsommer,
               ),
               const SizedBox(width: 4),
               IconButton(
                 icon: const Icon(Icons.close),
-                tooltip: 'Annuler la sélection',
+                tooltip: l10n.bulkAnnulerSelection,
                 onPressed: onCancel,
               ),
             ],

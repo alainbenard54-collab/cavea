@@ -4,8 +4,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/config_service.dart';
+import '../../core/locale_formatting.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 
 void showHistoryActionsSheet(BuildContext context, Bouteille bouteille) {
@@ -27,20 +30,12 @@ class _HistoryActionsSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
     final b = bouteille;
 
-    String? dateSortieFormatted;
-    final ds = b.dateSortie;
-    if (ds != null && ds.isNotEmpty) {
-      try {
-        final d = DateTime.parse(ds);
-        dateSortieFormatted =
-            '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-      } catch (_) {
-        dateSortieFormatted = ds;
-      }
-    }
+    final dateSortieFormatted = formatDateFromString(b.dateSortie, context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
@@ -71,30 +66,30 @@ class _HistoryActionsSheet extends ConsumerWidget {
           const SizedBox(height: 12),
 
           // ── Détails consommation ───────────────────────────────────────
-          _InfoRow(label: 'Couleur', value: b.couleur),
+          _InfoRow(label: l10n.fieldCouleur, value: ConfigService.displayCouleur(b.couleur, locale)),
           if (b.emplacement.isNotEmpty)
-            _InfoRow(label: 'Emplacement d\'origine', value: b.emplacement),
-          if (dateSortieFormatted != null)
-            _InfoRow(label: 'Date de consommation', value: dateSortieFormatted),
+            _InfoRow(label: l10n.historyEmplacementOrigine, value: b.emplacement),
+          if (dateSortieFormatted.isNotEmpty)
+            _InfoRow(label: l10n.historyDateConsommation, value: dateSortieFormatted),
           if (b.noteDegus != null)
-            _InfoRow(label: 'Note', value: '${b.noteDegus}/10'),
+            _InfoRow(label: l10n.historyNote, value: '${b.noteDegus}/10'),
           if (b.commentaireDegus != null && b.commentaireDegus!.isNotEmpty)
-            _InfoRow(label: 'Commentaire', value: b.commentaireDegus!),
+            _InfoRow(label: l10n.historyCommentaire, value: b.commentaireDegus!),
 
           const SizedBox(height: 16),
 
           // ── Actions ───────────────────────────────────────────────────
           if (isReadOnly)
-            const Text(
-              'Mode lecture seule — modifications indisponibles',
-              style: TextStyle(color: Colors.orange),
+            Text(
+              l10n.actionsReadOnly,
+              style: const TextStyle(color: Colors.orange),
             )
           else
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonal(
                 onPressed: () => _confirmRehabiliter(context, ref),
-                child: const Text('Réhabiliter (remettre en stock)'),
+                child: Text(l10n.historyRehabiliter),
               ),
             ),
           const SizedBox(height: 8),
@@ -105,7 +100,7 @@ class _HistoryActionsSheet extends ConsumerWidget {
                 Navigator.of(context).pop();
                 context.push('/bottle/${b.id}');
               },
-              child: const Text('Consulter la fiche'),
+              child: Text(l10n.actionsConsulterFiche),
             ),
           ),
           const SizedBox(height: 8),
@@ -113,7 +108,7 @@ class _HistoryActionsSheet extends ConsumerWidget {
             width: double.infinity,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fermer'),
+              child: Text(l10n.actionFermer),
             ),
           ),
         ],
@@ -122,22 +117,20 @@ class _HistoryActionsSheet extends ConsumerWidget {
   }
 
   Future<void> _confirmRehabiliter(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Réhabiliter cette bouteille ?'),
-        content: const Text(
-          'La bouteille sera remise en stock à son emplacement d\'origine.\n\n'
-          'La note et le commentaire de dégustation seront effacés.',
-        ),
+        title: Text(l10n.historyRehabiliterTitle),
+        content: Text(l10n.historyRehabiliterBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Réhabiliter'),
+            child: Text(l10n.historyRehabiliterConfirm),
           ),
         ],
       ),

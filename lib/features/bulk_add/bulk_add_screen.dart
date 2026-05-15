@@ -8,9 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/config_service.dart';
+import '../../core/locale_formatting.dart';
 import '../../data/database.dart';
 import '../../services/sync_service.dart';
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 import 'bulk_add_controller.dart';
 import 'widgets/repartition_row.dart';
 
@@ -91,6 +93,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final l10n = context.l10n;
     final state = ref.read(bulkAddProvider);
     if (!state.isValid) return;
 
@@ -100,7 +103,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Garde min doit être ≤ garde max.'),
+            content: Text(l10n.bulkAddGardeError),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -112,25 +115,23 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     if (state.gardeMin.trim().isEmpty || state.gardeMax.trim().isEmpty) {
       final confirm = await showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Garde non renseignée'),
-          content: const Text(
-            'La garde min ou max n\'est pas renseignée.\n\n'
-            'La maturité de ces bouteilles ne pourra pas être '
-            'déterminée dans la vue Stock.\n\n'
-            'Confirmer quand même sans ces données ?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Retour — saisir la garde'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Confirmer sans garde'),
-            ),
-          ],
-        ),
+        builder: (ctx) {
+          final dl10n = ctx.l10n;
+          return AlertDialog(
+            title: Text(dl10n.bulkAddGardeDialogTitle),
+            content: Text(dl10n.bulkAddGardeDialogBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(dl10n.bulkAddRetourGarde),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(dl10n.bulkAddConfirmerSansGarde),
+              ),
+            ],
+          );
+        },
       );
       if (confirm != true) return;
     }
@@ -183,7 +184,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
       if (mounted) {
         setState(() => _submitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur : $e')),
+          SnackBar(content: Text(context.l10n.errorGeneric(e.toString()))),
         );
       }
     }
@@ -192,12 +193,14 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
   @override
   Widget build(BuildContext context) {
     // Fermer l'écran si le mode passe en lecture seule pendant la saisie
+    final l10n = context.l10n;
+
     ref.listen<SyncState>(syncServiceProvider, (prev, next) {
       if (next is SyncReadOnly && prev is! SyncReadOnly && mounted) {
         context.go('/');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Retour en lecture seule — saisie annulée'),
+          SnackBar(
+            content: Text(context.l10n.bulkAddCancelled),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -209,42 +212,42 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajouter des bouteilles')),
+      appBar: AppBar(title: Text(l10n.bulkAddTitle)),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _SectionHeader('Identité'),
+            _SectionHeader(l10n.bulkAddSectionIdentite),
             _AutocompleteField(
-              label: 'Domaine *',
+              label: l10n.bulkAddFieldDomaine,
               initialValue: state.domaine,
               suggestions: _domaines,
               onChanged: (v) => notifier.set((s) => s.copyWith(domaine: v)),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
             const SizedBox(height: 10),
             _AutocompleteField(
-              label: 'Appellation *',
+              label: l10n.bulkAddFieldAppellation,
               initialValue: state.appellation,
               suggestions: _appellations,
               onChanged: (v) => notifier.set((s) => s.copyWith(appellation: v)),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
             const SizedBox(height: 10),
             Row(children: [
               Expanded(
                 child: _field(
-                  label: 'Millésime *',
+                  label: l10n.bulkAddFieldMillesime,
                   initialValue: state.millesime,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (v) =>
                       notifier.set((s) => s.copyWith(millesime: v)),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                      (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
                 ),
               ),
               const SizedBox(width: 10),
@@ -254,7 +257,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             Row(children: [
               Expanded(
                 child: _DropdownOptionalField(
-                  label: 'Cru',
+                  label: l10n.bulkAddFieldCru,
                   choices: _crus,
                   initialValue: state.cru,
                   onChanged: (v) => notifier.set((s) => s.copyWith(cru: v)),
@@ -263,7 +266,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _DropdownOptionalField(
-                  label: 'Contenance',
+                  label: l10n.bulkAddFieldContenance,
                   choices: _contenances,
                   initialValue: state.contenance,
                   onChanged: (v) =>
@@ -273,11 +276,11 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             ]),
             const SizedBox(height: 16),
 
-            _SectionHeader('Garde & prix'),
+            _SectionHeader(l10n.bulkAddSectionGarde),
             Row(children: [
               Expanded(
                 child: _field(
-                  label: 'Garde min (ans)',
+                  label: l10n.bulkAddFieldGardeMin,
                   initialValue: state.gardeMin,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -288,7 +291,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _field(
-                  label: 'Garde max (ans)',
+                  label: l10n.bulkAddFieldGardeMax,
                   initialValue: state.gardeMax,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -299,7 +302,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _field(
-                  label: 'Prix achat (€)',
+                  label: l10n.bulkAddFieldPrix,
                   initialValue: state.prixAchat,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
@@ -310,9 +313,9 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             ]),
             const SizedBox(height: 16),
 
-            _SectionHeader('Fournisseur'),
+            _SectionHeader(l10n.bulkAddSectionFournisseur),
             _AutocompleteField(
-              label: 'Nom fournisseur',
+              label: l10n.bulkAddFieldFournisseur,
               initialValue: state.fournisseurNom,
               suggestions: _fournisseurs,
               onChanged: (v) =>
@@ -320,23 +323,23 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             ),
             const SizedBox(height: 10),
             _field(
-              label: 'Infos fournisseur',
+              label: l10n.bulkAddFieldFournisseurInfos,
               initialValue: state.fournisseurInfos,
               onChanged: (v) =>
                   notifier.set((s) => s.copyWith(fournisseurInfos: v)),
             ),
             const SizedBox(height: 10),
             _field(
-              label: 'Producteur',
+              label: l10n.bulkAddFieldProducteur,
               initialValue: state.producteur,
               onChanged: (v) =>
                   notifier.set((s) => s.copyWith(producteur: v)),
             ),
             const SizedBox(height: 16),
 
-            _SectionHeader('Commentaire & date'),
+            _SectionHeader(l10n.bulkAddSectionCommentaire),
             _field(
-              label: 'Commentaire entrée',
+              label: l10n.bulkAddFieldCommentaire,
               initialValue: state.commentaireEntree,
               maxLines: 3,
               onChanged: (v) =>
@@ -346,9 +349,9 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             _DateEntreeField(),
             const SizedBox(height: 16),
 
-            _SectionHeader('Répartition'),
+            _SectionHeader(l10n.bulkAddSectionRepartition),
             Row(children: [
-              const Text('Quantité totale :'),
+              Text(l10n.bulkAddQuantiteTotal),
               const SizedBox(width: 12),
               SizedBox(
                 width: 72,
@@ -396,7 +399,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Assignées : ${state.sommeGroupes} / ${state.quantiteTotal}',
+                  l10n.bulkAddAssignees(state.sommeGroupes, state.quantiteTotal),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: state.sommeGroupes == state.quantiteTotal
                         ? theme.colorScheme.primary
@@ -407,7 +410,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
             ),
             TextButton.icon(
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Ajouter un emplacement'),
+              label: Text(l10n.bulkAddAjouterEmplacement),
               onPressed: notifier.addGroupe,
             ),
             const SizedBox(height: 24),
@@ -420,9 +423,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
-                      'Confirmer — ${state.quantiteTotal} bouteille${state.quantiteTotal > 1 ? 's' : ''}',
-                    ),
+                  : Text(l10n.bulkAddConfirmer(state.quantiteTotal)),
             ),
             const SizedBox(height: 16),
           ],
@@ -516,20 +517,25 @@ class _CouleurFieldState extends ConsumerState<_CouleurField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
     return FormField<String>(
-      validator: (_) => _ctrl.text.trim().isEmpty ? 'Obligatoire' : null,
+      validator: (_) => _ctrl.text.trim().isEmpty ? l10n.validationObligatoire : null,
       builder: (field) => DropdownMenu<String>(
         controller: _ctrl,
         enableFilter: true,
         requestFocusOnTap: true,
         expandedInsets: EdgeInsets.zero,
-        label: const Text('Couleur *'),
+        label: Text(l10n.bulkAddFieldCouleur),
         errorText: field.errorText,
         onSelected: (v) {
           if (v != null) _ctrl.text = v;
         },
         dropdownMenuEntries: widget.couleurs
-            .map((c) => DropdownMenuEntry(value: c, label: c))
+            .map((c) => DropdownMenuEntry(
+                  value: c,
+                  label: ConfigService.displayCouleur(c, locale),
+                ))
             .toList(),
       ),
     );
@@ -560,11 +566,10 @@ class _DateEntreeFieldState extends ConsumerState<_DateEntreeField> {
   @override
   Widget build(BuildContext context) {
     final date = ref.watch(bulkAddProvider).dateEntree;
-    final label =
-        '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final label = formatDate(date, context);
     return OutlinedButton.icon(
       icon: const Icon(Icons.calendar_today, size: 16),
-      label: Text("Date d'entrée : $label"),
+      label: Text(context.l10n.bulkAddDateEntreeLabel(label)),
       onPressed: _pick,
       style: OutlinedButton.styleFrom(
         alignment: Alignment.centerLeft,

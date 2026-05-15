@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'dart:io';
+import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,7 @@ class ConfigService {
   static const _keyRefContenances = 'ref_contenances';
   static const _keyRefCrus = 'ref_crus';
   static const _keyAndroidWriteWarningSeen = 'android_write_warning_seen';
+  static const _keyLocalePreference = 'locale_preference';
 
   static const builtinCouleurs = [
     'Blanc',
@@ -32,6 +34,22 @@ class ConfigService {
     'Rosé effervescent',
     'Rouge',
   ];
+
+  static const _couleurLabels = <String, Map<String, String>>{
+    'Blanc':              {'fr': 'Blanc',              'en': 'White'},
+    'Blanc effervescent': {'fr': 'Blanc effervescent', 'en': 'Sparkling white'},
+    'Blanc liquoreux':    {'fr': 'Blanc liquoreux',    'en': 'Sweet white'},
+    'Blanc moelleux':     {'fr': 'Blanc moelleux',     'en': 'Semi-sweet white'},
+    'Rosé':               {'fr': 'Rosé',               'en': 'Rosé'},
+    'Rosé effervescent':  {'fr': 'Rosé effervescent',  'en': 'Sparkling rosé'},
+    'Rouge':              {'fr': 'Rouge',               'en': 'Red'},
+  };
+
+  static String displayCouleur(String dbKey, Locale locale) {
+    final labels = _couleurLabels[dbKey];
+    if (labels == null) return dbKey;
+    return labels[locale.languageCode] ?? labels['fr'] ?? dbKey;
+  }
   static const builtinContenances = ['37,5 cl', '50 cl', '75 cl', '1,5 L (magnum)'];
   static const builtinCrus = [
     '1ER CRU',
@@ -165,6 +183,20 @@ class ConfigService {
   Future<void> setAndroidWriteWarningSeen() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyAndroidWriteWarningSeen, true);
+  }
+
+  Future<String?> getLocalePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLocalePreference);
+  }
+
+  Future<void> saveLocalePreference(String? code) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (code != null) {
+      await prefs.setString(_keyLocalePreference, code);
+    } else {
+      await prefs.remove(_keyLocalePreference);
+    }
   }
 }
 

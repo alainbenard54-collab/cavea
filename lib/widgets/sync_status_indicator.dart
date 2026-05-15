@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
 import '../services/sync_service.dart';
 
 /// Indicateur d'état permanent dans la navigation.
@@ -40,9 +41,11 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
     final mode = ref.watch(storageModeProvider);
     final isMode2 = mode == 'drive';
 
+    final l10n = context.l10n;
+
     // Icône de mode — toujours affichée
     final modeIcon = Tooltip(
-      message: isMode2 ? 'Mode partagé — Google Drive' : 'Mode local — PC seul',
+      message: isMode2 ? l10n.tooltipModePartage : l10n.tooltipModeLocal,
       child: Icon(
         isMode2 ? Icons.cloud : Icons.computer,
         color: isMode2 ? Colors.blue : Colors.grey,
@@ -60,23 +63,23 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
     switch (syncState) {
       case SyncIdle():
         _rotationCtrl.stop();
-        statusIcon = const Tooltip(
-          message: 'Votre cave est ouverte en écriture',
-          child: Icon(Icons.lock_open, color: Colors.green, size: 20),
+        statusIcon = Tooltip(
+          message: l10n.tooltipCaveEcriture,
+          child: const Icon(Icons.lock_open, color: Colors.green, size: 20),
         );
 
       case SyncReadOnly():
         _rotationCtrl.stop();
-        statusIcon = const Tooltip(
-          message: 'Mode lecture seule',
+        statusIcon = Tooltip(
+          message: l10n.tooltipLectureSeule,
           triggerMode: TooltipTriggerMode.tap,
-          child: Icon(Icons.lock, color: Colors.amber, size: 20),
+          child: const Icon(Icons.lock, color: Colors.amber, size: 20),
         );
 
       case SyncSyncing() || SyncExiting():
         _rotationCtrl.repeat();
         statusIcon = Tooltip(
-          message: 'Synchronisation en cours…',
+          message: l10n.tooltipSynchronisation,
           child: RotationTransition(
             turns: _rotationCtrl,
             child: const Icon(Icons.sync, color: Colors.blue, size: 20),
@@ -85,9 +88,9 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
 
       case SyncError():
         _rotationCtrl.stop();
-        statusIcon = const Tooltip(
-          message: 'Erreur de synchronisation',
-          child: Icon(Icons.sync_problem, color: Colors.red, size: 20),
+        statusIcon = Tooltip(
+          message: l10n.tooltipErreurSync,
+          child: const Icon(Icons.sync_problem, color: Colors.red, size: 20),
         );
 
       case SyncStarting() || SyncNeedsCrashRecovery() || SyncNeedsLockChoice():

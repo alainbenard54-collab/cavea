@@ -4,9 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/config_service.dart';
+import '../../core/locale_formatting.dart';
 import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 
 class BottleDetailScreen extends ConsumerWidget {
   final String id;
@@ -15,6 +18,7 @@ class BottleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final async = ref.watch(bottleByIdProvider(id));
 
     return async.when(
@@ -22,13 +26,13 @@ class BottleDetailScreen extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Fiche bouteille')),
-        body: Center(child: Text('Erreur : $e')),
+        appBar: AppBar(title: Text(l10n.ficheTitle)),
+        body: Center(child: Text(l10n.errorGeneric(e.toString()))),
       ),
       data: (bouteille) {
         if (bouteille == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Fiche bouteille')),
+            appBar: AppBar(title: Text(l10n.ficheTitle)),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -39,11 +43,11 @@ class BottleDetailScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.outline,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Bouteille introuvable.'),
+                  Text(l10n.ficheNotFound),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Retour'),
+                    child: Text(l10n.actionRetour),
                   ),
                 ],
               ),
@@ -61,73 +65,71 @@ class _DetailView extends StatelessWidget {
 
   const _DetailView({required this.bouteille});
 
-  String _formatDate(String? iso) {
-    if (iso == null || iso.isEmpty) return '';
-    final d = DateTime.tryParse(iso);
-    if (d == null) return iso;
-    return '${d.day.toString().padLeft(2, '0')}/'
-        '${d.month.toString().padLeft(2, '0')}/'
-        '${d.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context);
     final b = bouteille;
     final consommee = b.dateSortie != null && b.dateSortie!.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Fiche bouteille')),
+      appBar: AppBar(title: Text(l10n.ficheTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _SectionHeader('Identité'),
-          _ReadField(label: 'Domaine', value: b.domaine),
+          _SectionHeader(l10n.bulkAddSectionIdentite),
+          _ReadField(label: l10n.fieldDomaine, value: b.domaine),
           const SizedBox(height: 10),
-          _ReadField(label: 'Appellation', value: b.appellation),
+          _ReadField(label: l10n.fieldAppellation, value: b.appellation),
           const SizedBox(height: 10),
           Row(children: [
             Expanded(
               child: _ReadField(
-                label: 'Millésime',
+                label: l10n.fieldMillesime,
                 value: b.millesime > 0 ? b.millesime.toString() : '',
               ),
             ),
             const SizedBox(width: 10),
-            Expanded(child: _ReadField(label: 'Couleur', value: b.couleur)),
+            Expanded(
+              child: _ReadField(
+                label: l10n.fieldCouleur,
+                value: ConfigService.displayCouleur(b.couleur, locale),
+              ),
+            ),
           ]),
           const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: _ReadField(label: 'Cru', value: b.cru ?? '')),
+            Expanded(child: _ReadField(label: l10n.fieldCru, value: b.cru ?? '')),
             const SizedBox(width: 10),
-            Expanded(child: _ReadField(label: 'Contenance', value: b.contenance)),
+            Expanded(child: _ReadField(label: l10n.fieldContenance, value: b.contenance)),
           ]),
           const SizedBox(height: 16),
 
-          _SectionHeader('Emplacement'),
-          _ReadField(label: 'Emplacement', value: b.emplacement),
+          _SectionHeader(l10n.fieldEmplacement),
+          _ReadField(label: l10n.fieldEmplacement, value: b.emplacement),
           const SizedBox(height: 16),
 
-          _SectionHeader('Garde & prix'),
+          _SectionHeader(l10n.bulkAddSectionGarde),
           Row(children: [
             Expanded(
               child: _ReadField(
-                label: 'Garde min (ans)',
+                label: l10n.bulkAddFieldGardeMin,
                 value: b.gardeMin?.toString() ?? '',
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _ReadField(
-                label: 'Garde max (ans)',
+                label: l10n.bulkAddFieldGardeMax,
                 value: b.gardeMax?.toString() ?? '',
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _ReadField(
-                label: 'Prix achat (€)',
+                label: l10n.bulkAddFieldPrix,
                 value: b.prixAchat != null
-                    ? b.prixAchat!.toStringAsFixed(2).replaceAll('.', ',')
+                    ? formatNumber(b.prixAchat!, context, decimals: 2)
                     : '',
               ),
             ),
@@ -139,28 +141,28 @@ class _DetailView extends StatelessWidget {
           ] else
             const SizedBox(height: 6),
 
-          _SectionHeader('Fournisseur'),
-          _ReadField(label: 'Nom fournisseur', value: b.fournisseurNom ?? ''),
+          _SectionHeader(l10n.bulkAddSectionFournisseur),
+          _ReadField(label: l10n.bulkAddFieldFournisseur, value: b.fournisseurNom ?? ''),
           const SizedBox(height: 10),
           _ReadField(
-            label: 'Infos fournisseur',
+            label: l10n.bulkAddFieldFournisseurInfos,
             value: b.fournisseurInfos ?? '',
             maxLines: 2,
           ),
           const SizedBox(height: 10),
-          _ReadField(label: 'Producteur', value: b.producteur ?? ''),
+          _ReadField(label: l10n.bulkAddFieldProducteur, value: b.producteur ?? ''),
           const SizedBox(height: 16),
 
-          _SectionHeader('Commentaire & date'),
+          _SectionHeader(l10n.bulkAddSectionCommentaire),
           _ReadField(
-            label: "Commentaire d'entrée",
+            label: l10n.fieldCommentaireEntree,
             value: b.commentaireEntree ?? '',
             maxLines: 3,
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
             icon: const Icon(Icons.calendar_today, size: 16),
-            label: Text("Date d'entrée : ${_formatDate(b.dateEntree)}"),
+            label: Text(l10n.bulkAddDateEntreeLabel(formatDateFromString(b.dateEntree, context))),
             onPressed: null,
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
@@ -171,11 +173,11 @@ class _DetailView extends StatelessWidget {
 
           // Consommation — uniquement si date_sortie renseignée
           if (consommee) ...[
-            _SectionHeader('Consommation'),
+            _SectionHeader(l10n.ficheConsommation),
             OutlinedButton.icon(
               icon: const Icon(Icons.calendar_today, size: 16),
               label: Text(
-                'Date de consommation : ${_formatDate(b.dateSortie)}',
+                l10n.consommerDateLabel(formatDateFromString(b.dateSortie, context)),
               ),
               onPressed: null,
               style: OutlinedButton.styleFrom(
@@ -185,14 +187,14 @@ class _DetailView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             _ReadField(
-              label: 'Note /10',
+              label: l10n.ficheNote,
               value: b.noteDegus != null
-                  ? b.noteDegus!.toStringAsFixed(1).replaceAll('.', ',')
+                  ? formatNumber(b.noteDegus!, context, decimals: 1)
                   : '',
             ),
             const SizedBox(height: 10),
             _ReadField(
-              label: 'Commentaire de dégustation',
+              label: l10n.ficheCommentaireDegus,
               value: b.commentaireDegus ?? '',
               maxLines: 3,
             ),
@@ -262,6 +264,7 @@ class _MaturityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final level = computeMaturity(
       millesime: bouteille.millesime,
       gardeMin: bouteille.gardeMin,
@@ -272,22 +275,22 @@ class _MaturityBadge extends StatelessWidget {
       MaturityLevel.tropJeune => (
           Colors.blue.shade50,
           Colors.blue.shade800,
-          'Trop jeune',
+          l10n.maturityTropJeune,
         ),
       MaturityLevel.optimal => (
           Colors.green.shade50,
           Colors.green.shade800,
-          'Optimal',
+          l10n.maturityOptimal,
         ),
       MaturityLevel.aBoireUrgent => (
           Colors.red.shade50,
           Colors.red.shade800,
-          'À boire — urgent',
+          l10n.maturityUrgentDetail,
         ),
       MaturityLevel.sansDonnee => (
           Colors.grey.shade100,
           Colors.grey.shade600,
-          'Maturité inconnue',
+          l10n.maturityInconnue,
         ),
     };
 

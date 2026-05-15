@@ -6,7 +6,9 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/config_service.dart';
 import '../../core/maturity/maturity_service.dart';
+import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import '../../shared/adaptive_layout.dart' show isDesktop;
 import '../bottle_actions/bottle_actions_sheet.dart';
@@ -61,6 +63,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final filters = ref.watch(stockFilterProvider);
     final ctrl = ref.read(stockFilterProvider.notifier);
     final stockAsync = ref.watch(stockProvider);
@@ -70,6 +73,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final millesimesAsync = ref.watch(millesimesProvider);
     final selection = ref.watch(selectionProvider);
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
+    final locale = Localizations.localeOf(context);
 
     // isDesktop() est basé sur la largeur (≥600dp). Un téléphone en paysage
     // dépasse ce seuil, donc !isDesktop() serait faux → on utilise Platform.isAndroid.
@@ -95,7 +99,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
           child: SearchBar(
             controller: _searchController,
-            hintText: 'Rechercher : domaine, appellation, millésime…',
+            hintText: l10n.stockSearchHint,
             backgroundColor: filters.texte.isNotEmpty
                 ? WidgetStatePropertyAll(
                     Theme.of(context).colorScheme.primaryContainer,
@@ -158,7 +162,9 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          filters.hasActiveFilters ? 'Filtres actifs' : 'Filtres',
+                          filters.hasActiveFilters
+                              ? l10n.stockFiltresActifs
+                              : l10n.stockFiltres,
                           style: TextStyle(
                             fontSize: 12,
                             color: filters.hasActiveFilters
@@ -177,7 +183,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                     icon: Icon(Icons.filter_alt_off, size: 16,
                         color: Theme.of(context).colorScheme.primary),
                     onPressed: _reset,
-                    tooltip: 'Réinitialiser les filtres',
+                    tooltip: l10n.stockReinitialiseFiltres,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   ),
@@ -213,7 +219,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(right: 6),
                             child: FilterChip(
-                              label: Text(c),
+                              label: Text(ConfigService.displayCouleur(c, locale)),
                               selected: selected,
                               onSelected: (_) {
                                 ctrl.toggleCouleur(c);
@@ -250,7 +256,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             child: Row(
               children: [
                 _MaturityChip(
-                  label: 'À boire urgent !',
+                  label: l10n.stockMaturityUrgent,
                   color: Colors.red.shade100,
                   selectedColor: Colors.red.shade200,
                   selected: filters.maturites.contains(MaturityLevel.aBoireUrgent),
@@ -258,7 +264,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 ),
                 const SizedBox(width: 6),
                 _MaturityChip(
-                  label: 'À boire',
+                  label: l10n.stockMaturityOptimal,
                   color: Colors.green.shade100,
                   selectedColor: Colors.green.shade200,
                   selected: filters.maturites.contains(MaturityLevel.optimal),
@@ -266,7 +272,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 ),
                 const SizedBox(width: 6),
                 _MaturityChip(
-                  label: 'Trop jeune',
+                  label: l10n.stockMaturityJeune,
                   color: Colors.blue.shade100,
                   selectedColor: Colors.blue.shade200,
                   selected: filters.maturites.contains(MaturityLevel.tropJeune),
@@ -291,9 +297,9 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
-              title: const Text(
-                'Filtres avancés',
-                style: TextStyle(fontSize: 13),
+              title: Text(
+                l10n.stockFiltresAvances,
+                style: const TextStyle(fontSize: 13),
               ),
               tilePadding: const EdgeInsets.symmetric(horizontal: 4),
               childrenPadding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
@@ -302,7 +308,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                   children: [
                     Expanded(
                       child: _CascadeDropdown<String>(
-                        hint: 'Appellation',
+                        hint: l10n.stockFilterAppellation,
                         value: filters.appellation,
                         items: appellationsAsync.valueOrNull ?? [],
                         onChanged: ctrl.setAppellation,
@@ -311,7 +317,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _CascadeDropdown<int>(
-                        hint: 'Millésime',
+                        hint: l10n.stockFilterMillesime,
                         value: filters.millesime,
                         items: millesimesAsync.valueOrNull ?? [],
                         onChanged: ctrl.setMillesime,
@@ -332,7 +338,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               if (filters.hasActiveFilters && !isLandscapeMobile)
                 TextButton.icon(
                   icon: const Icon(Icons.filter_alt_off, size: 16),
-                  label: const Text('Réinitialiser'),
+                  label: Text(l10n.stockReinitialise),
                   onPressed: _reset,
                 ),
               const Spacer(),
@@ -340,8 +346,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 data: (list) => totalAsync.maybeWhen(
                   data: (total) => Text(
                     filters.hasActiveFilters
-                        ? '${list.length} / $total bouteilles'
-                        : '${list.length} bouteille${list.length > 1 ? 's' : ''} en stock',
+                        ? l10n.stockCountFiltered(list.length, total)
+                        : l10n.stockCountTotal(list.length),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   orElse: () => const SizedBox.shrink(),
@@ -362,7 +368,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
         Expanded(
           child: stockAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => Center(child: Text('Erreur : $e')),
+            error: (e, st) => Center(child: Text(l10n.errorGeneric(e.toString()))),
             data: (bouteilles) {
               if (bouteilles.isEmpty) {
                 return _EmptyState(
@@ -482,7 +488,7 @@ class _CascadeDropdown<T> extends StatelessWidget {
         border: const OutlineInputBorder(),
       ),
       items: [
-        DropdownMenuItem<T>(value: null, child: const Text('Tous')),
+        DropdownMenuItem<T>(value: null, child: Text(context.l10n.stockFilterTous)),
         ...items.map(
           (item) => DropdownMenuItem<T>(
             value: item,
@@ -503,10 +509,9 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (hasFilters) {
-      return const Center(
-        child: Text('Aucune bouteille ne correspond aux filtres.'),
-      );
+      return Center(child: Text(l10n.stockEmptyFiltered));
     }
     return Center(
       child: Column(
@@ -514,12 +519,12 @@ class _EmptyState extends StatelessWidget {
         children: [
           const Icon(Icons.wine_bar_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          const Text('Aucune bouteille en stock', style: TextStyle(fontSize: 18)),
+          Text(l10n.stockEmptyTitle, style: const TextStyle(fontSize: 18)),
           if (!isReadOnly) ...[
             const SizedBox(height: 8),
             FilledButton.icon(
               icon: const Icon(Icons.upload_file),
-              label: const Text('Importer un CSV'),
+              label: Text(l10n.stockImportCsv),
               onPressed: () => context.go('/data'),
             ),
           ],

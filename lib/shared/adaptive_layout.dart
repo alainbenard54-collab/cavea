@@ -8,25 +8,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config_service.dart';
+import '../l10n/l10n.dart';
 import '../services/sync_service.dart';
 import '../widgets/sync_status_indicator.dart';
 
 const kDesktopBreakpoint = 600.0;
 
-// Couleur commune à toutes les icônes/boutons "Sauvegarder" (Android + Windows).
 const _kSaveColor = Colors.green;
 
 bool isDesktop(BuildContext context) =>
     MediaQuery.of(context).size.width >= kDesktopBreakpoint;
 
 class _AppDestination {
-  final String label;
   final IconData icon;
   final IconData selectedIcon;
   final String route;
 
   const _AppDestination({
-    required this.label,
     required this.icon,
     required this.selectedIcon,
     required this.route,
@@ -35,42 +33,45 @@ class _AppDestination {
 
 const _destinations = [
   _AppDestination(
-    label: 'Stock',
     icon: Icons.wine_bar_outlined,
     selectedIcon: Icons.wine_bar,
     route: '/',
   ),
   _AppDestination(
-    label: 'Ajouter',
     icon: Icons.add_circle_outline,
     selectedIcon: Icons.add_circle,
     route: '/bulk-add',
   ),
   _AppDestination(
-    label: 'Emplacements',
     icon: Icons.shelves,
     selectedIcon: Icons.shelves,
     route: '/locations',
   ),
   _AppDestination(
-    label: 'Historique',
     icon: Icons.history,
     selectedIcon: Icons.history,
     route: '/history',
   ),
   _AppDestination(
-    label: 'Données',
     icon: Icons.import_export,
     selectedIcon: Icons.import_export,
     route: '/data',
   ),
   _AppDestination(
-    label: 'Paramètres',
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings,
     route: '/settings',
   ),
 ];
+
+String _navLabel(int index, AppLocalizations l10n) => [
+      l10n.navStock,
+      l10n.navAjouter,
+      l10n.navEmplacements,
+      l10n.navHistorique,
+      l10n.navDonnees,
+      l10n.navParametres,
+    ][index];
 
 class AppShell extends ConsumerStatefulWidget {
   final int selectedIndex;
@@ -83,16 +84,11 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  // Indices des destinations réservées à l'écriture (Ajouter=1).
-  // L'onglet Données (4) est accessible en lecture seule — seul le bouton Import interne est bloqué.
   static const _writeOnlyIndices = {1};
 
   @override
   void initState() {
     super.initState();
-    // Cas ProviderScope recréé (Drive download) : le SyncService démarre directement
-    // en SyncIdle via _startWithLock. Le ref.listen ne voit jamais SyncStarting → SyncIdle.
-    // On détecte via pendingWriteOnboarding positionné avant le download.
     if (Platform.isAndroid) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!pendingWriteOnboarding || !mounted) return;
@@ -105,7 +101,6 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   void _onDestinationSelected(BuildContext context, int index) {
-    // Sur Android, l'index 4 (Plus) ouvre le menu complémentaire.
     if (Platform.isAndroid && index == 4) {
       _showMoreMenuSheet(context);
       return;
@@ -113,7 +108,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     final syncState = ref.read(syncServiceProvider);
     if (syncState is SyncReadOnly && _writeOnlyIndices.contains(index)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Indisponible en mode lecture seule')),
+        SnackBar(content: Text(context.l10n.syncReadOnlyUnavailable)),
       );
       return;
     }
@@ -138,24 +133,20 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final syncState = ref.watch(syncServiceProvider);
     ref.watch(storageModeProvider);
     final syncService = ref.read(syncServiceProvider.notifier);
 
-    // Réactions aux transitions d'état
     ref.listen<SyncState>(syncServiceProvider, (previous, next) {
       if (!mounted) return;
       switch (next) {
         case SyncIdle():
-          // Snackbar uniquement après un upload manuel (SyncSyncing → SyncIdle)
-          // Pas après startup (SyncStarting → SyncIdle)
           if (previous is SyncSyncing) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cave sauvegardée sur Drive')),
+              SnackBar(content: Text(l10n.syncSavedToDrive)),
             );
           }
-          // Cas Drive vide (pas de ProviderScope recréé) : le flag a été posé dans
-          // syncOnStartup() et la transition SyncStarting → SyncIdle est observable.
           if (Platform.isAndroid && pendingWriteOnboarding) {
             pendingWriteOnboarding = false;
             configService.getAndroidWriteWarningSeen().then((seen) {
@@ -168,33 +159,22 @@ class _AppShellState extends ConsumerState<AppShell> {
             });
           }
         case SyncReadOnly():
-          // Snackbar après "Sauvegarder et libérer" (SyncSyncing → SyncReadOnly)
           if (previous is SyncSyncing) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cave sauvegardée et verrou libéré')),
+              SnackBar(content: Text(l10n.syncSavedAndUnlocked)),
             );
           }
         case SyncError(:final message):
-          // SyncStarting → SyncError = acquireLock a échoué (verrou tiers).
-          // On remet immédiatement en lecture seule : l'icône d'erreur sync
-          // n'apparaît pas et le bouton "Prendre la main" reste visible.
           final wasAcquiringLock = previous is SyncStarting;
           if (wasAcquiringLock) syncService.resetToReadOnly();
           showDialog<void>(
             context: context,
             builder: (_) => _SyncErrorDialog(
-              title: wasAcquiringLock ? 'Impossible de prendre la main' : null,
-              message: wasAcquiringLock
-                  ? 'La cave est actuellement verrouillée par un autre appareil.'
-                  : message,
-              onRetry: wasAcquiringLock
-                  ? syncService.acquireLock
-                  : syncService.sync,
-              // wasAcquiringLock : état déjà SyncReadOnly, fermeture suffit.
-              // sync() failure : "Fermer" laisse l'état SyncError (icône rouge visible,
-              // sauvegarde possible via _SaveIconBtn, lock toujours détenu).
+              title: wasAcquiringLock ? l10n.syncAcquireLockFailedTitle : null,
+              message: wasAcquiringLock ? l10n.syncAcquireLockFailedBody : message,
+              onRetry: wasAcquiringLock ? syncService.acquireLock : syncService.sync,
               onClose: null,
-              closeLabel: wasAcquiringLock ? 'Rester en lecture seule' : null,
+              closeLabel: wasAcquiringLock ? l10n.syncStayReadOnly : null,
             ),
           );
         case SyncNeedsCrashRecovery():
@@ -206,7 +186,6 @@ class _AppShellState extends ConsumerState<AppShell> {
       }
     });
 
-    // États qui bloquent l'UI (overlay plein écran)
     final isBlocking = syncState is SyncSyncing ||
         syncState is SyncStarting ||
         syncState is SyncNeedsCrashRecovery ||
@@ -215,14 +194,10 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     final isReadOnly = syncState is SyncReadOnly;
 
-    // Le bouton Sync est visible en mode écriture, y compris après une erreur (retry).
     final showSyncButton = syncService.isActive &&
         (syncState is SyncIdle || syncState is SyncSyncing || syncState is SyncError);
 
     final isAndroid = Platform.isAndroid;
-    // Sur Android (portrait ET paysage), on utilise toujours la BottomNavigationBar :
-    // la NavigationRail ne tient pas en hauteur en paysage avec le clavier ouvert,
-    // et le _MobileBar inclut déjà le bouton "Prendre la main" et l'indicateur sync.
     final useRail = isDesktop(context) && !isAndroid;
 
     Widget shellContent;
@@ -271,7 +246,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                     const CircularProgressIndicator(color: Colors.white),
                     const SizedBox(height: 16),
                     Text(
-                      _overlayMessage(syncState),
+                      _overlayMessage(syncState, l10n),
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
@@ -286,23 +261,21 @@ class _AppShellState extends ConsumerState<AppShell> {
     return shellContent;
   }
 
-  String _overlayMessage(SyncState state) => switch (state) {
+  String _overlayMessage(SyncState state, AppLocalizations l10n) => switch (state) {
         SyncStarting() || SyncNeedsCrashRecovery() || SyncNeedsLockChoice() =>
-          'Connexion à Google Drive…',
-        SyncExiting() || SyncSyncing() => 'Sauvegarde en cours…',
-        _ => 'Synchronisation en cours…',
+          l10n.syncConnecting,
+        SyncExiting() || SyncSyncing() => l10n.syncSaving,
+        _ => l10n.syncSyncing,
       };
 
   void _showCrashRecoveryDialog(BuildContext context, SyncService syncService) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Session précédente interrompue'),
-        content: const Text(
-          'La dernière session ne s\'est pas terminée correctement. '
-          'Choisissez quelle version de la cave conserver.',
-        ),
+        title: Text(l10n.syncCrashRecoveryTitle),
+        content: Text(l10n.syncCrashRecoveryBody),
         actions: [
           TextButton(
             onPressed: () {
@@ -310,16 +283,14 @@ class _AppShellState extends ConsumerState<AppShell> {
               _showCrashRecoveryConfirm(
                 context,
                 syncService,
-                title: 'Envoyer mes données locales ?',
-                content: 'Votre base locale va remplacer la version sur Google Drive. '
-                    'Comme la cave était verrouillée, aucun autre appareil n\'a pu '
-                    'la modifier depuis la dernière synchronisation.',
-                confirmLabel: 'Envoyer',
+                title: l10n.syncCrashSendLocalConfirmTitle,
+                content: l10n.syncCrashSendLocalConfirmBody,
+                confirmLabel: l10n.syncCrashConfirmSend,
                 onConfirm: syncService.resolveOwnLockWithUpload,
                 onCancel: () => _showCrashRecoveryDialog(context, syncService),
               );
             },
-            child: const Text('Envoyer mes données locales'),
+            child: Text(l10n.syncCrashSendLocal),
           ),
           FilledButton(
             onPressed: () {
@@ -327,15 +298,14 @@ class _AppShellState extends ConsumerState<AppShell> {
               _showCrashRecoveryConfirm(
                 context,
                 syncService,
-                title: 'Repartir depuis Google Drive ?',
-                content: 'La base Google Drive va remplacer votre base locale. '
-                    'Toutes vos modifications locales non sauvegardées seront perdues.',
-                confirmLabel: 'Remplacer ma base locale',
+                title: l10n.syncCrashDownloadConfirmTitle,
+                content: l10n.syncCrashDownloadConfirmBody,
+                confirmLabel: l10n.syncCrashConfirmReplace,
                 onConfirm: syncService.resolveOwnLockWithDownload,
                 onCancel: () => _showCrashRecoveryDialog(context, syncService),
               );
             },
-            child: const Text('Repartir depuis Google Drive'),
+            child: Text(l10n.syncCrashDownloadDrive),
           ),
         ],
       ),
@@ -351,6 +321,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     required VoidCallback onConfirm,
     required VoidCallback onCancel,
   }) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -363,7 +334,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               Navigator.of(dialogContext).pop();
               onCancel();
             },
-            child: const Text('Retour'),
+            child: Text(l10n.actionRetour),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.orange),
@@ -383,28 +354,27 @@ class _AppShellState extends ConsumerState<AppShell> {
     SyncService syncService,
     String lockedBy,
   ) {
+    final l10n = context.l10n;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Cave utilisée sur un autre appareil'),
-        content: const Text(
-          'Votre cave est actuellement ouverte sur un autre appareil.',
-        ),
+        title: Text(l10n.syncLockTiersTitle),
+        content: Text(l10n.syncLockTiersBody),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              exit(0); // Terminate process — SystemNavigator.pop() laisserait l'app en arrière-plan.
+              exit(0);
             },
-            child: const Text('Quitter'),
+            child: Text(l10n.actionQuitter),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
               syncService.enterReadOnly();
             },
-            child: const Text('Consulter en lecture seule'),
+            child: Text(l10n.syncEnterReadOnly),
           ),
         ],
       ),
@@ -432,8 +402,8 @@ class _DesktopRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
-    // Badge cadenas sur les destinations verrouillées — même visuel que _MobileBar.
     Widget lockableIcon(IconData iconData, bool disabled) {
       if (!disabled) return Icon(iconData);
       return Stack(
@@ -484,7 +454,10 @@ class _DesktopRail extends StatelessWidget {
         return NavigationRailDestination(
           icon: lockableIcon(d.icon, disabled),
           selectedIcon: lockableIcon(d.selectedIcon, disabled),
-          label: Text(d.label, style: TextStyle(color: disabled ? cs.outline : null)),
+          label: Text(
+            _navLabel(e.key, l10n),
+            style: TextStyle(color: disabled ? cs.outline : null),
+          ),
         );
       }).toList(),
     );
@@ -513,6 +486,7 @@ class _MobileBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     final bottomPad = MediaQuery.of(context).padding.bottom;
     return Container(
       color: cs.surfaceContainer,
@@ -521,7 +495,6 @@ class _MobileBar extends StatelessWidget {
         height: 56,
         child: Row(
           children: [
-            // ── Zone sync (Mode 2 uniquement) ─────────────────────────
             if (syncService.isActive) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -546,9 +519,8 @@ class _MobileBar extends StatelessWidget {
                 color: cs.outlineVariant,
               ),
             ],
-            // ── Navigation primaire ────────────────────────────────────
             _NavBtn(
-              tooltip: 'Stock',
+              tooltip: l10n.navStock,
               icon: Icons.wine_bar_outlined,
               selectedIcon: Icons.wine_bar,
               selected: selectedIndex == 0,
@@ -556,8 +528,8 @@ class _MobileBar extends StatelessWidget {
             ),
             _NavBtn(
               tooltip: isReadOnly
-                  ? 'Ajouter (indisponible en lecture seule)'
-                  : 'Ajouter',
+                  ? '${l10n.navAjouter} — ${l10n.syncReadOnlyUnavailable}'
+                  : l10n.navAjouter,
               icon: Icons.add_circle_outline,
               selectedIcon: Icons.add_circle,
               selected: selectedIndex == 1,
@@ -565,7 +537,7 @@ class _MobileBar extends StatelessWidget {
               onTap: () => onDestinationSelected(1),
             ),
             _NavBtn(
-              tooltip: 'Emplacements',
+              tooltip: l10n.navEmplacements,
               icon: Icons.shelves,
               selectedIcon: Icons.shelves,
               selected: selectedIndex == 2,
@@ -573,7 +545,7 @@ class _MobileBar extends StatelessWidget {
               compact: true,
             ),
             _NavBtn(
-              tooltip: 'Historique',
+              tooltip: l10n.navHistorique,
               icon: Icons.history,
               selectedIcon: Icons.history,
               selected: selectedIndex == 3,
@@ -581,9 +553,8 @@ class _MobileBar extends StatelessWidget {
               compact: true,
             ),
             const Spacer(),
-            // ── Menu Plus (Import CSV, Paramètres, futures fonctions) ──
             _NavBtn(
-              tooltip: 'Plus',
+              tooltip: l10n.navPlus,
               icon: Icons.more_horiz,
               selectedIcon: Icons.more_horiz,
               selected: selectedIndex >= 4,
@@ -632,8 +603,6 @@ class _NavBtn extends StatelessWidget {
       message: tooltip,
       preferBelow: false,
       child: InkWell(
-        // Toujours déclencher onTap — _onDestinationSelected gère la snackbar
-        // en mode lecture seule au lieu de bloquer silencieusement.
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
@@ -674,28 +643,22 @@ void _showAcquireLockDialog(
   SyncService syncService, {
   bool isAndroid = false,
 }) {
+  final l10n = context.l10n;
   showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Passer en mode écriture ?'),
+      title: Text(l10n.syncAcquireLockTitle),
       content: Text(
-        isAndroid
-            ? 'La cave sera verrouillée pendant votre session. '
-                'Utilisez le bouton Quitter pour sauvegarder vos modifications '
-                'et libérer le verrou avant de fermer l\'application.'
-            : 'La cave sera verrouillée pendant toute votre session. '
-                'Le verrou sera automatiquement libéré et vos modifications '
-                'sauvegardées sur Google Drive à la fermeture de l\'application '
-                'ou via le bouton "Sauvegarder".',
+        isAndroid ? l10n.syncAcquireLockBodyAndroid : l10n.syncAcquireLockBodyDesktop,
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Annuler'),
+          child: Text(l10n.actionAnnuler),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Confirmer'),
+          child: Text(l10n.actionConfirmer),
         ),
       ],
     ),
@@ -718,18 +681,14 @@ class _WriteOnboardingDialogState extends State<_WriteOnboardingDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: const Text('Mode écriture activé'),
+      title: Text(l10n.syncWriteOnboardingTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sur Android, utilisez toujours le bouton Quitter pour sauvegarder '
-            'vos modifications et libérer le verrou. Sans cela, vos données '
-            'resteraient uniquement en local et l\'accès en écriture depuis '
-            'd\'autres appareils serait bloqué.',
-          ),
+          Text(l10n.syncWriteOnboardingBody),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -737,7 +696,7 @@ class _WriteOnboardingDialogState extends State<_WriteOnboardingDialog> {
                 value: _dontShowAgain,
                 onChanged: (v) => setState(() => _dontShowAgain = v ?? false),
               ),
-              const Text('Ne plus afficher ce message'),
+              Text(l10n.syncWriteOnboardingDontShow),
             ],
           ),
         ],
@@ -748,7 +707,7 @@ class _WriteOnboardingDialogState extends State<_WriteOnboardingDialog> {
             if (_dontShowAgain) configService.setAndroidWriteWarningSeen();
             Navigator.of(context).pop();
           },
-          child: const Text('OK'),
+          child: Text(l10n.actionOk),
         ),
       ],
     );
@@ -764,7 +723,7 @@ class _AcquireLockIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Prendre la main',
+      message: context.l10n.tooltipPrendreLaMain,
       preferBelow: false,
       child: IconButton(
         icon: const Icon(Icons.lock_open, size: 20, color: Colors.green),
@@ -787,7 +746,7 @@ class _AcquireLockButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: () => _showAcquireLockDialog(context, syncService),
       icon: const Icon(Icons.lock_open, size: 16, color: Colors.green),
-      label: const Text('Prendre la main'),
+      label: Text(context.l10n.syncPrendreLaMain),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         textStyle: const TextStyle(fontSize: 12),
@@ -803,7 +762,7 @@ class _SaveIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Sauvegarder',
+      message: context.l10n.tooltipSauvegarder,
       preferBelow: false,
       child: IconButton(
         icon: const Icon(Icons.save, size: 20, color: _kSaveColor),
@@ -822,7 +781,7 @@ class _QuitIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Quitter',
+      message: context.l10n.actionQuitter,
       preferBelow: false,
       child: IconButton(
         icon: const Icon(Icons.exit_to_app, size: 20, color: Colors.red),
@@ -834,21 +793,20 @@ class _QuitIconBtn extends StatelessWidget {
   }
 
   void _showQuitDialog(BuildContext context) {
+    final l10n = context.l10n;
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sauvegarder et quitter ?'),
-        content: const Text(
-          'Vos modifications seront envoyées sur Drive et le verrou libéré.',
-        ),
+        title: Text(l10n.quitDialogTitle),
+        content: Text(l10n.quitDialogBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Quitter'),
+            child: Text(l10n.actionQuitter),
           ),
         ],
       ),
@@ -866,26 +824,17 @@ class _QuitIconBtn extends StatelessWidget {
           context: context,
           barrierDismissible: false,
           builder: (ctx2) => AlertDialog(
-            title: const Text('Impossible de sauvegarder'),
-            content: const Text(
-              'Les données n\'ont pas pu être envoyées sur Drive '
-              'et le verrou n\'a pas été libéré.\n\n'
-              'Vos modifications restent disponibles localement sur cet appareil. '
-              'Elles pourront être synchronisées lors d\'une prochaine connexion à Drive, '
-              'sauf si le verrou a été libéré manuellement depuis un autre appareil '
-              'entre-temps.\n\n'
-              'Tant que le verrou reste actif, l\'accès en écriture depuis d\'autres '
-              'appareils sera bloqué.',
-            ),
+            title: Text(l10n.quitFailTitle),
+            content: Text(l10n.quitFailBody),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx2).pop(false),
-                child: const Text('Annuler'),
+                child: Text(l10n.actionAnnuler),
               ),
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () => Navigator.of(ctx2).pop(true),
-                child: const Text('Quitter quand même'),
+                child: Text(l10n.quitAnyway),
               ),
             ],
           ),
@@ -903,7 +852,7 @@ class _SyncIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Sauvegarder',
+      message: context.l10n.tooltipSauvegarder,
       preferBelow: false,
       child: IconButton(
         icon: const Icon(Icons.save, size: 20, color: _kSaveColor),
@@ -927,7 +876,7 @@ class _SyncButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: syncService.sync,
       icon: const Icon(Icons.save, size: 16, color: _kSaveColor),
-      label: const Text('Sauvegarder'),
+      label: Text(context.l10n.syncSauvegarder),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         textStyle: const TextStyle(fontSize: 12),
@@ -949,18 +898,19 @@ class _MoreMenuSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             leading: const Icon(Icons.import_export),
-            title: const Text('Données'),
+            title: Text(l10n.navDonnees),
             onTap: onImportCsv,
           ),
           ListTile(
             leading: const Icon(Icons.settings_outlined),
-            title: const Text('Paramètres'),
+            title: Text(l10n.navParametres),
             onTap: onSettings,
           ),
         ],
@@ -988,8 +938,9 @@ class _SyncErrorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: Text(title ?? 'Erreur de synchronisation'),
+      title: Text(title ?? l10n.syncErrorTitle),
       content: Text(message),
       actions: [
         TextButton(
@@ -997,7 +948,7 @@ class _SyncErrorDialog extends StatelessWidget {
             Navigator.of(context).pop();
             onClose?.call();
           },
-          child: Text(closeLabel ?? 'Fermer'),
+          child: Text(closeLabel ?? l10n.actionFermer),
         ),
         if (onRetry != null)
           FilledButton(
@@ -1005,7 +956,7 @@ class _SyncErrorDialog extends StatelessWidget {
               Navigator.of(context).pop();
               onRetry!();
             },
-            child: const Text('Réessayer'),
+            child: Text(l10n.actionReessayer),
           ),
       ],
     );

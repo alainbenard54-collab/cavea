@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
+import '../../l10n/l10n.dart';
 
 Color couleurVin(String couleur) {
   final c = couleur.toLowerCase().trim();
@@ -112,10 +113,11 @@ class _MaturityBadge extends StatelessWidget {
       gardeMin: bouteille.gardeMin,
       gardeMax: bouteille.gardeMax,
     );
+    final l10n = context.l10n;
     final (bgColor, textColor, label) = switch (level) {
-      MaturityLevel.tropJeune => (Colors.blue.shade50, Colors.blue.shade800, 'Trop jeune'),
-      MaturityLevel.optimal => (Colors.green.shade50, Colors.green.shade800, 'Optimal'),
-      MaturityLevel.aBoireUrgent => (Colors.red.shade50, Colors.red.shade800, 'À boire !'),
+      MaturityLevel.tropJeune => (Colors.blue.shade50, Colors.blue.shade800, l10n.maturityTropJeune),
+      MaturityLevel.optimal => (Colors.green.shade50, Colors.green.shade800, l10n.maturityOptimal),
+      MaturityLevel.aBoireUrgent => (Colors.red.shade50, Colors.red.shade800, l10n.maturityUrgent),
       MaturityLevel.sansDonnee => (null, null, ''),
     };
     if (bgColor == null) return const SizedBox.shrink();

@@ -7,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/config_service.dart';
+import '../../core/locale_formatting.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 
 class BottleEditScreen extends ConsumerStatefulWidget {
   final String id;
@@ -99,7 +101,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
     _cruCtrl.text = bouteille.cru ?? '';
     _contenanceCtrl.text = bouteille.contenance;
     _emplacementCtrl.text = bouteille.emplacement;
-    _prixAchatCtrl.text = bouteille.prixAchat?.toString() ?? '';
+    _prixAchatCtrl.text = bouteille.prixAchat != null
+        ? formatNumberForEdit(bouteille.prixAchat!, context)
+        : '';
     _gardeMinCtrl.text = bouteille.gardeMin?.toString() ?? '';
     _gardeMaxCtrl.text = bouteille.gardeMax?.toString() ?? '';
     _commentaireEntreeCtrl.text = bouteille.commentaireEntree ?? '';
@@ -161,12 +165,12 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
   static final _levelRe = RegExp(r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*$');
 
   String? _validateEmplacement(String? value) {
+    final l10n = context.l10n;
     final trimmed = value?.trim() ?? '';
-    if (trimmed.isEmpty) return 'Emplacement obligatoire';
+    if (trimmed.isEmpty) return l10n.deplacerEmplacementObligatoire;
     final levels = trimmed.split(' > ');
     if (levels.any((l) => !_levelRe.hasMatch(l.trim()))) {
-      return 'Format : "Niveau1" ou "Niveau1 > Niveau2 > …"\n'
-          '(lettres, chiffres, espaces ; séparateur " > ")';
+      return l10n.deplacerFormatError;
     }
     return null;
   }
@@ -175,11 +179,6 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
-
-  String _formatDateDisplay(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/'
-      '${d.month.toString().padLeft(2, '0')}/'
-      '${d.year}';
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -204,10 +203,12 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
     final gardeMinVal = int.tryParse(_gardeMinCtrl.text.trim());
     final gardeMaxVal = int.tryParse(_gardeMaxCtrl.text.trim());
 
+    final l10n = context.l10n;
+
     if (gardeMinVal != null && gardeMaxVal != null && gardeMinVal > gardeMaxVal) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text('Garde min doit être ≤ garde max.'),
+          content: Text(l10n.bulkAddGardeError),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ));
@@ -219,21 +220,16 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Garde non renseignée'),
-          content: const Text(
-            'La garde min ou max n\'est pas renseignée.\n\n'
-            'La maturité de cette bouteille ne pourra pas être '
-            'déterminée dans la vue Stock.\n\n'
-            'Confirmer quand même sans ces données ?',
-          ),
+          title: Text(l10n.bulkAddGardeDialogTitle),
+          content: Text(l10n.editGardeDialogBody),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Retour — saisir la garde'),
+              child: Text(l10n.bulkAddRetourGarde),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Confirmer sans garde'),
+              child: Text(l10n.bulkAddConfirmerSansGarde),
             ),
           ],
         ),
@@ -283,7 +279,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
       if (mounted) {
         setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur : $e')),
+          SnackBar(content: Text(context.l10n.errorGeneric(e.toString()))),
         );
       }
     }
@@ -291,24 +287,25 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_bouteille == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Modifier la fiche')),
-        body: const Center(child: Text('Bouteille introuvable.')),
+        appBar: AppBar(title: Text(l10n.editTitle)),
+        body: Center(child: Text(l10n.ficheNotFound)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Modifier la fiche'),
+        title: Text(l10n.editTitle),
         actions: [
           TextButton(
             onPressed: _saving ? null : _cancel,
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           const SizedBox(width: 8),
           FilledButton(
@@ -319,7 +316,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Enregistrer'),
+                : Text(l10n.actionEnregistrer),
           ),
           const SizedBox(width: 12),
         ],
@@ -329,44 +326,44 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _SectionHeader('Identité'),
+            _SectionHeader(l10n.bulkAddSectionIdentite),
             _AutocompleteField(
-              label: 'Domaine *',
+              label: l10n.bulkAddFieldDomaine,
               controller: _domaineCtrl,
               suggestions: _domaines,
               initialValue: _domaineInitial,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
             const SizedBox(height: 10),
             _AutocompleteField(
-              label: 'Appellation *',
+              label: l10n.bulkAddFieldAppellation,
               controller: _appellationCtrl,
               suggestions: _appellations,
               initialValue: _appellationInitial,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
             const SizedBox(height: 10),
             Row(children: [
               Expanded(
                 child: TextFormField(
                   controller: _millesimeCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Millésime *',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.bulkAddFieldMillesime,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Obligatoire' : null,
+                      (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _FilterDropdownField(
-                  label: 'Couleur *',
+                  label: l10n.bulkAddFieldCouleur,
                   choices: _couleurs,
                   controller: _couleurCtrl,
                   required: true,
@@ -377,7 +374,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             Row(children: [
               Expanded(
                 child: _FilterDropdownField(
-                  label: 'Cru',
+                  label: l10n.bulkAddFieldCru,
                   choices: _crus,
                   controller: _cruCtrl,
                 ),
@@ -385,7 +382,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: _FilterDropdownField(
-                  label: 'Contenance',
+                  label: l10n.bulkAddFieldContenance,
                   choices: _contenances,
                   controller: _contenanceCtrl,
                 ),
@@ -393,9 +390,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             ]),
             const SizedBox(height: 16),
 
-            _SectionHeader('Emplacement'),
+            _SectionHeader(l10n.fieldEmplacement),
             _AutocompleteField(
-              label: 'Emplacement *',
+              label: l10n.fieldEmplacementRequired,
               controller: _emplacementCtrl,
               suggestions: _emplacements,
               initialValue: _emplacementInitial,
@@ -403,14 +400,14 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             ),
             const SizedBox(height: 16),
 
-            _SectionHeader('Garde & prix'),
+            _SectionHeader(l10n.bulkAddSectionGarde),
             Row(children: [
               Expanded(
                 child: TextFormField(
                   controller: _gardeMinCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Garde min (ans)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.bulkAddFieldGardeMin,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   keyboardType: TextInputType.number,
@@ -421,9 +418,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
               Expanded(
                 child: TextFormField(
                   controller: _gardeMaxCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Garde max (ans)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.bulkAddFieldGardeMax,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   keyboardType: TextInputType.number,
@@ -434,9 +431,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
               Expanded(
                 child: TextFormField(
                   controller: _prixAchatCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Prix achat (€)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.bulkAddFieldPrix,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   keyboardType:
@@ -446,9 +443,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             ]),
             const SizedBox(height: 16),
 
-            _SectionHeader('Fournisseur'),
+            _SectionHeader(l10n.bulkAddSectionFournisseur),
             _AutocompleteField(
-              label: 'Nom fournisseur',
+              label: l10n.bulkAddFieldFournisseur,
               controller: _fournisseurNomCtrl,
               suggestions: _fournisseurs,
               initialValue: _fournisseurNomInitial,
@@ -456,9 +453,9 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             const SizedBox(height: 10),
             TextFormField(
               controller: _fournisseurInfosCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Infos fournisseur',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.bulkAddFieldFournisseurInfos,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               maxLines: 2,
@@ -466,20 +463,20 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             const SizedBox(height: 10),
             TextFormField(
               controller: _producteurCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Producteur',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.bulkAddFieldProducteur,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
             const SizedBox(height: 16),
 
-            _SectionHeader('Commentaire & date'),
+            _SectionHeader(l10n.bulkAddSectionCommentaire),
             TextFormField(
               controller: _commentaireEntreeCtrl,
-              decoration: const InputDecoration(
-                labelText: "Commentaire d'entrée",
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.fieldCommentaireEntree,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               maxLines: 3,
@@ -487,7 +484,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
             const SizedBox(height: 10),
             OutlinedButton.icon(
               icon: const Icon(Icons.calendar_today, size: 16),
-              label: Text("Date d'entrée : ${_formatDateDisplay(_dateEntree)}"),
+              label: Text(l10n.bulkAddDateEntreeLabel(formatDate(_dateEntree, context))),
               onPressed: _pickDate,
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
@@ -504,7 +501,7 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Enregistrer'),
+                  : Text(l10n.actionEnregistrer),
             ),
             const SizedBox(height: 16),
           ],
@@ -558,7 +555,7 @@ class _FilterDropdownFieldState extends State<_FilterDropdownField> {
   Widget build(BuildContext context) {
     return FormField<String>(
       validator: widget.required
-          ? (_) => widget.controller.text.trim().isEmpty ? 'Obligatoire' : null
+          ? (_) => widget.controller.text.trim().isEmpty ? context.l10n.validationObligatoire : null
           : null,
       builder: (field) => DropdownMenu<String>(
         controller: widget.controller,
@@ -645,10 +642,10 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
           suffixIcon: widget.initialValue != null
               ? ValueListenableBuilder<TextEditingValue>(
                   valueListenable: widget.controller,
-                  builder: (_, value, __) => value.text != widget.initialValue
+                  builder: (ctx, value, __) => value.text != widget.initialValue
                       ? IconButton(
                           icon: const Icon(Icons.restore, size: 18),
-                          tooltip: 'Restaurer la valeur initiale',
+                          tooltip: ctx.l10n.editRestore,
                           onPressed: _restore,
                         )
                       : const SizedBox.shrink(),

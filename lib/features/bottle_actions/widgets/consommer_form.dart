@@ -3,8 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/locale_formatting.dart';
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/l10n.dart';
 
 class ConsommerForm extends ConsumerStatefulWidget {
   final Bouteille bouteille;
@@ -68,8 +70,8 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel =
-        '${_date.day.toString().padLeft(2, '0')}/${_date.month.toString().padLeft(2, '0')}/${_date.year}';
+    final l10n = context.l10n;
+    final dateLabel = formatDate(_date, context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -77,13 +79,13 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Consommer', style: Theme.of(context).textTheme.titleSmall),
+          Text(l10n.consommerTitle, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 12),
 
           // Sélecteur de date
           OutlinedButton.icon(
             icon: const Icon(Icons.calendar_today, size: 16),
-            label: Text('Date de consommation : $dateLabel'),
+            label: Text(l10n.consommerDateLabel(dateLabel)),
             onPressed: _pickDate,
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
@@ -100,7 +102,7 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
                 onChanged: (v) => setState(() => _noterActive = v),
               ),
               const SizedBox(width: 8),
-              const Text('Ajouter une note'),
+              Text(l10n.consommerAjouterNote),
               if (_noterActive) ...[
                 const Spacer(),
                 Text(
@@ -123,9 +125,9 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
             const SizedBox(height: 8),
             TextField(
               controller: _commentaireCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Commentaire (optionnel)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.consommerCommentaireHint,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               maxLines: 2,
@@ -138,7 +140,7 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
             children: [
               TextButton(
                 onPressed: _loading ? null : widget.onCancel,
-                child: const Text('Annuler'),
+                child: Text(l10n.actionAnnuler),
               ),
               const SizedBox(width: 8),
               FilledButton(
@@ -149,7 +151,7 @@ class _ConsommerFormState extends ConsumerState<ConsommerForm> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Confirmer'),
+                    : Text(l10n.actionConfirmer),
               ),
             ],
           ),

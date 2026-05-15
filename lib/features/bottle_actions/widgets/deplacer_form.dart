@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/l10n.dart';
 
 class DeplacerForm extends ConsumerStatefulWidget {
   final Bouteille bouteille;
@@ -78,11 +79,12 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
   static final _levelRe = RegExp(r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*$');
 
   String? _validate(String value) {
+    final l10n = context.l10n;
     final trimmed = value.trim();
-    if (trimmed.isEmpty) return 'Emplacement obligatoire';
+    if (trimmed.isEmpty) return l10n.deplacerEmplacementObligatoire;
     final levels = trimmed.split(' > ');
     if (levels.any((l) => !_levelRe.hasMatch(l.trim()))) {
-      return 'Format : "Niveau1" ou "Niveau1 > Niveau2 > …"\n(lettres, chiffres, espaces ; séparateur " > ")';
+      return l10n.deplacerFormatError;
     }
     return null;
   }
@@ -106,6 +108,7 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -113,13 +116,13 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Déplacer', style: theme.textTheme.titleSmall),
+          Text(l10n.deplacerTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 12),
           TextField(
             controller: _ctrl,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: 'Emplacement',
+              labelText: l10n.fieldEmplacement,
               border: const OutlineInputBorder(),
               isDense: true,
               errorText: _validationError,
@@ -162,7 +165,7 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
             children: [
               TextButton(
                 onPressed: _loading ? null : widget.onCancel,
-                child: const Text('Annuler'),
+                child: Text(l10n.actionAnnuler),
               ),
               const SizedBox(width: 8),
               FilledButton(
@@ -173,7 +176,7 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Confirmer'),
+                    : Text(l10n.actionConfirmer),
               ),
             ],
           ),

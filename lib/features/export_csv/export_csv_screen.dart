@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 import 'csv_export_service.dart';
 
 class ExportCsvScreen extends ConsumerStatefulWidget {
@@ -34,18 +35,19 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
     return 'cave_$date.csv';
   }
 
-  Future<String> _buildCsv() async {
+  Future<String> _buildCsv(AppLocalizations l10n) async {
     final dao = ref.read(bouteillesDaoProvider);
     final bouteilles = await dao.getBouteillesForExport(stockOnly: _stockOnly);
-    return CsvExportService().buildCsv(bouteilles, separator: _separator);
+    return CsvExportService().buildCsv(bouteilles, separator: _separator, l10n: l10n);
   }
 
   Future<void> _exportWindows() async {
+    final l10n = context.l10n;
     setState(() => _exporting = true);
     try {
-      final csv = await _buildCsv();
+      final csv = await _buildCsv(l10n);
       final path = await FilePicker.platform.saveFile(
-        dialogTitle: 'Enregistrer le CSV',
+        dialogTitle: l10n.exportDialogTitle,
         fileName: _suggestedFileName,
         allowedExtensions: ['csv'],
         type: FileType.custom,
@@ -54,13 +56,13 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
       await File(path).writeAsBytes(utf8.encode(csv));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fichier enregistré : ${path.split(Platform.pathSeparator).last}')),
+          SnackBar(content: Text(context.l10n.exportSaved(path.split(Platform.pathSeparator).last))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de l\'export : $e')),
+          SnackBar(content: Text(context.l10n.exportError(e.toString()))),
         );
       }
     } finally {
@@ -69,13 +71,13 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
   }
 
   Future<void> _exportAndroidSave() async {
+    final l10n = context.l10n;
     setState(() => _exporting = true);
     try {
-      final csv = await _buildCsv();
-      // Sur Android, FilePicker.saveFile() exige les bytes et écrit lui-même le fichier.
+      final csv = await _buildCsv(l10n);
       final bytes = Uint8List.fromList(utf8.encode(csv));
       final path = await FilePicker.platform.saveFile(
-        dialogTitle: 'Enregistrer le CSV',
+        dialogTitle: l10n.exportDialogTitle,
         fileName: _suggestedFileName,
         allowedExtensions: ['csv'],
         type: FileType.custom,
@@ -84,13 +86,13 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
       if (!mounted) return;
       if (path != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fichier enregistré')),
+          SnackBar(content: Text(context.l10n.exportSavedAndroid)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de l\'export : $e')),
+          SnackBar(content: Text(context.l10n.exportError(e.toString()))),
         );
       }
     } finally {
@@ -101,7 +103,8 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
   Future<void> _exportAndroidShare() async {
     setState(() => _exporting = true);
     try {
-      final csv = await _buildCsv();
+      final l10n = context.l10n;
+      final csv = await _buildCsv(l10n);
       final tempDir = await getTemporaryDirectory();
       final tempFile = File('${tempDir.path}/$_suggestedFileName');
       await tempFile.writeAsBytes(utf8.encode(csv));
@@ -113,7 +116,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de l\'export : $e')),
+          SnackBar(content: Text(context.l10n.exportError(e.toString()))),
         );
       }
     } finally {
@@ -123,16 +126,17 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isAndroid = Platform.isAndroid;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Scope', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.exportScope, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         SegmentedButton<bool>(
-          segments: const [
-            ButtonSegment(value: true, label: Text('Stock uniquement')),
-            ButtonSegment(value: false, label: Text('Tout (stock + consommées)')),
+          segments: [
+            ButtonSegment(value: true, label: Text(l10n.exportStockOnly)),
+            ButtonSegment(value: false, label: Text(l10n.exportTout)),
           ],
           selected: {_stockOnly},
           onSelectionChanged: _exporting
@@ -140,13 +144,13 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
               : (v) => setState(() => _stockOnly = v.first),
         ),
         const SizedBox(height: 20),
-        Text('Séparateur', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.exportSeparateur, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: ';', label: Text('Point-virgule  ;')),
-            ButtonSegment(value: ',', label: Text('Virgule  ,')),
-            ButtonSegment(value: '\t', label: Text('Tabulation')),
+          segments: [
+            ButtonSegment(value: ';', label: Text(l10n.exportSeparateurPointVirgule)),
+            ButtonSegment(value: ',', label: Text(l10n.exportSeparateurVirgule)),
+            ButtonSegment(value: '\t', label: Text(l10n.exportSeparateurTabulation)),
           ],
           selected: {_separator},
           onSelectionChanged: _exporting
@@ -162,7 +166,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.download),
-            label: Text(_exporting ? 'Export en cours…' : 'Exporter…'),
+            label: Text(_exporting ? l10n.exportEnCours : l10n.exportButton),
             onPressed: _exporting ? null : _exportWindows,
           )
         else
@@ -176,7 +180,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.save_alt),
-                  label: Text(_exporting ? '…' : 'Enregistrer'),
+                  label: Text(_exporting ? '…' : l10n.exportEnregistrer),
                   onPressed: _exporting ? null : _exportAndroidSave,
                 ),
               ),
@@ -184,7 +188,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.share),
-                  label: const Text('Partager…'),
+                  label: Text(l10n.exportPartager),
                   onPressed: _exporting ? null : _exportAndroidShare,
                 ),
               ),

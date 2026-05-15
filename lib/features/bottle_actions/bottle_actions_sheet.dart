@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/database.dart';
+import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import 'widgets/deplacer_form.dart';
 import 'widgets/consommer_form.dart';
@@ -143,6 +144,7 @@ class _Menu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (isReadOnly) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -155,7 +157,7 @@ class _Menu extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Mode lecture seule — modifications indisponibles',
+                    l10n.actionsReadOnly,
                     style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13),
                   ),
                 ),
@@ -165,12 +167,12 @@ class _Menu extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('Consulter la fiche'),
+            title: Text(l10n.actionsConsulterFiche),
             onTap: onConsulterFiche,
           ),
           ListTile(
             leading: const Icon(Icons.close),
-            title: const Text('Fermer'),
+            title: Text(l10n.actionFermer),
             onTap: onAnnuler,
           ),
         ],
@@ -182,27 +184,27 @@ class _Menu extends StatelessWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.local_bar),
-          title: const Text('Consommer'),
+          title: Text(l10n.actionsConsommer),
           onTap: onConsommer,
         ),
         ListTile(
           leading: const Icon(Icons.info_outline),
-          title: const Text('Consulter la fiche'),
+          title: Text(l10n.actionsConsulterFiche),
           onTap: onConsulterFiche,
         ),
         ListTile(
           leading: const Icon(Icons.move_down),
-          title: const Text('Déplacer'),
+          title: Text(l10n.actionsDeplacer),
           onTap: onDeplacer,
         ),
         ListTile(
           leading: const Icon(Icons.edit_outlined),
-          title: const Text('Modifier la fiche'),
+          title: Text(l10n.actionsModifierFiche),
           onTap: onModifierFiche,
         ),
         ListTile(
           leading: const Icon(Icons.close),
-          title: const Text('Annuler'),
+          title: Text(l10n.actionAnnuler),
           onTap: onAnnuler,
         ),
       ],

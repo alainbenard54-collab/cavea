@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'location_node.dart';
 
 class LocationNodeTile extends StatelessWidget {
@@ -16,8 +17,8 @@ class LocationNodeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (count, sumPrix, nullPrixCount) = nodeStats(node, true); // toujours agréger
-    final statsLabel = _statsLabel(count, sumPrix, nullPrixCount);
+    final (count, sumPrix, nullPrixCount) = nodeStats(node, true);
+    final statsLabel = locationStatsLabel(context, count, sumPrix, nullPrixCount);
     final hasChildren = !node.isLeaf;
 
     return ListTile(
@@ -33,13 +34,15 @@ class LocationNodeTile extends StatelessWidget {
   }
 }
 
-String locationStatsLabel(int count, double? sumPrix, [int nullPrixCount = 0]) =>
-    _statsLabel(count, sumPrix, nullPrixCount);
-
-String _statsLabel(int count, double? sumPrix, [int nullPrixCount = 0]) {
-  final bottles = '$count bouteille${count > 1 ? 's' : ''}';
-  if (sumPrix == null || sumPrix <= 0) return bottles;
-  final label = '$bottles (${sumPrix.round()} €)';
-  if (nullPrixCount > 0) return '$label dont $nullPrixCount sans prix';
+String locationStatsLabel(
+  BuildContext context,
+  int count,
+  double? sumPrix, [
+  int nullPrixCount = 0,
+]) {
+  final l10n = context.l10n;
+  if (sumPrix == null || sumPrix <= 0) return l10n.locationsBouteilles(count);
+  final label = l10n.locationsBouteillesAvecPrix(count, sumPrix.round());
+  if (nullPrixCount > 0) return '$label${l10n.locationsSansPrix(nullPrixCount)}';
   return label;
 }

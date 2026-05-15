@@ -7,12 +7,15 @@ import 'dart:io' show Platform;
 import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/config_service.dart';
+import 'core/locale_provider.dart';
 import 'data/database.dart';
 import 'data/providers.dart';
+import 'l10n/l10n.dart';
 import 'services/sync_service.dart';
 
 final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -125,11 +128,17 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_pendingSnackbarMessage != null) {
-      final msg = _pendingSnackbarMessage!;
+      final msgKey = _pendingSnackbarMessage!;
       _pendingSnackbarMessage = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        final l10n = AppLocalizations.of(context);
+        final text = switch (msgKey) {
+          'syncVerrouPose' => l10n.syncVerrouPose,
+          'syncModificationsAbandonnees' => l10n.syncModificationsAbandonnees,
+          _ => msgKey,
+        };
         _scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(msg)),
+          SnackBar(content: Text(text)),
         );
       });
     }
@@ -144,18 +153,27 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   }
 }
 
-class CaveApp extends StatelessWidget {
+class CaveApp extends ConsumerWidget {
   final VoidCallback onSetupComplete;
 
   const CaveApp({super.key, required this.onSetupComplete});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     return MaterialApp.router(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       title: 'Cavea',
       theme: buildTheme(),
       routerConfig: buildRouter(onSetupComplete),
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

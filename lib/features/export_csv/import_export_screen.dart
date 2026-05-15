@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import '../import_csv/import_csv_screen.dart';
 import 'export_csv_screen.dart';
@@ -15,8 +16,9 @@ class ImportExportScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
 
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Données')),
+      appBar: AppBar(title: Text(l10n.donneesTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
@@ -24,13 +26,13 @@ class ImportExportScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(24),
             children: [
               _SectionCard(
-                title: 'Importer un CSV',
+                title: l10n.importSectionTitle,
                 icon: Icons.upload_file_outlined,
                 child: ImportCsvContent(isReadOnly: isReadOnly),
               ),
               const SizedBox(height: 16),
               _SectionCard(
-                title: 'Exporter en CSV',
+                title: l10n.exportSectionTitle,
                 icon: Icons.download_outlined,
                 child: const ExportCsvScreen(),
               ),

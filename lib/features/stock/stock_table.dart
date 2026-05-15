@@ -2,8 +2,10 @@
 // Copyright 2026 Alain Benard
 
 import 'package:flutter/material.dart';
+import '../../core/locale_formatting.dart';
 import '../../core/maturity/maturity_service.dart';
 import '../../data/database.dart';
+import '../../l10n/l10n.dart';
 import '../bottle_actions/bottle_actions_sheet.dart';
 import 'bouteille_list_tile.dart';
 
@@ -94,6 +96,7 @@ class StockTable extends StatelessWidget {
   }
 
   Widget _gardeCell(BuildContext context, Bouteille b) {
+    final l10n = context.l10n;
     final style = Theme.of(context).textTheme.bodySmall;
 
     if (b.gardeMin == null && b.gardeMax == null) {
@@ -119,7 +122,6 @@ class StockTable extends StatelessWidget {
       gardeMax: b.gardeMax,
     );
 
-    // score = age - gardeMax (négatif pour optimal/tropJeune) → valeur absolue pour affichage
     final absScore = score.abs();
     final yearsLeft = (b.gardeMax != null)
         ? (b.millesime + b.gardeMax! - DateTime.now().year)
@@ -131,15 +133,15 @@ class StockTable extends StatelessWidget {
     final (bgColor, deltaStr) = switch (level) {
       MaturityLevel.aBoireUrgent => (
           Colors.red.shade50,
-          '+$absScore an${absScore > 1 ? 's' : ''}',
+          l10n.gardeDepasse(absScore),
         ),
       MaturityLevel.optimal => (
           Colors.green.shade50,
-          'encore $yearsLeft an${yearsLeft > 1 ? 's' : ''}',
+          l10n.gardeEncore(yearsLeft),
         ),
       MaturityLevel.tropJeune => (
           Colors.blue.shade50,
-          'dans $yearsUntilReady an${yearsUntilReady > 1 ? 's' : ''}',
+          l10n.gardeDans(yearsUntilReady),
         ),
       MaturityLevel.sansDonnee => (null, ''),
     };
@@ -167,11 +169,6 @@ class StockTable extends StatelessWidget {
     final theme = Theme.of(context);
     final style = theme.textTheme.bodySmall;
     final isSelected = selectedIds.contains(b.id);
-
-    String prixStr() {
-      if (b.prixAchat == null) return '—';
-      return '${b.prixAchat!.toStringAsFixed(0)} €';
-    }
 
     final cells = [
       if (isSelectMode)
@@ -206,7 +203,11 @@ class StockTable extends StatelessWidget {
       _gardeCell(context, b),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-        child: Text(prixStr(), style: style, textAlign: TextAlign.right),
+        child: Text(
+          formatCurrency(b.prixAchat, context),
+          style: style,
+          textAlign: TextAlign.right,
+        ),
       ),
     ];
 
@@ -228,6 +229,7 @@ class StockTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     final header = Container(
@@ -236,12 +238,12 @@ class StockTable extends StatelessWidget {
         [
           if (isSelectMode) const SizedBox(),
           const SizedBox(),
-          _headerCell(context, 'DOMAINE', 'domaine'),
-          _headerCell(context, 'APPELLATION', 'appellation'),
-          _headerCell(context, 'MILL.', 'millesime', align: TextAlign.center),
-          _headerCell(context, 'EMPLACEMENT', 'emplacement'),
-          _headerCell(context, 'GARDE', 'gardeMin', align: TextAlign.center),
-          _headerCell(context, 'PRIX', 'prixAchat', align: TextAlign.right),
+          _headerCell(context, l10n.tableHeaderDomaine, 'domaine'),
+          _headerCell(context, l10n.tableHeaderAppellation, 'appellation'),
+          _headerCell(context, l10n.tableHeaderMillesime, 'millesime', align: TextAlign.center),
+          _headerCell(context, l10n.tableHeaderEmplacement, 'emplacement'),
+          _headerCell(context, l10n.tableHeaderGarde, 'gardeMin', align: TextAlign.center),
+          _headerCell(context, l10n.tableHeaderPrix, 'prixAchat', align: TextAlign.right),
         ],
         withCheckbox: isSelectMode,
       ),

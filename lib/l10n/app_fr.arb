@@ -1,0 +1,450 @@
+{
+  "@@locale": "fr",
+
+  "navStock": "Stock",
+  "navAjouter": "Ajouter",
+  "navEmplacements": "Emplacements",
+  "navHistorique": "Historique",
+  "navDonnees": "Import / Export",
+  "navParametres": "Paramètres",
+  "navPlus": "Plus",
+
+  "actionAnnuler": "Annuler",
+  "actionConfirmer": "Confirmer",
+  "actionRetour": "Retour",
+  "actionFermer": "Fermer",
+  "actionReessayer": "Réessayer",
+  "actionQuitter": "Quitter",
+  "actionOk": "OK",
+  "actionModifier": "Modifier",
+  "actionAjouter": "Ajouter",
+  "actionSuivant": "Suivant",
+  "actionContinuer": "Continuer",
+  "actionEnregistrer": "Enregistrer",
+  "validationObligatoire": "Obligatoire",
+  "errorGeneric": "Erreur : {message}",
+  "@errorGeneric": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+
+  "syncConnecting": "Connexion à Google Drive…",
+  "syncSaving": "Sauvegarde en cours…",
+  "syncSyncing": "Synchronisation en cours…",
+  "syncSavedToDrive": "Cave sauvegardée sur Drive",
+  "syncSavedAndUnlocked": "Cave sauvegardée et verrou libéré",
+  "syncReadOnlyUnavailable": "Indisponible en mode lecture seule",
+  "syncVerrouPose": "Verrou posé — cave à jour depuis Drive",
+  "syncModificationsAbandonnees": "Modifications abandonnées — version Drive restaurée",
+
+  "tooltipModePartage": "Mode partagé — Google Drive",
+  "tooltipModeLocal": "Mode local — PC seul",
+  "tooltipCaveEcriture": "Votre cave est ouverte en écriture",
+  "tooltipLectureSeule": "Mode lecture seule",
+  "tooltipSynchronisation": "Synchronisation en cours…",
+  "tooltipErreurSync": "Erreur de synchronisation",
+  "tooltipSauvegarder": "Sauvegarder",
+  "tooltipPrendreLaMain": "Prendre la main",
+
+  "syncCrashRecoveryTitle": "Session précédente interrompue",
+  "syncCrashRecoveryBody": "La dernière session ne s'est pas terminée correctement. Choisissez quelle version de la cave conserver.",
+  "syncCrashSendLocal": "Envoyer mes données locales",
+  "syncCrashDownloadDrive": "Repartir depuis Google Drive",
+  "syncCrashSendLocalConfirmTitle": "Envoyer mes données locales ?",
+  "syncCrashSendLocalConfirmBody": "Votre base locale va remplacer la version sur Google Drive. Comme la cave était verrouillée, aucun autre appareil n'a pu la modifier depuis la dernière synchronisation.",
+  "syncCrashConfirmSend": "Envoyer",
+  "syncCrashDownloadConfirmTitle": "Repartir depuis Google Drive ?",
+  "syncCrashDownloadConfirmBody": "La base Google Drive va remplacer votre base locale. Toutes vos modifications locales non sauvegardées seront perdues.",
+  "syncCrashConfirmReplace": "Remplacer ma base locale",
+
+  "syncLockTiersTitle": "Cave utilisée sur un autre appareil",
+  "syncLockTiersBody": "Votre cave est actuellement ouverte sur un autre appareil.",
+  "syncEnterReadOnly": "Consulter en lecture seule",
+  "syncAcquireLockFailedTitle": "Impossible de prendre la main",
+  "syncAcquireLockFailedBody": "La cave est actuellement verrouillée par un autre appareil.",
+  "syncStayReadOnly": "Rester en lecture seule",
+  "syncErrorTitle": "Erreur de synchronisation",
+  "syncAcquireLockTitle": "Passer en mode écriture ?",
+  "syncAcquireLockBodyAndroid": "La cave sera verrouillée pendant votre session. Utilisez le bouton Quitter pour sauvegarder vos modifications et libérer le verrou avant de fermer l'application.",
+  "syncAcquireLockBodyDesktop": "La cave sera verrouillée pendant toute votre session. Le verrou sera automatiquement libéré et vos modifications sauvegardées sur Google Drive à la fermeture de l'application ou via le bouton \"Sauvegarder\".",
+  "syncPrendreLaMain": "Prendre la main",
+  "syncSauvegarder": "Sauvegarder",
+  "syncWriteOnboardingTitle": "Mode écriture activé",
+  "syncWriteOnboardingBody": "Sur Android, utilisez toujours le bouton Quitter pour sauvegarder vos modifications et libérer le verrou. Sans cela, vos données resteraient uniquement en local et l'accès en écriture depuis d'autres appareils serait bloqué.",
+  "syncWriteOnboardingDontShow": "Ne plus afficher ce message",
+
+  "quitDialogTitle": "Sauvegarder et quitter ?",
+  "quitDialogBody": "Vos modifications seront envoyées sur Drive et le verrou libéré.",
+  "quitFailTitle": "Impossible de sauvegarder",
+  "quitFailBody": "Les données n'ont pas pu être envoyées sur Drive et le verrou n'a pas été libéré.\n\nVos modifications restent disponibles localement sur cet appareil. Elles pourront être synchronisées lors d'une prochaine connexion à Drive, sauf si le verrou a été libéré manuellement depuis un autre appareil entre-temps.\n\nTant que le verrou reste actif, l'accès en écriture depuis d'autres appareils sera bloqué.",
+  "quitAnyway": "Quitter quand même",
+
+  "driveSetupMissingTitle": "Configuration manquante",
+  "driveSetupMissingBody": "Le fichier de configuration Google Drive est introuvable à côté de l'application.\n\nSi vous avez installé Cavea via l'installateur, veuillez le désinstaller puis réinstaller une version récente.\n\nSi vous avez copié l'application manuellement, consultez le guide de configuration en ligne.",
+  "driveGuideEnLigne": "Guide en ligne",
+  "driveAuthOpening": "Ouverture de l'authentification Google…",
+  "driveAuthFailed": "Authentification échouée : {error}",
+  "@driveAuthFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "driveMigrateTitle": "Migrer vers Google Drive",
+  "driveMigrateBodyExisting": "Une cave existe déjà sur Google Drive.\n\nQue souhaitez-vous faire ?",
+  "driveMigrateBodyNew": "Voulez-vous envoyer votre cave locale vers Google Drive ?",
+  "driveDownloadExisting": "Récupérer la cave du Drive",
+  "driveUploadOverwrite": "Écraser le Drive avec ma cave locale",
+  "driveSendNew": "Envoyer ma cave vers Drive",
+  "driveConfirmOverwriteLocalTitle": "Écraser la base locale ?",
+  "driveConfirmOverwriteLocalBody": "Votre base locale sera remplacée par la version Google Drive. Toutes les données locales non présentes sur Drive seront perdues.",
+  "driveConfirmOverwriteDriveTitle": "Écraser la version Drive ?",
+  "driveConfirmOverwriteDriveBody": "La version sur Google Drive sera remplacée par votre base locale. Toutes les données Drive non présentes localement seront perdues.",
+  "driveDownloading": "Téléchargement en cours…",
+  "driveUploading": "Upload en cours…",
+  "driveDownloadFailed": "Téléchargement échoué : {error}",
+  "@driveDownloadFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "driveUploadFailed": "Upload échoué : {error}",
+  "@driveUploadFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "driveModeActivated": "Mode 2 activé — synchronisation Google Drive disponible",
+  "driveDeactivateTitle": "Revenir en mode local ?",
+  "driveDeactivateBody": "L'app passera en mode PC seul.\nVotre cave.db local est conservé tel quel.\nLe fichier Drive n'est pas supprimé.",
+  "driveModeDeactivated": "Mode local activé",
+
+  "settingsSectionLangue": "Langue",
+  "settingsLangAuto": "Automatique",
+
+  "settingsTitle": "Paramètres",
+  "settingsSectionCave": "Emplacement de la cave",
+  "settingsSectionDefaults": "Ajout en lot — valeurs par défaut",
+  "settingsSectionListes": "Listes de référence",
+  "settingsSectionSync": "Mode de synchronisation",
+  "settingsSectionAbout": "À propos",
+  "settingsDbFolder": "Dossier cave.db",
+  "settingsDbNotConfigured": "(non configuré)",
+  "settingsCouleurDefaut": "Couleur par défaut",
+  "settingsChoisir": "Choisir…",
+  "settingsContenanceDefaut": "Contenance par défaut",
+  "settingsRefCouleurs": "Couleurs",
+  "settingsRefContenances": "Contenances",
+  "settingsRefCrus": "Crus",
+  "settingsRefCount": "{count, plural, =1{1 valeur} other{{count} valeurs}}",
+  "@settingsRefCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "settingsRefAddHint": "Ajouter une valeur…",
+  "settingsActiverDrive": "Activer",
+  "settingsModePartage": "Mode partagé (Google Drive)",
+  "settingsModeLocalCurrent": "Mode actuel : PC seul (local)",
+  "settingsModeSyncCurrent": "Mode actuel : synchronisation activée",
+  "settingsRevenirLocal": "Revenir en local",
+  "settingsRestartTitle": "Redémarrage requis",
+  "settingsRestartBody": "Le dossier de la cave a été modifié.\n\nL'application doit redémarrer pour utiliser le nouveau chemin.",
+  "settingsQuitApp": "Quitter l'application",
+
+  "aboutTitle": "Cavea",
+  "aboutSubtitle": "Gestionnaire de cave à vin personnel",
+  "aboutButton": "À propos",
+  "aboutVersion": "Version 0.1.0",
+  "aboutCopyright": "© 2026 Alain Benard\nLicence Apache 2.0",
+  "aboutConfidentialite": "Confidentialité",
+  "aboutLicences": "Licences",
+
+  "stockSearchHint": "Rechercher : domaine, appellation, millésime…",
+  "stockFiltresActifs": "Filtres actifs",
+  "stockFiltres": "Filtres",
+  "stockReinitialiseFiltres": "Réinitialiser les filtres",
+  "stockReinitialise": "Réinitialiser",
+  "stockMaturityUrgent": "À boire urgent !",
+  "stockMaturityOptimal": "À boire",
+  "stockMaturityJeune": "Trop jeune",
+  "stockFiltresAvances": "Filtres avancés",
+  "stockFilterAppellation": "Appellation",
+  "stockFilterMillesime": "Millésime",
+  "stockFilterTous": "Tous",
+  "stockEmptyFiltered": "Aucune bouteille ne correspond aux filtres.",
+  "stockEmptyTitle": "Aucune bouteille en stock",
+  "stockImportCsv": "Importer un CSV",
+  "stockCountFiltered": "{shown} / {total} bouteilles",
+  "@stockCountFiltered": {
+    "placeholders": {
+      "shown": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "stockCountTotal": "{count, plural, =1{1 bouteille en stock} other{{count} bouteilles en stock}}",
+  "@stockCountTotal": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "tableHeaderDomaine": "DOMAINE",
+  "tableHeaderAppellation": "APPELLATION",
+  "tableHeaderMillesime": "MILL.",
+  "tableHeaderEmplacement": "EMPLACEMENT",
+  "tableHeaderGarde": "GARDE",
+  "tableHeaderPrix": "PRIX",
+
+  "maturityTropJeune": "Trop jeune",
+  "maturityOptimal": "Optimal",
+  "maturityUrgent": "À boire !",
+  "maturityUrgentDetail": "À boire — urgent",
+  "maturityInconnue": "Maturité inconnue",
+
+  "gardeDepasse": "{count, plural, =1{+1 an} other{+{count} ans}}",
+  "@gardeDepasse": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "gardeEncore": "{count, plural, =1{encore 1 an} other{encore {count} ans}}",
+  "@gardeEncore": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "gardeDans": "{count, plural, =1{dans 1 an} other{dans {count} ans}}",
+  "@gardeDans": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "actionsReadOnly": "Mode lecture seule — modifications indisponibles",
+  "actionsConsulterFiche": "Consulter la fiche",
+  "actionsConsommer": "Consommer",
+  "actionsDeplacer": "Déplacer",
+  "actionsModifierFiche": "Modifier la fiche",
+
+  "consommerTitle": "Consommer",
+  "consommerDateLabel": "Date de consommation : {date}",
+  "@consommerDateLabel": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "consommerAjouterNote": "Ajouter une note",
+  "consommerCommentaireHint": "Commentaire (optionnel)",
+
+  "deplacerTitle": "Déplacer",
+  "deplacerEmplacementObligatoire": "Emplacement obligatoire",
+  "deplacerFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces ; séparateur \" > \")",
+
+  "bulkSelectionCount": "{count, plural, =1{1 bouteille sélectionnée} other{{count} bouteilles sélectionnées}}",
+  "@bulkSelectionCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "bulkReadOnly": "Mode lecture seule",
+  "bulkAnnulerSelection": "Annuler la sélection",
+
+  "deplacerBatchTitle": "{count, plural, =1{Déplacer 1 bouteille} other{Déplacer {count} bouteilles}}",
+  "@deplacerBatchTitle": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "consommerBatchTitle": "{count, plural, =1{Consommer 1 bouteille} other{Consommer {count} bouteilles}}",
+  "@consommerBatchTitle": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "bulkAddTitle": "Ajouter des bouteilles",
+  "bulkAddSectionIdentite": "Identité",
+  "bulkAddFieldDomaine": "Domaine *",
+  "bulkAddFieldAppellation": "Appellation *",
+  "bulkAddFieldMillesime": "Millésime *",
+  "bulkAddFieldCouleur": "Couleur *",
+  "bulkAddFieldCru": "Cru",
+  "bulkAddFieldContenance": "Contenance",
+  "bulkAddSectionGarde": "Garde & prix",
+  "bulkAddFieldGardeMin": "Garde min (ans)",
+  "bulkAddFieldGardeMax": "Garde max (ans)",
+  "bulkAddFieldPrix": "Prix achat (€)",
+  "bulkAddSectionFournisseur": "Fournisseur",
+  "bulkAddFieldFournisseur": "Nom fournisseur",
+  "bulkAddFieldFournisseurInfos": "Infos fournisseur",
+  "bulkAddFieldProducteur": "Producteur",
+  "bulkAddSectionCommentaire": "Commentaire & date",
+  "bulkAddFieldCommentaire": "Commentaire entrée",
+  "bulkAddDateEntreeLabel": "Date d'entrée : {date}",
+  "@bulkAddDateEntreeLabel": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "bulkAddSectionRepartition": "Répartition",
+  "bulkAddQuantiteTotal": "Quantité totale :",
+  "bulkAddAssignees": "Assignées : {assigned} / {total}",
+  "@bulkAddAssignees": {
+    "placeholders": {
+      "assigned": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "bulkAddAjouterEmplacement": "Ajouter un emplacement",
+  "bulkAddConfirmer": "{count, plural, =1{Confirmer — 1 bouteille} other{Confirmer — {count} bouteilles}}",
+  "@bulkAddConfirmer": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "bulkAddGardeError": "Garde min doit être ≤ garde max.",
+  "bulkAddGardeDialogTitle": "Garde non renseignée",
+  "bulkAddGardeDialogBody": "La garde min ou max n'est pas renseignée.\n\nLa maturité de ces bouteilles ne pourra pas être déterminée dans la vue Stock.\n\nConfirmer quand même sans ces données ?",
+  "bulkAddRetourGarde": "Retour — saisir la garde",
+  "bulkAddConfirmerSansGarde": "Confirmer sans garde",
+  "bulkAddCancelled": "Retour en lecture seule — saisie annulée",
+
+  "repartitionQte": "Qté",
+  "repartitionSupprimer": "Supprimer",
+  "repartitionFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces ; séparateur \" > \")",
+
+  "fieldDomaine": "Domaine",
+  "fieldAppellation": "Appellation",
+  "fieldMillesime": "Millésime",
+  "fieldCouleur": "Couleur",
+  "fieldCru": "Cru",
+  "fieldContenance": "Contenance",
+  "fieldEmplacement": "Emplacement",
+  "fieldEmplacementRequired": "Emplacement *",
+  "fieldCommentaireEntree": "Commentaire d'entrée",
+
+  "ficheTitle": "Fiche bouteille",
+  "ficheNotFound": "Bouteille introuvable.",
+  "ficheConsommation": "Consommation",
+  "ficheNote": "Note /10",
+  "ficheCommentaireDegus": "Commentaire de dégustation",
+  "editTitle": "Modifier la fiche",
+  "editGardeDialogBody": "La garde min ou max n'est pas renseignée.\n\nLa maturité de cette bouteille ne pourra pas être déterminée dans la vue Stock.\n\nConfirmer quand même sans ces données ?",
+  "editRestore": "Restaurer la valeur initiale",
+
+  "historyTitle": "Historique",
+  "historySearchHint": "Rechercher domaine ou appellation…",
+  "historyEmpty": "Aucune bouteille consommée.",
+  "historyEmptySearch": "Aucun résultat pour \"{query}\".",
+  "@historyEmptySearch": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "historyEmplacementOrigine": "Emplacement d'origine",
+  "historyDateConsommation": "Date de consommation",
+  "historyNote": "Note",
+  "historyCommentaire": "Commentaire",
+  "historyRehabiliter": "Réhabiliter (remettre en stock)",
+  "historyRehabiliterTitle": "Réhabiliter cette bouteille ?",
+  "historyRehabiliterBody": "La bouteille sera remise en stock à son emplacement d'origine.\n\nLa note et le commentaire de dégustation seront effacés.",
+  "historyRehabiliterConfirm": "Réhabiliter",
+
+  "locationsEmpty": "Aucune bouteille.",
+  "locationsDirect": "Directement dans cet emplacement",
+  "locationsBouteilles": "{count, plural, =1{1 bouteille} other{{count} bouteilles}}",
+  "@locationsBouteilles": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "locationsBouteillesAvecPrix": "{count, plural, =1{1 bouteille} other{{count} bouteilles}} ({prix} €)",
+  "@locationsBouteillesAvecPrix": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "prix": { "type": "int" }
+    }
+  },
+  "locationsSansPrix": " dont {count} sans prix",
+  "@locationsSansPrix": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "donneesTitle": "Données",
+  "importSectionTitle": "Importer un CSV",
+  "exportSectionTitle": "Exporter en CSV",
+
+  "exportScope": "Scope",
+  "exportStockOnly": "Stock uniquement",
+  "exportTout": "Tout (stock + consommées)",
+  "exportSeparateur": "Séparateur",
+  "exportSeparateurPointVirgule": "Point-virgule  ;",
+  "exportSeparateurVirgule": "Virgule  ,",
+  "exportSeparateurTabulation": "Tabulation",
+  "exportEnCours": "Export en cours…",
+  "exportButton": "Exporter…",
+  "exportEnregistrer": "Enregistrer",
+  "exportPartager": "Partager…",
+  "exportDialogTitle": "Enregistrer le CSV",
+  "exportSaved": "Fichier enregistré : {filename}",
+  "@exportSaved": {
+    "placeholders": { "filename": { "type": "String" } }
+  },
+  "exportSavedAndroid": "Fichier enregistré",
+  "exportError": "Erreur lors de l'export : {error}",
+  "@exportError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "importPickFileDialog": "Choisir un fichier CSV",
+  "importChoisirFichier": "Choisir un fichier CSV",
+  "importFormatInfo": "Format attendu : UTF-8, ligne d'en-tête avec les noms de colonnes.\nColonnes : id, domaine, appellation, millesime, couleur, …",
+  "importEcraser": "Écraser les lignes existantes",
+  "importEcraserSubtitle": "Si décoché, les bouteilles déjà présentes (même UUID) sont ignorées.",
+  "importEnCours": "Import en cours…",
+  "importButton": "Importer",
+  "importReadOnly": "Import indisponible — la cave est verrouillée par un autre appareil.",
+  "importTermine": "Import terminé",
+  "importInserted": "Insérées",
+  "importUpdated": "Mises à jour",
+  "importIgnored": "Ignorées",
+  "importErrors": "Erreurs",
+  "importMasquerDetail": "Masquer le détail",
+  "importVoirDetail": "Voir le détail des erreurs",
+  "importFileError": "Erreur lors de la lecture du fichier : {error}",
+  "@importFileError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "setupTitle": "Configuration de Cavea",
+  "setupWelcome": "Bienvenue dans Cavea",
+  "setupChooseMode": "Choisissez votre mode de fonctionnement :",
+  "setupModeLocal": "PC seul (local)",
+  "setupModeLocalDesc": "La base de données est stockée localement sur ce PC.",
+  "setupModeDrive": "Mode partagé (Google Drive)",
+  "setupModeDriveDesc": "Partagez votre cave entre plusieurs appareils via Google Drive — nécessite un compte Google.",
+  "setupModeMobile": "Mobile seul",
+  "setupModeMobileDesc": "Non disponible dans cette version.",
+  "setupFolderTitle": "Dossier de la base de données",
+  "setupFolderDesc": "Choisissez le dossier où sera stocké cave.db.\nCe dossier doit exister.",
+  "setupFolderPath": "Chemin du dossier",
+  "setupParcourir": "Parcourir",
+  "setupPickerTitle": "Choisir le dossier de cave.db",
+  "setupConfirmTitle": "Confirmer la configuration",
+  "setupConfirmMode": "Mode",
+  "setupConfirmDb": "Base de données",
+  "setupDemarrer": "Démarrer Cavea",
+  "setupModifierChemin": "Modifier le chemin",
+  "setupDriveTitle": "Connexion Google Drive",
+  "setupDriveDescAndroid": "Un cache local de la base sera maintenu dans le stockage privé de l'application (non accessible depuis l'explorateur de fichiers Android).\nConnectez votre compte Google pour continuer.",
+  "setupDriveDescDesktop": "Choisissez d'abord le dossier local pour cave.db (cache de travail), puis connectez votre compte Google.",
+  "setupDriveLocalFolder": "Dossier local (cache)",
+  "setupDrivePickerTitle": "Dossier local pour cave.db",
+  "setupConnectDrive": "Connecter Google Drive",
+  "setupFolderRequired": "Choisissez un dossier local valide.",
+  "setupDriveConnectedTitle": "Google Drive connecté",
+  "setupNoCave": "Aucune cave n'a été détectée sur Google Drive.",
+  "setupCreerCave": "Créer une cave vide",
+  "setupCaveFound": "Une cave a été détectée sur Google Drive.",
+  "setupJoinReadOnly": "Rejoindre la cave existante (lecture seule)",
+  "setupJoin": "Rejoindre la cave existante",
+  "setupOverwriteButton": "Écraser par une nouvelle cave vide",
+  "setupOverwriteLocked": "Impossible d'écraser : la cave est verrouillée par un autre appareil",
+  "setupOverwriteTitle": "Écraser la cave existante ?",
+  "setupOverwriteBody": "Cette action supprimera définitivement cave.db du Drive et le remplacera par une base vide. Toutes les données actuelles seront perdues.",
+  "setupFinalConfirmTitle": "Confirmation finale",
+  "setupFinalConfirmBody": "Cette opération est IRRÉVERSIBLE.\n\nLa cave existante sera définitivement effacée. Confirmez-vous vouloir créer une nouvelle cave vide ?",
+  "setupEcraserDefinitivement": "Oui, écraser définitivement",
+  "setupEchec": "Échec : {error}",
+  "@setupEchec": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "csvHeaderId": "id",
+  "csvHeaderDomaine": "Domaine",
+  "csvHeaderAppellation": "Appellation",
+  "csvHeaderMillesime": "Millésime",
+  "csvHeaderCouleur": "Couleur",
+  "csvHeaderCru": "Cru",
+  "csvHeaderContenance": "Contenance",
+  "csvHeaderEmplacement": "Emplacement",
+  "csvHeaderDateEntree": "Date entrée",
+  "csvHeaderDateSortie": "Date sortie",
+  "csvHeaderPrixAchat": "Prix achat",
+  "csvHeaderGardeMin": "Garde min",
+  "csvHeaderGardeMax": "Garde max",
+  "csvHeaderCommentaireEntree": "Commentaire entrée",
+  "csvHeaderNoteDegus": "Note dégustation",
+  "csvHeaderCommentaireDegus": "Commentaire dégustation",
+  "csvHeaderFournisseurNom": "Fournisseur nom",
+  "csvHeaderFournisseurInfos": "Fournisseur infos",
+  "csvHeaderProducteur": "Producteur",
+  "csvHeaderUpdatedAt": "Mis à jour le"
+}

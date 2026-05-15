@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
+import '../../l10n/l10n.dart';
 import '../stock/stock_controller.dart';
 import 'csv_parser.dart';
 import 'import_service.dart';
@@ -29,10 +30,11 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
   String? _errorMessage;
 
   Future<void> _pickFile() async {
+    final dialogTitle = context.l10n.importPickFileDialog;
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
-      dialogTitle: 'Choisir un fichier CSV',
+      dialogTitle: dialogTitle,
     );
     if (result != null && result.files.single.path != null) {
       setState(() {
@@ -76,7 +78,7 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Erreur lors de la lecture du fichier : $e';
+        _errorMessage = context.l10n.importFileError(e.toString());
         _importing = false;
       });
     }
@@ -84,6 +86,8 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (widget.isReadOnly) {
       return Row(
         children: [
@@ -91,7 +95,7 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Import indisponible — la cave est verrouillée par un autre appareil.',
+              l10n.importReadOnly,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.orange.shade800,
               ),
@@ -106,18 +110,15 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Format attendu : UTF-8, ligne d\'en-tête avec les noms de colonnes.\n'
-          'Colonnes : id, domaine, appellation, millesime, couleur, …',
-        ),
+        Text(l10n.importFormatInfo),
         const SizedBox(height: 16),
-        Text('Séparateur', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.exportSeparateur, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: ';', label: Text('Point-virgule  ;')),
-            ButtonSegment(value: ',', label: Text('Virgule  ,')),
-            ButtonSegment(value: '\t', label: Text('Tabulation')),
+          segments: [
+            ButtonSegment(value: ';', label: Text(l10n.exportSeparateurPointVirgule)),
+            ButtonSegment(value: ',', label: Text(l10n.exportSeparateurVirgule)),
+            ButtonSegment(value: '\t', label: Text(l10n.exportSeparateurTabulation)),
           ],
           selected: {_separator},
           onSelectionChanged: blocked
@@ -130,16 +131,14 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
           label: Text(
             _filePath != null
                 ? _filePath!.split(Platform.pathSeparator).last
-                : 'Choisir un fichier CSV',
+                : l10n.importChoisirFichier,
           ),
           onPressed: blocked ? null : _pickFile,
         ),
         const SizedBox(height: 16),
         CheckboxListTile(
-          title: const Text('Écraser les lignes existantes'),
-          subtitle: const Text(
-            'Si décoché, les bouteilles déjà présentes (même UUID) sont ignorées.',
-          ),
+          title: Text(l10n.importEcraser),
+          subtitle: Text(l10n.importEcraserSubtitle),
           value: _overwrite,
           onChanged: blocked ? null : (v) => setState(() => _overwrite = v!),
           controlAffinity: ListTileControlAffinity.leading,
@@ -155,7 +154,7 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
                   ),
                 )
               : const Icon(Icons.play_arrow),
-          label: Text(_importing ? 'Import en cours…' : 'Importer'),
+          label: Text(_importing ? l10n.importEnCours : l10n.importButton),
           onPressed: (_filePath == null || blocked) ? null : _runImport,
         ),
         if (_result != null) ...[
@@ -189,7 +188,7 @@ class ImportCsvScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Importer un CSV')),
+      appBar: AppBar(title: Text(context.l10n.importSectionTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
@@ -216,22 +215,23 @@ class _ResultCardState extends State<_ResultCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Import terminé',
+            Text(l10n.importTermine,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
-            _Stat(icon: Icons.add_circle_outline, label: 'Insérées',
+            _Stat(icon: Icons.add_circle_outline, label: l10n.importInserted,
                 value: widget.result.inserted, color: Colors.green),
-            _Stat(icon: Icons.edit_outlined, label: 'Mises à jour',
+            _Stat(icon: Icons.edit_outlined, label: l10n.importUpdated,
                 value: widget.result.updated, color: Colors.blue),
-            _Stat(icon: Icons.remove_circle_outline, label: 'Ignorées',
+            _Stat(icon: Icons.remove_circle_outline, label: l10n.importIgnored,
                 value: widget.result.skipped, color: Colors.grey),
-            _Stat(icon: Icons.error_outline, label: 'Erreurs',
+            _Stat(icon: Icons.error_outline, label: l10n.importErrors,
                 value: widget.result.errors, color: Colors.red),
             if (widget.result.errorDetails.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -241,7 +241,7 @@ class _ResultCardState extends State<_ResultCard> {
                   Icon(_showErrors ? Icons.expand_less : Icons.expand_more,
                       size: 18, color: Colors.red),
                   const SizedBox(width: 4),
-                  Text(_showErrors ? 'Masquer le détail' : 'Voir le détail des erreurs',
+                  Text(_showErrors ? l10n.importMasquerDetail : l10n.importVoirDetail,
                       style: const TextStyle(color: Colors.red, fontSize: 13)),
                 ]),
               ),

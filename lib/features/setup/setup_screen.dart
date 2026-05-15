@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
+import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
 import 'setup_controller.dart';
 
@@ -19,8 +20,9 @@ class SetupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(setupControllerProvider);
 
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Configuration de Cavea')),
+      appBar: AppBar(title: Text(l10n.setupTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
@@ -66,37 +68,35 @@ class _ModeChoiceStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Bienvenue dans Cavea',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text(l10n.setupWelcome, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        const Text('Choisissez votre mode de fonctionnement :'),
+        Text(l10n.setupChooseMode),
         const SizedBox(height: 24),
         if (!Platform.isAndroid) ...[
           _ModeCard(
-            title: 'PC seul (local)',
-            description: 'La base de données est stockée localement sur ce PC.',
+            title: l10n.setupModeLocal,
+            description: l10n.setupModeLocalDesc,
             icon: Icons.computer,
             onTap: () => onSelect('local'),
           ),
           const SizedBox(height: 12),
         ],
         _ModeCard(
-          title: 'Mode partagé (Google Drive)',
-          description: 'Partagez votre cave entre plusieurs appareils via Google Drive — nécessite un compte Google.',
+          title: l10n.setupModeDrive,
+          description: l10n.setupModeDriveDesc,
           icon: Icons.sync,
           onTap: () => onSelect('drive'),
         ),
         if (!Platform.isAndroid) ...[
           const SizedBox(height: 12),
           _ModeCard(
-            title: 'Mobile seul',
-            description: 'Non disponible dans cette version.',
+            title: l10n.setupModeMobile,
+            description: l10n.setupModeMobileDesc,
             icon: Icons.phone_android,
             enabled: false,
             onTap: null,
@@ -157,19 +157,14 @@ class _PathInputStep extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = TextEditingController(text: state.folderPath);
 
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Dossier de la base de données',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text(l10n.setupFolderTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        const Text(
-          'Choisissez le dossier où sera stocké cave.db.\n'
-          'Ce dossier doit exister.',
-        ),
+        Text(l10n.setupFolderDesc),
         const SizedBox(height: 24),
         Row(
           children: [
@@ -177,7 +172,7 @@ class _PathInputStep extends ConsumerWidget {
               child: TextField(
                 controller: textController,
                 decoration: InputDecoration(
-                  labelText: 'Chemin du dossier',
+                  labelText: l10n.setupFolderPath,
                   errorText: state.errorMessage,
                   border: const OutlineInputBorder(),
                 ),
@@ -187,10 +182,10 @@ class _PathInputStep extends ConsumerWidget {
             const SizedBox(width: 8),
             IconButton.filled(
               icon: const Icon(Icons.folder_open),
-              tooltip: 'Parcourir',
+              tooltip: l10n.setupParcourir,
               onPressed: () async {
                 final dir = await FilePicker.platform.getDirectoryPath(
-                  dialogTitle: 'Choisir le dossier de cave.db',
+                  dialogTitle: l10n.setupPickerTitle,
                 );
                 if (dir != null) {
                   controller.setFolderPath(dir);
@@ -203,7 +198,7 @@ class _PathInputStep extends ConsumerWidget {
         const SizedBox(height: 24),
         FilledButton(
           onPressed: () => controller.validateAndAdvance(),
-          child: const Text('Suivant'),
+          child: Text(l10n.actionSuivant),
         ),
       ],
     );
@@ -225,19 +220,17 @@ class _ConfirmationStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Confirmer la configuration',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text(l10n.setupConfirmTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 24),
-        _ConfigRow(label: 'Mode', value: 'PC seul (local)'),
+        _ConfigRow(label: l10n.setupConfirmMode, value: l10n.setupModeLocal),
         const SizedBox(height: 8),
         _ConfigRow(
-          label: 'Base de données',
+          label: l10n.setupConfirmDb,
           value: '${state.folderPath}/cave.db',
         ),
         const SizedBox(height: 32),
@@ -246,12 +239,12 @@ class _ConfirmationStep extends StatelessWidget {
             final config = await controller.confirm();
             onComplete(config);
           },
-          child: const Text('Démarrer Cavea'),
+          child: Text(l10n.setupDemarrer),
         ),
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: controller.backToPathInput,
-          child: const Text('Modifier le chemin'),
+          child: Text(l10n.setupModifierChemin),
         ),
       ],
     );
@@ -270,26 +263,17 @@ class _DriveAuthStep extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final folderController = TextEditingController(text: state.folderPath);
 
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Connexion Google Drive',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text(l10n.setupDriveTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         if (Platform.isAndroid) ...[
-          const Text(
-            'Un cache local de la base sera maintenu dans le stockage privé de l\'application '
-            '(non accessible depuis l\'explorateur de fichiers Android).\n'
-            'Connectez votre compte Google pour continuer.',
-          ),
+          Text(l10n.setupDriveDescAndroid),
         ] else ...[
-          const Text(
-            'Choisissez d\'abord le dossier local pour cave.db (cache de travail), '
-            'puis connectez votre compte Google.',
-          ),
+          Text(l10n.setupDriveDescDesktop),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -297,7 +281,7 @@ class _DriveAuthStep extends ConsumerWidget {
                 child: TextField(
                   controller: folderController,
                   decoration: InputDecoration(
-                    labelText: 'Dossier local (cache)',
+                    labelText: l10n.setupDriveLocalFolder,
                     errorText: state.errorMessage,
                     border: const OutlineInputBorder(),
                   ),
@@ -309,7 +293,7 @@ class _DriveAuthStep extends ConsumerWidget {
                 icon: const Icon(Icons.folder_open),
                 onPressed: () async {
                   final dir = await FilePicker.platform.getDirectoryPath(
-                    dialogTitle: 'Dossier local pour cave.db',
+                    dialogTitle: l10n.setupDrivePickerTitle,
                   );
                   if (dir != null) {
                     controller.setFolderPath(dir);
@@ -326,12 +310,12 @@ class _DriveAuthStep extends ConsumerWidget {
         else
           FilledButton.icon(
             icon: const Icon(Icons.login),
-            label: const Text('Connecter Google Drive'),
+            label: Text(l10n.setupConnectDrive),
             onPressed: () async {
               if (!Platform.isAndroid &&
                   (state.folderPath.isEmpty || !Directory(state.folderPath).existsSync())) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Choisissez un dossier local valide.')),
+                  SnackBar(content: Text(context.l10n.setupFolderRequired)),
                 );
                 return;
               }
@@ -344,7 +328,7 @@ class _DriveAuthStep extends ConsumerWidget {
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: controller.backToModeChoice,
-          child: const Text('Retour'),
+          child: Text(l10n.actionRetour),
         ),
       ],
     );
@@ -376,7 +360,7 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Téléchargement échoué : $e')),
+        SnackBar(content: Text(context.l10n.driveDownloadFailed(e.toString()))),
       );
     }
   }
@@ -389,43 +373,41 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
   Future<void> _handleOverwrite() async {
     final confirm1 = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Écraser la cave existante ?'),
-        content: const Text(
-          'Cette action supprimera définitivement cave.db du Drive '
-          'et le remplacera par une base vide. '
-          'Toutes les données actuelles seront perdues.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Continuer'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final dl10n = ctx.l10n;
+        return AlertDialog(
+          title: Text(dl10n.setupOverwriteTitle),
+          content: Text(dl10n.setupOverwriteBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionAnnuler)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(dl10n.actionContinuer),
+            ),
+          ],
+        );
+      },
     );
     if (confirm1 != true || !mounted) return;
 
     final confirm2 = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmation finale'),
-        content: const Text(
-          'Cette opération est IRRÉVERSIBLE.\n\n'
-          'La cave existante sera définitivement effacée. '
-          'Confirmez-vous vouloir créer une nouvelle cave vide ?',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Oui, écraser définitivement'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final dl10n = ctx.l10n;
+        return AlertDialog(
+          title: Text(dl10n.setupFinalConfirmTitle),
+          content: Text(dl10n.setupFinalConfirmBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionAnnuler)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(dl10n.setupEcraserDefinitivement),
+            ),
+          ],
+        );
+      },
     );
     if (confirm2 != true || !mounted) return;
 
@@ -435,7 +417,7 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Échec : $e')),
+        SnackBar(content: Text(context.l10n.setupEchec(e.toString()))),
       );
     }
   }
@@ -444,14 +426,12 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
   Widget build(BuildContext context) {
     final state = widget.state;
 
+    final l10n = context.l10n;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Google Drive connecté',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text(l10n.setupDriveConnectedTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
 
         if (state.isLoading)
@@ -464,24 +444,22 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
         const SizedBox(height: 16),
         TextButton(
           onPressed: widget.controller.backToModeChoice,
-          child: const Text('Retour'),
+          child: Text(l10n.actionRetour),
         ),
       ],
     );
   }
 
   Widget _buildNoCave(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DetectionCard(
-          icon: Icons.cloud_off_outlined,
-          text: 'Aucune cave n\'a été détectée sur Google Drive.',
-        ),
+        _DetectionCard(icon: Icons.cloud_off_outlined, text: l10n.setupNoCave),
         const SizedBox(height: 24),
         FilledButton.icon(
           icon: const Icon(Icons.add),
-          label: const Text('Créer une cave vide'),
+          label: Text(l10n.setupCreerCave),
           onPressed: _handleNew,
         ),
       ],
@@ -489,33 +467,27 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
   }
 
   Widget _buildCaveFound(BuildContext context, SetupState state) {
+    final l10n = context.l10n;
     final locked = state.driveLockedByOther;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DetectionCard(
-          icon: Icons.cloud_done_outlined,
-          text: 'Une cave a été détectée sur Google Drive.',
-        ),
+        _DetectionCard(icon: Icons.cloud_done_outlined, text: l10n.setupCaveFound),
         const SizedBox(height: 24),
 
-        // Rejoindre — toujours actif ; label adapté selon verrou
         FilledButton.icon(
           icon: const Icon(Icons.cloud_download),
-          label: Text(locked
-              ? 'Rejoindre la cave existante (lecture seule)'
-              : 'Rejoindre la cave existante'),
+          label: Text(locked ? l10n.setupJoinReadOnly : l10n.setupJoin),
           onPressed: _handleJoin,
         ),
 
         const SizedBox(height: 12),
 
-        // Écraser — désactivé si verrou tiers
         OutlinedButton.icon(
           icon: Icon(Icons.delete_forever, color: locked ? Colors.grey : Colors.red),
           label: Text(
-            'Écraser par une nouvelle cave vide',
+            l10n.setupOverwriteButton,
             style: TextStyle(color: locked ? Colors.grey : Colors.red),
           ),
           onPressed: locked ? null : _handleOverwrite,
@@ -524,7 +496,7 @@ class _DriveChoiceStepState extends State<_DriveChoiceStep> {
         if (locked) ...[
           const SizedBox(height: 6),
           Text(
-            'Impossible d\'écraser : la cave est verrouillée par un autre appareil'
+            '${l10n.setupOverwriteLocked}'
             '${state.driveLockOwner != null ? ' (${state.driveLockOwner})' : ''}.',
             style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
           ),

@@ -10,6 +10,8 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config_service.dart';
+import '../../core/locale_provider.dart';
+import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
 import '../../services/sync_service.dart';
 
@@ -18,46 +20,52 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final isMode2 = ref.watch(storageModeProvider) == 'drive';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Paramètres')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ── Emplacement cave.db (Mode 1 uniquement) ──────────────────────
           if (!isMode2) ...[
-            _SectionTitle('Emplacement de la cave'),
+            _SectionTitle(l10n.settingsSectionCave),
             const _DbPathSection(),
             const Divider(height: 32),
           ],
 
           // ── Valeurs par défaut ajout en lot ───────────────────────────────
-          _SectionTitle('Ajout en lot — valeurs par défaut'),
+          _SectionTitle(l10n.settingsSectionDefaults),
           const _BulkAddDefaultsSection(),
           const Divider(height: 32),
 
           // ── Listes de référence ───────────────────────────────────────────
-          _SectionTitle('Listes de référence'),
+          _SectionTitle(l10n.settingsSectionListes),
           _RefListEditor(
-            title: 'Couleurs',
+            title: l10n.settingsRefCouleurs,
             initialValues: configService.refCouleurs,
             onSave: configService.saveRefCouleurs,
           ),
           _RefListEditor(
-            title: 'Contenances',
+            title: l10n.settingsRefContenances,
             initialValues: configService.refContenances,
             onSave: configService.saveRefContenances,
           ),
           _RefListEditor(
-            title: 'Crus',
+            title: l10n.settingsRefCrus,
             initialValues: configService.refCrus,
             onSave: configService.saveRefCrus,
           ),
           const Divider(height: 32),
 
+          // ── Langue ───────────────────────────────────────────────────────
+          _SectionTitle(l10n.settingsSectionLangue),
+          const _LanguageSection(),
+          const Divider(height: 32),
+
           // ── Mode de synchronisation ───────────────────────────────────────
-          _SectionTitle('Mode de synchronisation'),
+          _SectionTitle(l10n.settingsSectionSync),
           if (!isMode2)
             _DriveActivationTile(ref: ref)
           else
@@ -65,26 +73,28 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(height: 32),
 
           // ── À propos ──────────────────────────────────────────────────────
-          _SectionTitle('À propos'),
+          _SectionTitle(l10n.settingsSectionAbout),
           ListTile(
             leading: const Icon(Icons.wine_bar),
-            title: const Text('Cavea'),
-            subtitle: const Text('Gestionnaire de cave à vin personnel'),
+            title: Text(l10n.aboutTitle),
+            subtitle: Text(l10n.aboutSubtitle),
             trailing: TextButton(
               onPressed: () => showDialog(
                 context: context,
                 builder: (dialogContext) => AlertDialog(
-                  title: const Text('Cavea'),
-                  content: const Text(
-                    'Version 0.1.0\n\n© 2026 Alain Benard\nLicence Apache 2.0',
-                  ),
+                  title: Text(l10n.aboutTitle),
+                  content: Text('${l10n.aboutVersion}\n\n${l10n.aboutCopyright}'),
                   actions: [
                     TextButton(
-                      onPressed: () => launchUrl(
-                        Uri.parse('https://alainbenard54-collab.github.io/cavea/privacy.html'),
-                        mode: LaunchMode.externalApplication,
-                      ),
-                      child: const Text('Confidentialité'),
+                      onPressed: () {
+                        final lang = Localizations.localeOf(dialogContext).languageCode;
+                        final page = lang == 'en' ? 'en' : 'fr';
+                        launchUrl(
+                          Uri.parse('https://alainbenard54-collab.github.io/cavea/privacy/$page.html'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Text(l10n.aboutConfidentialite),
                     ),
                     TextButton(
                       onPressed: () {
@@ -96,19 +106,48 @@ class SettingsScreen extends ConsumerWidget {
                           applicationLegalese: '© 2026 Alain Benard',
                         );
                       },
-                      child: const Text('Licences'),
+                      child: Text(l10n.aboutLicences),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: const Text('Fermer'),
+                      child: Text(l10n.actionFermer),
                     ),
                   ],
                 ),
               ),
-              child: const Text('À propos'),
+              child: Text(l10n.aboutButton),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Section langue ────────────────────────────────────────────────────────────
+
+class _LanguageSection extends ConsumerWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final locale = ref.watch(localeProvider);
+    final selected = <String>{locale?.languageCode ?? 'auto'};
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: SegmentedButton<String>(
+        segments: [
+          ButtonSegment(value: 'auto', label: Text(l10n.settingsLangAuto)),
+          const ButtonSegment(value: 'fr', label: Text('Français')),
+          const ButtonSegment(value: 'en', label: Text('English')),
+        ],
+        selected: selected,
+        onSelectionChanged: (Set<String> s) {
+          final code = s.first;
+          ref.read(localeProvider.notifier).setLocale(code == 'auto' ? null : code);
+        },
       ),
     );
   }
@@ -150,12 +189,13 @@ class _DbPathSectionState extends State<_DbPathSection> {
   void initState() {
     super.initState();
     final dbPath = configService.config?.dbPath ?? '';
-    _dirPath = dbPath.isEmpty ? '(non configuré)' : p.dirname(dbPath);
+    _dirPath = dbPath.isEmpty ? '' : p.dirname(dbPath);
   }
 
   Future<void> _pickDir() async {
+    final l10n = context.l10n;
     final dir = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: 'Dossier contenant cave.db',
+      dialogTitle: l10n.settingsDbFolder,
     );
     if (dir == null || !mounted) return;
     final current = configService.config!;
@@ -165,20 +205,16 @@ class _DbPathSectionState extends State<_DbPathSection> {
     ));
     setState(() => _dirPath = dir);
     if (!mounted) return;
-    // Forcer la fermeture — continuer avec l'ancien chemin risque une corruption.
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Redémarrage requis'),
-        content: const Text(
-          'Le dossier de la cave a été modifié.\n\n'
-          'L\'application doit redémarrer pour utiliser le nouveau chemin.',
-        ),
+        title: Text(context.l10n.settingsRestartTitle),
+        content: Text(context.l10n.settingsRestartBody),
         actions: [
           FilledButton(
             onPressed: () => exit(0),
-            child: const Text('Quitter l\'application'),
+            child: Text(context.l10n.settingsQuitApp),
           ),
         ],
       ),
@@ -187,13 +223,15 @@ class _DbPathSectionState extends State<_DbPathSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final displayDir = _dirPath.isEmpty ? l10n.settingsDbNotConfigured : _dirPath;
     return ListTile(
       leading: const Icon(Icons.folder_outlined),
-      title: const Text('Dossier cave.db'),
-      subtitle: Text(_dirPath, maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Text(l10n.settingsDbFolder),
+      subtitle: Text(displayDir, maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: OutlinedButton(
         onPressed: _pickDir,
-        child: const Text('Modifier'),
+        child: Text(l10n.actionModifier),
       ),
     );
   }
@@ -227,16 +265,17 @@ class _BulkAddDefaultsSectionState extends State<_BulkAddDefaultsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final couleurs = configService.refCouleurs;
     final displayCouleur = couleurs.contains(_couleur) ? _couleur : null;
 
     return Column(
       children: [
         ListTile(
-          title: const Text('Couleur par défaut'),
+          title: Text(l10n.settingsCouleurDefaut),
           trailing: DropdownButton<String>(
             value: displayCouleur,
-            hint: const Text('Choisir…'),
+            hint: Text(l10n.settingsChoisir),
             items: couleurs
                 .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                 .toList(),
@@ -248,7 +287,7 @@ class _BulkAddDefaultsSectionState extends State<_BulkAddDefaultsSection> {
           ),
         ),
         ListTile(
-          title: const Text('Contenance par défaut'),
+          title: Text(l10n.settingsContenanceDefaut),
           trailing: SizedBox(
             width: 130,
             child: TextField(
@@ -315,9 +354,10 @@ class _RefListEditorState extends State<_RefListEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpansionTile(
       title: Text(widget.title),
-      subtitle: Text('${_values.length} valeur${_values.length > 1 ? 's' : ''}'),
+      subtitle: Text(l10n.settingsRefCount(_values.length)),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -340,10 +380,10 @@ class _RefListEditorState extends State<_RefListEditor> {
                   Expanded(
                     child: TextField(
                       controller: _addCtrl,
-                      decoration: const InputDecoration(
-                        hintText: 'Ajouter une valeur…',
+                      decoration: InputDecoration(
+                        hintText: l10n.settingsRefAddHint,
                         isDense: true,
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       onSubmitted: (_) => _add(),
                     ),
@@ -352,7 +392,7 @@ class _RefListEditorState extends State<_RefListEditor> {
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: _add,
-                    tooltip: 'Ajouter',
+                    tooltip: l10n.actionAjouter,
                   ),
                 ],
               ),
@@ -372,45 +412,39 @@ class _DriveActivationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
+    final l10n = context.l10n;
     return ListTile(
       leading: const Icon(Icons.cloud_outlined),
-      title: const Text('Mode partagé (Google Drive)'),
-      subtitle: const Text('Mode actuel : PC seul (local)'),
+      title: Text(l10n.settingsModePartage),
+      subtitle: Text(l10n.settingsModeLocalCurrent),
       trailing: FilledButton(
         onPressed: () => _activateDrive(context, widgetRef),
-        child: const Text('Activer'),
+        child: Text(l10n.settingsActiverDrive),
       ),
     );
   }
 
   Future<void> _activateDrive(BuildContext context, WidgetRef ref) async {
-    // Vérifier que le fichier de credentials Desktop existe
+    final l10n = context.l10n;
     final secretsPath = DriveStorageAdapter.desktopSecretsPath;
     if (!Platform.isAndroid && !File(secretsPath).existsSync()) {
       if (!context.mounted) return;
       await showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Configuration manquante'),
-          content: const Text(
-            'Le fichier de configuration Google Drive est introuvable '
-            'à côté de l\'application.\n\n'
-            'Si vous avez installé Cavea via l\'installateur, '
-            'veuillez le désinstaller puis réinstaller une version récente.\n\n'
-            'Si vous avez copié l\'application manuellement, consultez '
-            'le guide de configuration en ligne.',
-          ),
+          title: Text(l10n.driveSetupMissingTitle),
+          content: Text(l10n.driveSetupMissingBody),
           actions: [
             TextButton(
               onPressed: () => launchUrl(
                 Uri.parse('https://alainbenard54-collab.github.io/cavea/setup-drive.html'),
                 mode: LaunchMode.externalApplication,
               ),
-              child: const Text('Guide en ligne'),
+              child: Text(l10n.driveGuideEnLigne),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Fermer'),
+              child: Text(l10n.actionFermer),
             ),
           ],
         ),
@@ -420,10 +454,9 @@ class _DriveActivationTile extends ConsumerWidget {
 
     final adapter = DriveStorageAdapter();
 
-    // Lancer l'authentification
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ouverture de l\'authentification Google…')),
+      SnackBar(content: Text(l10n.driveAuthOpening)),
     );
 
     try {
@@ -439,14 +472,13 @@ class _DriveActivationTile extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Authentification échouée : $e')),
+        SnackBar(content: Text(l10n.driveAuthFailed(e.toString()))),
       );
       return;
     }
 
     if (!context.mounted) return;
 
-    // Vérifier si une cave existe déjà sur Drive
     bool remoteExists = false;
     try {
       remoteExists = await adapter.remoteDbExists();
@@ -454,35 +486,31 @@ class _DriveActivationTile extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    // Choix selon l'état du Drive
     final choice = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Migrer vers Google Drive'),
+        title: Text(l10n.driveMigrateTitle),
         content: Text(
-          remoteExists
-              ? 'Une cave existe déjà sur Google Drive.\n\n'
-                'Que souhaitez-vous faire ?'
-              : 'Voulez-vous envoyer votre cave locale vers Google Drive ?',
+          remoteExists ? l10n.driveMigrateBodyExisting : l10n.driveMigrateBodyNew,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(null),
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           if (remoteExists) ...[
             OutlinedButton(
               onPressed: () => Navigator.of(dialogContext).pop('download'),
-              child: const Text('Récupérer la cave du Drive'),
+              child: Text(l10n.driveDownloadExisting),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop('upload'),
-              child: const Text('Écraser le Drive avec ma cave locale'),
+              child: Text(l10n.driveUploadOverwrite),
             ),
           ] else
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop('upload'),
-              child: const Text('Envoyer ma cave vers Drive'),
+              child: Text(l10n.driveSendNew),
             ),
         ],
       ),
@@ -493,14 +521,13 @@ class _DriveActivationTile extends ConsumerWidget {
       return;
     }
 
-    // Confirmation secondaire avant tout écrasement de données
     if (!context.mounted) return;
     final confirmTitle = choice == 'download'
-        ? 'Écraser la base locale ?'
-        : 'Écraser la version Drive ?';
+        ? l10n.driveConfirmOverwriteLocalTitle
+        : l10n.driveConfirmOverwriteDriveTitle;
     final confirmContent = choice == 'download'
-        ? 'Votre base locale sera remplacée par la version Google Drive. Toutes les données locales non présentes sur Drive seront perdues.'
-        : 'La version sur Google Drive sera remplacée par votre base locale. Toutes les données Drive non présentes localement seront perdues.';
+        ? l10n.driveConfirmOverwriteLocalBody
+        : l10n.driveConfirmOverwriteDriveBody;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -510,12 +537,12 @@ class _DriveActivationTile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirmer'),
+            child: Text(l10n.actionConfirmer),
           ),
         ],
       ),
@@ -531,7 +558,10 @@ class _DriveActivationTile extends ConsumerWidget {
 
     if (choice == 'download') {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Téléchargement en cours…'), duration: Duration(minutes: 1)),
+        SnackBar(
+          content: Text(l10n.driveDownloading),
+          duration: const Duration(minutes: 1),
+        ),
       );
       try {
         await adapter.downloadDb(configService.config!.dbPath);
@@ -540,13 +570,16 @@ class _DriveActivationTile extends ConsumerWidget {
         messenger.clearSnackBars();
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Téléchargement échoué : $e')),
+          SnackBar(content: Text(l10n.driveDownloadFailed(e.toString()))),
         );
         return;
       }
     } else {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Upload en cours…'), duration: Duration(minutes: 1)),
+        SnackBar(
+          content: Text(l10n.driveUploading),
+          duration: const Duration(minutes: 1),
+        ),
       );
       try {
         final dbFile = File(configService.config!.dbPath);
@@ -556,16 +589,14 @@ class _DriveActivationTile extends ConsumerWidget {
         messenger.clearSnackBars();
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload échoué : $e')),
+          SnackBar(content: Text(l10n.driveUploadFailed(e.toString()))),
         );
         return;
       }
     }
 
-    // Le prochain SyncService démarrera avec le lock déjà acquis
     primeNextSyncWithLock();
 
-    // Basculer en Mode 2
     final newConfig = AppConfig(
       storageMode: 'drive',
       dbPath: configService.config!.dbPath,
@@ -575,7 +606,7 @@ class _DriveActivationTile extends ConsumerWidget {
     messenger.clearSnackBars();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Mode 2 activé — synchronisation Google Drive disponible')),
+      SnackBar(content: Text(l10n.driveModeActivated)),
     );
 
     ref.read(storageModeProvider.notifier).state = 'drive';
@@ -590,37 +621,35 @@ class _DriveActiveTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
+    final l10n = context.l10n;
     return ListTile(
       leading: const Icon(Icons.cloud_done, color: Colors.green),
-      title: const Text('Mode partagé (Google Drive)'),
-      subtitle: const Text('Mode actuel : synchronisation activée'),
+      title: Text(l10n.settingsModePartage),
+      subtitle: Text(l10n.settingsModeSyncCurrent),
       trailing: Platform.isAndroid
           ? null
           : OutlinedButton(
               onPressed: () => _deactivateDrive(context, widgetRef),
-              child: const Text('Revenir en local'),
+              child: Text(l10n.settingsRevenirLocal),
             ),
     );
   }
 
   Future<void> _deactivateDrive(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Revenir en mode local ?'),
-        content: const Text(
-          'L\'app passera en mode PC seul.\n'
-          'Votre cave.db local est conservé tel quel.\n'
-          'Le fichier Drive n\'est pas supprimé.',
-        ),
+        title: Text(l10n.driveDeactivateTitle),
+        content: Text(l10n.driveDeactivateBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Annuler'),
+            child: Text(l10n.actionAnnuler),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Confirmer'),
+            child: Text(l10n.actionConfirmer),
           ),
         ],
       ),
@@ -628,14 +657,10 @@ class _DriveActiveTile extends ConsumerWidget {
 
     if (confirm != true) return;
 
-    // Libérer le lock Drive si on le détient (upload + unlock).
     try {
       await activeSyncService?.releaseIfNeeded();
-    } catch (_) {
-      // Échec réseau : on bascule quand même en local, le lock expirera en 24h.
-    }
+    } catch (_) {}
 
-    // Supprimer le token OAuth pour forcer un nouveau flow à la prochaine activation.
     await DriveStorageAdapter().signOut();
 
     final newConfig = AppConfig(
@@ -648,7 +673,7 @@ class _DriveActiveTile extends ConsumerWidget {
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Mode local activé')),
+      SnackBar(content: Text(l10n.driveModeDeactivated)),
     );
   }
 }

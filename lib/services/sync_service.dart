@@ -294,7 +294,7 @@ class SyncService extends StateNotifier<SyncState> {
       }
       await adapter.downloadDb(configService.config!.dbPath);
       if (_reopenDbCallback != null) {
-        await _reopenDbCallback!(message: 'Modifications abandonnées — version Drive restaurée');
+        await _reopenDbCallback!(message: 'syncModificationsAbandonnees');
       }
       if (_isDisposed) return;
       _startAsReadOnly = false;
@@ -365,7 +365,7 @@ class SyncService extends StateNotifier<SyncState> {
         _startWithLock = true;
         if (_closeDbCallback != null) await _closeDbCallback!();
         await adapter.downloadDb(configService.config!.dbPath);
-        if (_reopenDbCallback != null) await _reopenDbCallback!(message: 'Verrou posé — cave à jour depuis Drive');
+        if (_reopenDbCallback != null) await _reopenDbCallback!(message: 'syncVerrouPose');
         if (_isDisposed) return;
         _lockHeldByUs = true; // fallback si ProviderScope non recréé
         _startWithLock = false;

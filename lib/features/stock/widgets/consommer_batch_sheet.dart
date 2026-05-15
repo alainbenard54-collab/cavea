@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers.dart';
+import '../../../core/locale_formatting.dart';
+import '../../../l10n/l10n.dart';
 
 void showConsommerBatchSheet(
   BuildContext context,
@@ -81,8 +83,8 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel =
-        '${_date.day.toString().padLeft(2, '0')}/${_date.month.toString().padLeft(2, '0')}/${_date.year}';
+    final l10n = context.l10n;
+    final dateLabel = formatDate(_date, context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -95,14 +97,14 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Consommer ${widget.ids.length} bouteille${widget.ids.length > 1 ? 's' : ''}',
+              l10n.consommerBatchTitle(widget.ids.length),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
 
             OutlinedButton.icon(
               icon: const Icon(Icons.calendar_today, size: 16),
-              label: Text('Date de consommation : $dateLabel'),
+              label: Text(l10n.consommerDateLabel(dateLabel)),
               onPressed: _pickDate,
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
@@ -118,7 +120,7 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
                   onChanged: (v) => setState(() => _noterActive = v),
                 ),
                 const SizedBox(width: 8),
-                const Text('Ajouter une note'),
+                Text(l10n.consommerAjouterNote),
                 if (_noterActive) ...[
                   const Spacer(),
                   Text(
@@ -141,9 +143,9 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
               const SizedBox(height: 8),
               TextField(
                 controller: _commentaireCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Commentaire (optionnel)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.consommerCommentaireHint,
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
                 maxLines: 2,
@@ -158,7 +160,7 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
                   onPressed: _loading
                       ? null
                       : () => Navigator.of(context).pop(),
-                  child: const Text('Annuler'),
+                  child: Text(l10n.actionAnnuler),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
@@ -169,7 +171,7 @@ class _ConsommerBatchSheetState extends ConsumerState<_ConsommerBatchSheet> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Confirmer'),
+                      : Text(l10n.actionConfirmer),
                 ),
               ],
             ),

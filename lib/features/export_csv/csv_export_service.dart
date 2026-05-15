@@ -2,36 +2,40 @@
 // Copyright 2026 Alain Benard
 
 import '../../data/database.dart';
+import '../../l10n/app_localizations.dart';
 
 const _bom = '﻿';
 
-const _headers = [
-  'id',
-  'domaine',
-  'appellation',
-  'millesime',
-  'couleur',
-  'cru',
-  'contenance',
-  'emplacement',
-  'date_entree',
-  'date_sortie',
-  'prix_achat',
-  'garde_min',
-  'garde_max',
-  'commentaire_entree',
-  'note_degus',
-  'commentaire_degus',
-  'fournisseur_nom',
-  'fournisseur_infos',
-  'producteur',
-  'updated_at',
-];
-
 class CsvExportService {
-  String buildCsv(List<Bouteille> bouteilles, {required String separator}) {
+  String buildCsv(
+    List<Bouteille> bouteilles, {
+    required String separator,
+    required AppLocalizations l10n,
+  }) {
+    final headers = [
+      l10n.csvHeaderId,
+      l10n.csvHeaderDomaine,
+      l10n.csvHeaderAppellation,
+      l10n.csvHeaderMillesime,
+      l10n.csvHeaderCouleur,
+      l10n.csvHeaderCru,
+      l10n.csvHeaderContenance,
+      l10n.csvHeaderEmplacement,
+      l10n.csvHeaderDateEntree,
+      l10n.csvHeaderDateSortie,
+      l10n.csvHeaderPrixAchat,
+      l10n.csvHeaderGardeMin,
+      l10n.csvHeaderGardeMax,
+      l10n.csvHeaderCommentaireEntree,
+      l10n.csvHeaderNoteDegus,
+      l10n.csvHeaderCommentaireDegus,
+      l10n.csvHeaderFournisseurNom,
+      l10n.csvHeaderFournisseurInfos,
+      l10n.csvHeaderProducteur,
+      l10n.csvHeaderUpdatedAt,
+    ];
     final buf = StringBuffer(_bom);
-    buf.writeln(_headers.join(separator));
+    buf.writeln(headers.join(separator));
     for (final b in bouteilles) {
       final row = [
         b.id,

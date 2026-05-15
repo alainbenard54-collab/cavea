@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/l10n.dart';
 
 
 void showDeplacerBatchSheet(
@@ -86,11 +87,12 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
   static final _levelRe = RegExp(r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*$');
 
   String? _validate(String value) {
+    final l10n = context.l10n;
     final trimmed = value.trim();
-    if (trimmed.isEmpty) return 'Emplacement obligatoire';
+    if (trimmed.isEmpty) return l10n.deplacerEmplacementObligatoire;
     final levels = trimmed.split(' > ');
     if (levels.any((l) => !_levelRe.hasMatch(l.trim()))) {
-      return 'Format : "Niveau1" ou "Niveau1 > Niveau2 > …"\n(lettres, chiffres, espaces ; séparateur " > ")';
+      return l10n.deplacerFormatError;
     }
     return null;
   }
@@ -117,6 +119,7 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(
@@ -129,7 +132,7 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Déplacer ${widget.ids.length} bouteille${widget.ids.length > 1 ? 's' : ''}',
+              l10n.deplacerBatchTitle(widget.ids.length),
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
@@ -137,7 +140,7 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
               controller: _ctrl,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: 'Emplacement',
+                labelText: l10n.fieldEmplacement,
                 border: const OutlineInputBorder(),
                 isDense: true,
                 errorText: _validationError,
@@ -180,7 +183,7 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
                   onPressed: _loading
                       ? null
                       : () => Navigator.of(context).pop(),
-                  child: const Text('Annuler'),
+                  child: Text(l10n.actionAnnuler),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
@@ -191,7 +194,7 @@ class _DeplacerBatchSheetState extends ConsumerState<_DeplacerBatchSheet> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Confirmer'),
+                      : Text(l10n.actionConfirmer),
                 ),
               ],
             ),
