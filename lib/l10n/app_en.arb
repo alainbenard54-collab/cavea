@@ -21,6 +21,7 @@
   "actionSuivant": "Next",
   "actionContinuer": "Continue",
   "actionEnregistrer": "Save",
+  "actionReinitialiser": "Reset",
   "validationObligatoire": "Required",
   "errorGeneric": "Error: {message}",
 
@@ -123,6 +124,9 @@
   "settingsModeLocalCurrent": "Current mode: PC only (local)",
   "settingsModeSyncCurrent": "Current mode: sync activated",
   "settingsRevenirLocal": "Switch to local",
+  "settingsResetWriteWarning": "Android write mode warning",
+  "settingsResetWriteWarningSubtitle": "Show the \"Use the Quit button\" warning again",
+  "settingsResetWriteWarningDone": "Warning reset",
   "settingsRestartTitle": "Restart required",
   "settingsRestartBody": "The cellar folder has been changed.\n\nThe application must restart to use the new path.",
   "settingsQuitApp": "Quit application",

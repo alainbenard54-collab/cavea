@@ -622,16 +622,36 @@ class _DriveActiveTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
     final l10n = context.l10n;
-    return ListTile(
-      leading: const Icon(Icons.cloud_done, color: Colors.green),
-      title: Text(l10n.settingsModePartage),
-      subtitle: Text(l10n.settingsModeSyncCurrent),
-      trailing: Platform.isAndroid
-          ? null
-          : OutlinedButton(
-              onPressed: () => _deactivateDrive(context, widgetRef),
-              child: Text(l10n.settingsRevenirLocal),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.cloud_done, color: Colors.green),
+          title: Text(l10n.settingsModePartage),
+          subtitle: Text(l10n.settingsModeSyncCurrent),
+          trailing: Platform.isAndroid
+              ? null
+              : OutlinedButton(
+                  onPressed: () => _deactivateDrive(context, widgetRef),
+                  child: Text(l10n.settingsRevenirLocal),
+                ),
+        ),
+        if (Platform.isAndroid)
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: Text(l10n.settingsResetWriteWarning),
+            subtitle: Text(l10n.settingsResetWriteWarningSubtitle),
+            trailing: OutlinedButton(
+              onPressed: () async {
+                await configService.resetAndroidWriteWarningSeen();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.settingsResetWriteWarningDone)),
+                );
+              },
+              child: Text(l10n.actionReinitialiser),
             ),
+          ),
+      ],
     );
   }
 

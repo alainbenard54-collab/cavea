@@ -185,6 +185,11 @@ class ConfigService {
     await prefs.setBool(_keyAndroidWriteWarningSeen, true);
   }
 
+  Future<void> resetAndroidWriteWarningSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyAndroidWriteWarningSeen);
+  }
+
   Future<String?> getLocalePreference() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyLocalePreference);
