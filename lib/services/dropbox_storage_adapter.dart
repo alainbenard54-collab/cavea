@@ -87,7 +87,7 @@ class DropboxStorageAdapter implements StorageAdapter {
 
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final port = server.port;
-    final redirectUri = 'http://localhost:$port/callback';
+    final redirectUri = 'http://localhost:$port';
 
     final authUri = Uri.parse(_authUrl).replace(queryParameters: {
       'client_id': appKey,

@@ -379,7 +379,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsModeLocalCurrent => 'Current mode: PC only (local)';
 
   @override
-  String settingsModeSyncCurrent(String provider) => 'Current mode: $provider active';
+  String settingsModeSyncCurrent(String provider) {
+    return 'Current mode: $provider active';
+  }
 
   @override
   String get settingsRevenirLocal => 'Switch to local';
@@ -1003,25 +1005,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupChooseProvider => 'Choose your cloud provider';
 
   @override
-  String get setupProviderDriveDesc => 'Requires a Google account and a GCP project.';
+  String get setupProviderDriveDesc =>
+      'Requires a Google account and a GCP project.';
 
   @override
-  String get setupProviderDropboxDesc => 'Requires a Dropbox account. Create an app at developer.dropbox.com.';
+  String get setupProviderDropboxDesc =>
+      'Requires a Dropbox account. Create an app at developer.dropbox.com.';
 
   @override
   String get setupDropboxTitle => 'Dropbox connection';
 
   @override
-  String get setupDropboxDescDesktop => 'First choose the local folder for cave.db (working cache), then connect your Dropbox account.';
+  String get setupDropboxDescDesktop =>
+      'First choose the local folder for cave.db (working cache), then connect your Dropbox account.';
 
   @override
-  String get setupDropboxDescAndroid => 'Enter your Dropbox App Key, then connect.\nThe browser will open — return to Cavea after authorization.';
+  String get setupDropboxDescAndroid =>
+      'Enter your Dropbox App Key, then connect.\nThe browser will open — return to Cavea after authorization.';
 
   @override
   String get setupDropboxAppKey => 'Dropbox App Key';
 
   @override
   String get setupConnectDropbox => 'Connect Dropbox';
+
+  @override
+  String get setupDropboxConnectedTitle => 'Dropbox connected';
+
+  @override
+  String get setupDropboxNoCave => 'No cellar detected on Dropbox.';
+
+  @override
+  String get setupDropboxCaveFound => 'A cellar was detected on Dropbox.';
 
   @override
   String get setupModeMobile => 'Mobile only';

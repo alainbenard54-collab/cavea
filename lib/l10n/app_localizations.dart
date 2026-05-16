@@ -1797,28 +1797,58 @@ abstract class AppLocalizations {
   String get setupModeDriveDesc;
 
   /// No description provided for @setupChooseProvider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre fournisseur cloud'**
   String get setupChooseProvider;
 
   /// No description provided for @setupProviderDriveDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte Google requis. Nécessite la configuration d\'un projet GCP.'**
   String get setupProviderDriveDesc;
 
   /// No description provided for @setupProviderDropboxDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte Dropbox requis. Créez une app sur developer.dropbox.com.'**
   String get setupProviderDropboxDesc;
 
   /// No description provided for @setupDropboxTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion Dropbox'**
   String get setupDropboxTitle;
 
   /// No description provided for @setupDropboxDescDesktop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.'**
   String get setupDropboxDescDesktop;
 
   /// No description provided for @setupDropboxDescAndroid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez votre App Key Dropbox, puis connectez-vous.\nLe navigateur va s\'ouvrir — revenez dans Cavea après autorisation.'**
   String get setupDropboxDescAndroid;
 
   /// No description provided for @setupDropboxAppKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'App Key Dropbox'**
   String get setupDropboxAppKey;
 
   /// No description provided for @setupConnectDropbox.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecter Dropbox'**
   String get setupConnectDropbox;
+
+  String get setupDropboxConnectedTitle;
+
+  String get setupDropboxNoCave;
+
+  String get setupDropboxCaveFound;
 
   /// No description provided for @setupModeMobile.
   ///

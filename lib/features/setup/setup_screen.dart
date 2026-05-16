@@ -800,7 +800,7 @@ class _DropboxChoiceStepState extends State<_DropboxChoiceStep> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Dropbox connecté', style: Theme.of(context).textTheme.headlineSmall),
+        Text(l10n.setupDropboxConnectedTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
 
         if (state.isLoading)
@@ -824,7 +824,7 @@ class _DropboxChoiceStepState extends State<_DropboxChoiceStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DetectionCard(icon: Icons.cloud_off_outlined, text: 'Aucune cave n\'a été détectée sur Dropbox.'),
+        _DetectionCard(icon: Icons.cloud_off_outlined, text: l10n.setupDropboxNoCave),
         const SizedBox(height: 24),
         FilledButton.icon(
           icon: const Icon(Icons.add),
@@ -842,7 +842,7 @@ class _DropboxChoiceStepState extends State<_DropboxChoiceStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DetectionCard(icon: Icons.cloud_done_outlined, text: 'Une cave a été détectée sur Dropbox.'),
+        _DetectionCard(icon: Icons.cloud_done_outlined, text: l10n.setupDropboxCaveFound),
         const SizedBox(height: 24),
 
         FilledButton.icon(

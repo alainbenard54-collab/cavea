@@ -379,7 +379,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsModeLocalCurrent => 'Mode actuel : PC seul (local)';
 
   @override
-  String settingsModeSyncCurrent(String provider) => 'Mode actuel : $provider actif';
+  String settingsModeSyncCurrent(String provider) {
+    return 'Mode actuel : $provider actif';
+  }
 
   @override
   String get settingsRevenirLocal => 'Revenir en local';
@@ -1006,25 +1008,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setupChooseProvider => 'Choisissez votre fournisseur cloud';
 
   @override
-  String get setupProviderDriveDesc => 'Compte Google requis. Nécessite la configuration d\'un projet GCP.';
+  String get setupProviderDriveDesc =>
+      'Compte Google requis. Nécessite la configuration d\'un projet GCP.';
 
   @override
-  String get setupProviderDropboxDesc => 'Compte Dropbox requis. Créez une app sur developer.dropbox.com.';
+  String get setupProviderDropboxDesc =>
+      'Compte Dropbox requis. Créez une app sur developer.dropbox.com.';
 
   @override
   String get setupDropboxTitle => 'Connexion Dropbox';
 
   @override
-  String get setupDropboxDescDesktop => 'Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.';
+  String get setupDropboxDescDesktop =>
+      'Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.';
 
   @override
-  String get setupDropboxDescAndroid => 'Saisissez votre App Key Dropbox, puis connectez-vous.\nLe navigateur va s\'ouvrir — revenez dans Cavea après autorisation.';
+  String get setupDropboxDescAndroid =>
+      'Saisissez votre App Key Dropbox, puis connectez-vous.\nLe navigateur va s\'ouvrir — revenez dans Cavea après autorisation.';
 
   @override
   String get setupDropboxAppKey => 'App Key Dropbox';
 
   @override
   String get setupConnectDropbox => 'Connecter Dropbox';
+
+  @override
+  String get setupDropboxConnectedTitle => 'Dropbox connecté';
+
+  @override
+  String get setupDropboxNoCave => "Aucune cave n'a été détectée sur Dropbox.";
+
+  @override
+  String get setupDropboxCaveFound => 'Une cave a été détectée sur Dropbox.';
 
   @override
   String get setupModeMobile => 'Mobile seul';
