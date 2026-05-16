@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppConfig {
-  final String storageMode; // 'local' ou 'drive'
+  final String storageMode; // 'local', 'drive' ou 'dropbox'
   final String dbPath; // chemin absolu vers cave.db
 
   const AppConfig({required this.storageMode, required this.dbPath});

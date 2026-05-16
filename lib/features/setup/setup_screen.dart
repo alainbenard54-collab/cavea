@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
 import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
+import '../../services/dropbox_storage_adapter.dart';
 import 'setup_controller.dart';
 
 class SetupScreen extends ConsumerWidget {
@@ -42,11 +43,24 @@ class SetupScreen extends ConsumerWidget {
                 controller: ref.read(setupControllerProvider.notifier),
                 onComplete: onComplete,
               ),
+              SetupStep.providerChoice => _ProviderChoiceStep(
+                onSelectProvider: ref.read(setupControllerProvider.notifier).selectProvider,
+                onBack: ref.read(setupControllerProvider.notifier).backToModeChoice,
+              ),
               SetupStep.driveAuth => _DriveAuthStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
               ),
               SetupStep.driveChoice => _DriveChoiceStep(
+                state: state,
+                controller: ref.read(setupControllerProvider.notifier),
+                onComplete: onComplete,
+              ),
+              SetupStep.dropboxAuth => _DropboxAuthStep(
+                state: state,
+                controller: ref.read(setupControllerProvider.notifier),
+              ),
+              SetupStep.dropboxChoice => _DropboxChoiceStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
                 onComplete: onComplete,
@@ -90,7 +104,7 @@ class _ModeChoiceStep extends StatelessWidget {
           title: l10n.setupModeDrive,
           description: l10n.setupModeDriveDesc,
           icon: Icons.sync,
-          onTap: () => onSelect('drive'),
+          onTap: () => onSelect('shared'),
         ),
         if (!Platform.isAndroid) ...[
           const SizedBox(height: 12),
@@ -532,6 +546,331 @@ class _DetectionCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Mode 2 : choix du fournisseur ─────────────────────────────────────────────
+
+class _ProviderChoiceStep extends StatelessWidget {
+  final void Function(String) onSelectProvider;
+  final VoidCallback onBack;
+
+  const _ProviderChoiceStep({required this.onSelectProvider, required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.setupChooseProvider, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 24),
+        _ModeCard(
+          title: 'Google Drive',
+          description: l10n.setupProviderDriveDesc,
+          icon: Icons.cloud,
+          onTap: () => onSelectProvider('drive'),
+        ),
+        const SizedBox(height: 12),
+        _ModeCard(
+          title: 'Dropbox',
+          description: l10n.setupProviderDropboxDesc,
+          icon: Icons.cloud_queue,
+          onTap: () => onSelectProvider('dropbox'),
+        ),
+        const SizedBox(height: 24),
+        OutlinedButton(
+          onPressed: onBack,
+          child: Text(l10n.actionRetour),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Mode 2 Dropbox : authentification ─────────────────────────────────────────
+
+class _DropboxAuthStep extends ConsumerStatefulWidget {
+  final SetupState state;
+  final SetupController controller;
+
+  const _DropboxAuthStep({required this.state, required this.controller});
+
+  @override
+  ConsumerState<_DropboxAuthStep> createState() => _DropboxAuthStepState();
+}
+
+class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
+  final _folderController = TextEditingController();
+  final _appKeyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _folderController.text = widget.state.folderPath;
+  }
+
+  @override
+  void dispose() {
+    _folderController.dispose();
+    _appKeyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
+    final l10n = context.l10n;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.setupDropboxTitle, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 8),
+        if (Platform.isAndroid) ...[
+          Text(l10n.setupDropboxDescAndroid),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _appKeyController,
+            decoration: InputDecoration(
+              labelText: l10n.setupDropboxAppKey,
+              errorText: state.errorMessage,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ] else ...[
+          Text(l10n.setupDropboxDescDesktop),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _folderController,
+                  decoration: InputDecoration(
+                    labelText: l10n.setupDriveLocalFolder,
+                    errorText: state.errorMessage,
+                    border: const OutlineInputBorder(),
+                  ),
+                  onChanged: widget.controller.setFolderPath,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filled(
+                icon: const Icon(Icons.folder_open),
+                onPressed: () async {
+                  final dir = await FilePicker.platform.getDirectoryPath(
+                    dialogTitle: l10n.setupDrivePickerTitle,
+                  );
+                  if (dir != null) {
+                    widget.controller.setFolderPath(dir);
+                    _folderController.text = dir;
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 24),
+        if (state.isLoading)
+          const Center(child: CircularProgressIndicator())
+        else
+          FilledButton.icon(
+            icon: const Icon(Icons.login),
+            label: Text(l10n.setupConnectDropbox),
+            onPressed: () async {
+              if (!Platform.isAndroid &&
+                  (state.folderPath.isEmpty || !Directory(state.folderPath).existsSync())) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.setupFolderRequired)),
+                );
+                return;
+              }
+              await widget.controller.authenticateDropbox(
+                folderPath: Platform.isAndroid ? widget.state.folderPath : state.folderPath,
+                androidAppKey: Platform.isAndroid ? _appKeyController.text.trim() : null,
+              );
+            },
+          ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: widget.controller.backToProviderChoice,
+          child: Text(l10n.actionRetour),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Mode 2 Dropbox : choix après vérification ────────────────────────────────
+
+class _DropboxChoiceStep extends StatefulWidget {
+  final SetupState state;
+  final SetupController controller;
+  final void Function(AppConfig) onComplete;
+
+  const _DropboxChoiceStep({
+    required this.state,
+    required this.controller,
+    required this.onComplete,
+  });
+
+  @override
+  State<_DropboxChoiceStep> createState() => _DropboxChoiceStepState();
+}
+
+class _DropboxChoiceStepState extends State<_DropboxChoiceStep> {
+  Future<void> _handleJoin() async {
+    try {
+      final config = await widget.controller.confirmDropboxDownload();
+      widget.onComplete(config);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.driveDownloadFailed(e.toString()))),
+      );
+    }
+  }
+
+  Future<void> _handleNew() async {
+    final config = await widget.controller.confirmDropboxNew();
+    widget.onComplete(config);
+  }
+
+  Future<void> _handleOverwrite() async {
+    final confirm1 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final dl10n = ctx.l10n;
+        return AlertDialog(
+          title: Text(dl10n.setupOverwriteTitle),
+          content: Text(dl10n.setupOverwriteBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionAnnuler)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(dl10n.actionContinuer),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm1 != true || !mounted) return;
+
+    final confirm2 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final dl10n = ctx.l10n;
+        return AlertDialog(
+          title: Text(dl10n.setupFinalConfirmTitle),
+          content: Text(dl10n.setupFinalConfirmBody),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionAnnuler)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(dl10n.setupEcraserDefinitivement),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm2 != true || !mounted) return;
+
+    try {
+      final config = await widget.controller.confirmDropboxOverwrite();
+      widget.onComplete(config);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.setupEchec(e.toString()))),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
+    final l10n = context.l10n;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Dropbox connecté', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 16),
+
+        if (state.isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (!state.driveHasCave)
+          _buildNoCave(context)
+        else
+          _buildCaveFound(context, state),
+
+        const SizedBox(height: 16),
+        TextButton(
+          onPressed: widget.controller.backToProviderChoice,
+          child: Text(l10n.actionRetour),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoCave(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _DetectionCard(icon: Icons.cloud_off_outlined, text: 'Aucune cave n\'a été détectée sur Dropbox.'),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          icon: const Icon(Icons.add),
+          label: Text(l10n.setupCreerCave),
+          onPressed: _handleNew,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCaveFound(BuildContext context, SetupState state) {
+    final l10n = context.l10n;
+    final locked = state.driveLockedByOther;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _DetectionCard(icon: Icons.cloud_done_outlined, text: 'Une cave a été détectée sur Dropbox.'),
+        const SizedBox(height: 24),
+
+        FilledButton.icon(
+          icon: const Icon(Icons.cloud_download),
+          label: Text(locked ? l10n.setupJoinReadOnly : l10n.setupJoin),
+          onPressed: _handleJoin,
+        ),
+
+        const SizedBox(height: 12),
+
+        OutlinedButton.icon(
+          icon: Icon(Icons.delete_forever, color: locked ? Colors.grey : Colors.red),
+          label: Text(
+            l10n.setupOverwriteButton,
+            style: TextStyle(color: locked ? Colors.grey : Colors.red),
+          ),
+          onPressed: locked ? null : _handleOverwrite,
+        ),
+
+        if (locked) ...[
+          const SizedBox(height: 6),
+          Text(
+            '${l10n.setupOverwriteLocked}'
+            '${state.driveLockOwner != null ? ' (${state.driveLockOwner})' : ''}.',
+            style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+          ),
+        ],
+      ],
     );
   }
 }

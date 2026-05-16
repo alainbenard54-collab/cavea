@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/config_service.dart';
 import 'storage_adapter.dart';
 import 'drive_storage_adapter.dart';
+import 'dropbox_storage_adapter.dart';
 
 // ── États ─────────────────────────────────────────────────────────────────────
 
@@ -477,9 +478,11 @@ final storageModeProvider = StateProvider<String>((ref) {
 
 final syncServiceProvider = StateNotifierProvider<SyncService, SyncState>((ref) {
   final mode = ref.watch(storageModeProvider);
-  final service = mode == 'drive'
-      ? SyncService(DriveStorageAdapter())
-      : SyncService(null);
+  final service = switch (mode) {
+    'drive' => SyncService(DriveStorageAdapter()),
+    'dropbox' => SyncService(DropboxStorageAdapter()),
+    _ => SyncService(null),
+  };
   activeSyncService = service;
   ref.onDispose(() {
     if (identical(activeSyncService, service)) activeSyncService = null;

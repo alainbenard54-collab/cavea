@@ -13,6 +13,7 @@ import '../../core/config_service.dart';
 import '../../core/locale_provider.dart';
 import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
+import '../../services/dropbox_storage_adapter.dart';
 import '../../services/sync_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -21,7 +22,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isMode2 = ref.watch(storageModeProvider) == 'drive';
+    final storageMode = ref.watch(storageModeProvider);
+    final isMode2 = storageMode == 'drive' || storageMode == 'dropbox';
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -67,9 +69,9 @@ class SettingsScreen extends ConsumerWidget {
           // ── Mode de synchronisation ───────────────────────────────────────
           _SectionTitle(l10n.settingsSectionSync),
           if (!isMode2)
-            _DriveActivationTile(ref: ref)
+            _CloudActivationTile(ref: ref)
           else
-            const _DriveActiveTile(),
+            _CloudActiveTile(storageMode: storageMode),
           const Divider(height: 32),
 
           // ── À propos ──────────────────────────────────────────────────────
@@ -406,9 +408,9 @@ class _RefListEditorState extends State<_RefListEditor> {
 
 // ── Mode 1 → Mode 2 ───────────────────────────────────────────────────────────
 
-class _DriveActivationTile extends ConsumerWidget {
+class _CloudActivationTile extends ConsumerWidget {
   final WidgetRef ref;
-  const _DriveActivationTile({required this.ref});
+  const _CloudActivationTile({required this.ref});
 
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
@@ -418,10 +420,49 @@ class _DriveActivationTile extends ConsumerWidget {
       title: Text(l10n.settingsModePartage),
       subtitle: Text(l10n.settingsModeLocalCurrent),
       trailing: FilledButton(
-        onPressed: () => _activateDrive(context, widgetRef),
+        onPressed: () => _activateCloud(context, widgetRef),
         child: Text(l10n.settingsActiverDrive),
       ),
     );
+  }
+
+  Future<void> _activateCloud(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    // Choix du fournisseur
+    final provider = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.settingsChoisirFournisseur),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.cloud),
+              title: const Text('Google Drive'),
+              onTap: () => Navigator.of(ctx).pop('drive'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.cloud_queue),
+              title: const Text('Dropbox'),
+              onTap: () => Navigator.of(ctx).pop('dropbox'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: Text(l10n.actionAnnuler),
+          ),
+        ],
+      ),
+    );
+    if (provider == null || !context.mounted) return;
+
+    if (provider == 'drive') {
+      await _activateDrive(context, ref);
+    } else {
+      await _activateDropbox(context, ref);
+    }
   }
 
   Future<void> _activateDrive(BuildContext context, WidgetRef ref) async {
@@ -611,18 +652,190 @@ class _DriveActivationTile extends ConsumerWidget {
 
     ref.read(storageModeProvider.notifier).state = 'drive';
   }
+
+  Future<void> _activateDropbox(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+
+    // Desktop : vérifier le fichier secrets
+    if (!Platform.isAndroid) {
+      final secretsPath = DropboxStorageAdapter.desktopSecretsPath;
+      if (!File(secretsPath).existsSync()) {
+        if (!context.mounted) return;
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Fichier Dropbox manquant'),
+            content: Text(
+              'Créez dropbox_desktop_secrets.json avec {"app_key": "...", "app_secret": "..."} '
+              'à côté de l\'exécutable ou à la racine du projet.',
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(l10n.actionFermer),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
+    // Android : demander le App Key si pas encore stocké
+    if (Platform.isAndroid) {
+      final appKeyCtrl = TextEditingController();
+      final appKey = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Dropbox App Key'),
+          content: TextField(
+            controller: appKeyCtrl,
+            decoration: const InputDecoration(
+              labelText: 'App Key',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(null),
+              child: Text(context.l10n.actionAnnuler),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(appKeyCtrl.text.trim()),
+              child: Text(context.l10n.actionConfirmer),
+            ),
+          ],
+        ),
+      );
+      if (appKey == null || appKey.isEmpty || !context.mounted) return;
+      await DropboxStorageAdapter.saveAndroidAppKey(appKey);
+    }
+
+    final adapter = DropboxStorageAdapter();
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.driveAuthOpening)),
+    );
+
+    try {
+      await adapter.authenticate();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.driveAuthFailed(e.toString()))),
+      );
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    bool remoteExists = false;
+    try {
+      remoteExists = await adapter.remoteDbExists();
+    } catch (_) {}
+
+    if (!context.mounted) return;
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.driveMigrateTitle),
+        content: Text(
+          remoteExists ? l10n.driveMigrateBodyExisting : l10n.driveMigrateBodyNew,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: Text(l10n.actionAnnuler),
+          ),
+          if (remoteExists) ...[
+            OutlinedButton(
+              onPressed: () => Navigator.of(ctx).pop('download'),
+              child: Text(l10n.driveDownloadExisting),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop('upload'),
+              child: Text(l10n.driveUploadOverwrite),
+            ),
+          ] else
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop('upload'),
+              child: Text(l10n.driveSendNew),
+            ),
+        ],
+      ),
+    );
+
+    if (choice == null) {
+      await adapter.signOut();
+      return;
+    }
+
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (choice == 'download') {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.driveDownloading), duration: const Duration(minutes: 1)),
+      );
+      try {
+        await adapter.downloadDb(configService.config!.dbPath);
+        await adapter.lock();
+      } catch (e) {
+        messenger.clearSnackBars();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.driveDownloadFailed(e.toString()))),
+        );
+        return;
+      }
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.driveUploading), duration: const Duration(minutes: 1)),
+      );
+      try {
+        await adapter.uploadDb(File(configService.config!.dbPath));
+        await adapter.lock();
+      } catch (e) {
+        messenger.clearSnackBars();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.driveUploadFailed(e.toString()))),
+        );
+        return;
+      }
+    }
+
+    primeNextSyncWithLock();
+
+    final newConfig = AppConfig(
+      storageMode: 'dropbox',
+      dbPath: configService.config!.dbPath,
+    );
+    await configService.save(newConfig);
+
+    messenger.clearSnackBars();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.driveModeActivated)),
+    );
+
+    ref.read(storageModeProvider.notifier).state = 'dropbox';
+  }
 }
 
 // ── Mode 2 actif ──────────────────────────────────────────────────────────────
 
-class _DriveActiveTile extends ConsumerStatefulWidget {
-  const _DriveActiveTile();
+class _CloudActiveTile extends ConsumerStatefulWidget {
+  final String storageMode;
+  const _CloudActiveTile({required this.storageMode});
 
   @override
-  ConsumerState<_DriveActiveTile> createState() => _DriveActiveTileState();
+  ConsumerState<_CloudActiveTile> createState() => _CloudActiveTileState();
 }
 
-class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
+class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
   bool _warningEnabled = true;
 
   @override
@@ -636,6 +849,9 @@ class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
     if (mounted) setState(() => _warningEnabled = !seen);
   }
 
+  String get _providerLabel =>
+      widget.storageMode == 'dropbox' ? 'Dropbox' : 'Google Drive';
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -644,14 +860,21 @@ class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
         ListTile(
           leading: const Icon(Icons.cloud_done, color: Colors.green),
           title: Text(l10n.settingsModePartage),
-          subtitle: Text(l10n.settingsModeSyncCurrent),
+          subtitle: Text(l10n.settingsModeSyncCurrent(_providerLabel)),
           trailing: Platform.isAndroid
               ? null
               : OutlinedButton(
-                  onPressed: () => _deactivateDrive(context),
+                  onPressed: () => _deactivate(context),
                   child: Text(l10n.settingsRevenirLocal),
                 ),
         ),
+        if (!Platform.isAndroid)
+          ListTile(
+            leading: const Icon(Icons.swap_horiz),
+            title: Text(l10n.settingsChangerFournisseur),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _changeProvider(context),
+          ),
         if (Platform.isAndroid)
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined),
@@ -670,7 +893,7 @@ class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
     );
   }
 
-  Future<void> _deactivateDrive(BuildContext context) async {
+  Future<void> _deactivate(BuildContext context) async {
     final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
@@ -696,7 +919,11 @@ class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
       await activeSyncService?.releaseIfNeeded();
     } catch (_) {}
 
-    await DriveStorageAdapter().signOut();
+    if (widget.storageMode == 'drive') {
+      await DriveStorageAdapter().signOut();
+    } else {
+      await DropboxStorageAdapter.clearTokens();
+    }
 
     final newConfig = AppConfig(
       storageMode: 'local',
@@ -710,5 +937,50 @@ class _DriveActiveTileState extends ConsumerState<_DriveActiveTile> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.driveModeDeactivated)),
     );
+  }
+
+  Future<void> _changeProvider(BuildContext context) async {
+    final l10n = context.l10n;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.settingsChangerFournisseur),
+        content: Text(
+          'Vous allez déconnecter $_providerLabel. '
+          'Vos données locales seront conservées. '
+          'Vous pourrez ensuite configurer un autre fournisseur.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.actionAnnuler),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.actionConfirmer),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await activeSyncService?.releaseIfNeeded();
+    } catch (_) {}
+
+    if (widget.storageMode == 'drive') {
+      await DriveStorageAdapter().signOut();
+    } else {
+      await DropboxStorageAdapter.clearTokens();
+    }
+
+    final newConfig = AppConfig(
+      storageMode: 'local',
+      dbPath: configService.config!.dbPath,
+    );
+    await configService.save(newConfig);
+
+    ref.read(storageModeProvider.notifier).state = 'local';
   }
 }

@@ -66,6 +66,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionEnregistrer => 'Save';
 
   @override
+  String get actionReinitialiser => 'Reset';
+
+  @override
   String get validationObligatoire => 'Required';
 
   @override
@@ -90,6 +93,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncReadOnlyUnavailable => 'Unavailable in read-only mode';
+
+  @override
+  String get syncVerrouPose => 'Lock acquired — cellar up to date from Drive';
+
+  @override
+  String get syncModificationsAbandonnees =>
+      'Changes discarded — Drive version restored';
 
   @override
   String get tooltipModePartage => 'Shared mode — Google Drive';
@@ -360,19 +370,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRefAddHint => 'Add a value…';
 
   @override
-  String get settingsActiverDrive => 'Activate';
+  String get settingsActiverDrive => 'Enable shared mode';
 
   @override
-  String get settingsModePartage => 'Shared mode (Google Drive)';
+  String get settingsModePartage => 'Shared mode';
 
   @override
   String get settingsModeLocalCurrent => 'Current mode: PC only (local)';
 
   @override
-  String get settingsModeSyncCurrent => 'Current mode: sync activated';
+  String settingsModeSyncCurrent(String provider) => 'Current mode: $provider active';
 
   @override
   String get settingsRevenirLocal => 'Switch to local';
+
+  @override
+  String get settingsChangerFournisseur => 'Change provider';
+
+  @override
+  String get settingsChoisirFournisseur => 'Choose your provider';
+
+  @override
+  String get settingsResetWriteWarning => 'Android write mode warning';
 
   @override
   String get settingsRestartTitle => 'Restart required';
@@ -974,11 +993,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupModeLocalDesc => 'The database is stored locally on this PC.';
 
   @override
-  String get setupModeDrive => 'Shared mode (Google Drive)';
+  String get setupModeDrive => 'Shared mode';
 
   @override
   String get setupModeDriveDesc =>
-      'Share your cellar across multiple devices via Google Drive — requires a Google account.';
+      'Share your cellar across multiple devices via Google Drive or Dropbox.';
+
+  @override
+  String get setupChooseProvider => 'Choose your cloud provider';
+
+  @override
+  String get setupProviderDriveDesc => 'Requires a Google account and a GCP project.';
+
+  @override
+  String get setupProviderDropboxDesc => 'Requires a Dropbox account. Create an app at developer.dropbox.com.';
+
+  @override
+  String get setupDropboxTitle => 'Dropbox connection';
+
+  @override
+  String get setupDropboxDescDesktop => 'First choose the local folder for cave.db (working cache), then connect your Dropbox account.';
+
+  @override
+  String get setupDropboxDescAndroid => 'Enter your Dropbox App Key, then connect.\nThe browser will open — return to Cavea after authorization.';
+
+  @override
+  String get setupDropboxAppKey => 'Dropbox App Key';
+
+  @override
+  String get setupConnectDropbox => 'Connect Dropbox';
 
   @override
   String get setupModeMobile => 'Mobile only';

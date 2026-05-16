@@ -7,13 +7,17 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../../core/config_service.dart';
 import '../../services/drive_storage_adapter.dart';
+import '../../services/dropbox_storage_adapter.dart';
 
 enum SetupStep {
   modeChoice,
-  pathInput,      // Mode 1 : saisie du chemin
-  confirmation,   // Mode 1 : confirmation
-  driveAuth,      // Mode 2 : authentification Google
-  driveChoice,    // Mode 2 : nouvelle cave ou télécharger
+  pathInput,       // Mode 1 : saisie du chemin
+  confirmation,    // Mode 1 : confirmation
+  providerChoice,  // Mode 2 : choix du fournisseur (Drive ou Dropbox)
+  driveAuth,       // Mode 2 Drive : authentification Google
+  driveChoice,     // Mode 2 Drive : nouvelle cave ou télécharger
+  dropboxAuth,     // Mode 2 Dropbox : authentification Dropbox
+  dropboxChoice,   // Mode 2 Dropbox : nouvelle cave ou télécharger
 }
 
 class SetupState {
@@ -65,28 +69,36 @@ class SetupController extends StateNotifier<SetupState> {
 
   DriveStorageAdapter? _driveAdapter;
   DriveStorageAdapter? get driveAdapter => _driveAdapter;
+  DropboxStorageAdapter? _dropboxAdapter;
 
   void selectMode(String mode) {
     if (mode == 'local') {
       state = state.copyWith(selectedMode: mode, step: SetupStep.pathInput);
-    } else if (mode == 'drive') {
+    } else if (mode == 'shared') {
       if (Platform.isAndroid) {
-        _selectDriveAndroid();
+        _selectSharedAndroid();
       } else {
-        state = state.copyWith(selectedMode: mode, step: SetupStep.driveAuth);
+        state = state.copyWith(step: SetupStep.providerChoice);
       }
     }
     // Mobile seul : non disponible
   }
 
-  // Sur Android, le chemin est automatiquement le stockage privé de l'app.
-  Future<void> _selectDriveAndroid() async {
+  Future<void> _selectSharedAndroid() async {
     final dir = await getApplicationDocumentsDirectory();
-    state = state.copyWith(
-      selectedMode: 'drive',
-      folderPath: dir.path,
-      step: SetupStep.driveAuth,
-    );
+    state = state.copyWith(folderPath: dir.path, step: SetupStep.providerChoice);
+  }
+
+  void selectProvider(String provider) {
+    if (provider == 'drive') {
+      state = state.copyWith(selectedMode: 'drive', step: SetupStep.driveAuth);
+    } else if (provider == 'dropbox') {
+      state = state.copyWith(selectedMode: 'dropbox', step: SetupStep.dropboxAuth);
+    }
+  }
+
+  void backToProviderChoice() {
+    state = state.copyWith(step: SetupStep.providerChoice, errorMessage: null);
   }
 
   void setFolderPath(String path) {
@@ -196,6 +208,73 @@ class SetupController extends StateNotifier<SetupState> {
 
   void backToModeChoice() {
     state = state.copyWith(step: SetupStep.modeChoice, errorMessage: null);
+  }
+
+  // ── Mode 2 Dropbox ──────────────────────────────────────────────────────────
+
+  Future<void> authenticateDropbox({
+    required String folderPath,
+    String? androidAppKey,
+  }) async {
+    state = state.copyWith(folderPath: folderPath, isLoading: true, errorMessage: null);
+    try {
+      _dropboxAdapter = DropboxStorageAdapter();
+      if (Platform.isAndroid && androidAppKey != null && androidAppKey.isNotEmpty) {
+        await DropboxStorageAdapter.saveAndroidAppKey(androidAppKey);
+      }
+      await _dropboxAdapter!.authenticate();
+
+      final hasCave = await _dropboxAdapter!.remoteDbExists();
+      final lockStatus = await _dropboxAdapter!.getLockStatus();
+      final lockedByOther = lockStatus.isLocked && !lockStatus.isOurs;
+
+      state = state.copyWith(
+        step: SetupStep.dropboxChoice,
+        isLoading: false,
+        driveHasCave: hasCave,
+        driveLockedByOther: lockedByOther,
+        driveLockOwner: lockedByOther ? lockStatus.lockedBy : null,
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString(), isLoading: false);
+    }
+  }
+
+  Future<AppConfig> confirmDropboxNew() async {
+    final dbPath = p.join(state.folderPath, 'cave.db');
+    final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
+    await configService.save(config);
+    return config;
+  }
+
+  Future<AppConfig> confirmDropboxDownload() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final dbPath = p.join(state.folderPath, 'cave.db');
+    try {
+      await _dropboxAdapter!.downloadDb(dbPath);
+      final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
+      await configService.save(config);
+      state = state.copyWith(isLoading: false);
+      return config;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString(), isLoading: false);
+      rethrow;
+    }
+  }
+
+  Future<AppConfig> confirmDropboxOverwrite() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final dbPath = p.join(state.folderPath, 'cave.db');
+    try {
+      await _dropboxAdapter!.deleteDb();
+      final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
+      await configService.save(config);
+      state = state.copyWith(isLoading: false);
+      return config;
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString(), isLoading: false);
+      rethrow;
+    }
   }
 }
 

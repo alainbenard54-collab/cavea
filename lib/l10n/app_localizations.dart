@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Enregistrer'**
   String get actionEnregistrer;
 
+  /// No description provided for @actionReinitialiser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser'**
+  String get actionReinitialiser;
+
   /// No description provided for @validationObligatoire.
   ///
   /// In fr, this message translates to:
@@ -259,6 +265,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Indisponible en mode lecture seule'**
   String get syncReadOnlyUnavailable;
+
+  /// No description provided for @syncVerrouPose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Verrou posé — cave à jour depuis Drive'**
+  String get syncVerrouPose;
+
+  /// No description provided for @syncModificationsAbandonnees.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifications abandonnées — version Drive restaurée'**
+  String get syncModificationsAbandonnees;
 
   /// No description provided for @tooltipModePartage.
   ///
@@ -737,13 +755,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsActiverDrive.
   ///
   /// In fr, this message translates to:
-  /// **'Activer'**
+  /// **'Activer le mode partagé'**
   String get settingsActiverDrive;
 
   /// No description provided for @settingsModePartage.
   ///
   /// In fr, this message translates to:
-  /// **'Mode partagé (Google Drive)'**
+  /// **'Mode partagé'**
   String get settingsModePartage;
 
   /// No description provided for @settingsModeLocalCurrent.
@@ -755,14 +773,32 @@ abstract class AppLocalizations {
   /// No description provided for @settingsModeSyncCurrent.
   ///
   /// In fr, this message translates to:
-  /// **'Mode actuel : synchronisation activée'**
-  String get settingsModeSyncCurrent;
+  /// **'Mode actuel : {provider} actif'**
+  String settingsModeSyncCurrent(String provider);
 
   /// No description provided for @settingsRevenirLocal.
   ///
   /// In fr, this message translates to:
   /// **'Revenir en local'**
   String get settingsRevenirLocal;
+
+  /// No description provided for @settingsChangerFournisseur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de fournisseur'**
+  String get settingsChangerFournisseur;
+
+  /// No description provided for @settingsChoisirFournisseur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre fournisseur'**
+  String get settingsChoisirFournisseur;
+
+  /// No description provided for @settingsResetWriteWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avertissement mode écriture Android'**
+  String get settingsResetWriteWarning;
 
   /// No description provided for @settingsRestartTitle.
   ///
@@ -1751,14 +1787,38 @@ abstract class AppLocalizations {
   /// No description provided for @setupModeDrive.
   ///
   /// In fr, this message translates to:
-  /// **'Mode partagé (Google Drive)'**
+  /// **'Mode partagé'**
   String get setupModeDrive;
 
   /// No description provided for @setupModeDriveDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Partagez votre cave entre plusieurs appareils via Google Drive — nécessite un compte Google.'**
+  /// **'Partagez votre cave entre plusieurs appareils via Google Drive ou Dropbox.'**
   String get setupModeDriveDesc;
+
+  /// No description provided for @setupChooseProvider.
+  String get setupChooseProvider;
+
+  /// No description provided for @setupProviderDriveDesc.
+  String get setupProviderDriveDesc;
+
+  /// No description provided for @setupProviderDropboxDesc.
+  String get setupProviderDropboxDesc;
+
+  /// No description provided for @setupDropboxTitle.
+  String get setupDropboxTitle;
+
+  /// No description provided for @setupDropboxDescDesktop.
+  String get setupDropboxDescDesktop;
+
+  /// No description provided for @setupDropboxDescAndroid.
+  String get setupDropboxDescAndroid;
+
+  /// No description provided for @setupDropboxAppKey.
+  String get setupDropboxAppKey;
+
+  /// No description provided for @setupConnectDropbox.
+  String get setupConnectDropbox;
 
   /// No description provided for @setupModeMobile.
   ///
