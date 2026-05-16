@@ -39,7 +39,7 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
   Widget build(BuildContext context) {
     final syncState = ref.watch(syncServiceProvider);
     final mode = ref.watch(storageModeProvider);
-    final isMode2 = mode == 'drive';
+    final isMode2 = mode != 'local';
 
     final l10n = context.l10n;
 

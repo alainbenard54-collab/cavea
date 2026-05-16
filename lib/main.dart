@@ -48,7 +48,8 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
     if (configService.isConfigured) {
       _db = AppDatabase(configService.config!.dbPath);
       _registerSyncCallbacks();
-      if (configService.config?.storageMode == 'drive') {
+      final mode = configService.config?.storageMode ?? 'local';
+      if (mode != 'local') {
         WidgetsBinding.instance.addPostFrameCallback((_) => _runStartupSync());
       }
     }
@@ -121,7 +122,8 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
       _db = AppDatabase(configService.config!.dbPath);
     });
     _registerSyncCallbacks();
-    if (configService.config?.storageMode == 'drive') {
+    final mode = configService.config?.storageMode ?? 'local';
+    if (mode != 'local') {
       WidgetsBinding.instance.addPostFrameCallback((_) => _runStartupSync());
     }
   }
