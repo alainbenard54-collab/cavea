@@ -9,6 +9,7 @@ import 'dart:ui' show AppExitResponse;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/config_service.dart';
@@ -155,19 +156,41 @@ class _AppWrapperState extends State<AppWrapper> with WidgetsBindingObserver {
   }
 }
 
-class CaveApp extends ConsumerWidget {
+// ConsumerStatefulWidget pour que le GoRouter soit créé une seule fois dans
+// initState() — évite qu'un changement de locale (rebuild) recréé le router,
+// ce qui dépilerait les dialogs ouverts (ex : onboarding mode écriture Android).
+class CaveApp extends ConsumerStatefulWidget {
   final VoidCallback onSetupComplete;
 
   const CaveApp({super.key, required this.onSetupComplete});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CaveApp> createState() => _CaveAppState();
+}
+
+class _CaveAppState extends ConsumerState<CaveApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = buildRouter(widget.onSetupComplete);
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     return MaterialApp.router(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       title: 'Cavea',
       theme: buildTheme(),
-      routerConfig: buildRouter(onSetupComplete),
+      routerConfig: _router,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
