@@ -77,7 +77,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get syncConnecting => 'Connexion à Google Drive…';
+  String get syncConnecting => 'Connexion au partage…';
 
   @override
   String get syncSaving => 'Sauvegarde en cours…';
@@ -86,7 +86,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncSyncing => 'Synchronisation en cours…';
 
   @override
-  String get syncSavedToDrive => 'Cave sauvegardée sur Drive';
+  String get syncSavedToDrive => 'Cave sauvegardée dans le partage';
 
   @override
   String get syncSavedAndUnlocked => 'Cave sauvegardée et verrou libéré';
@@ -95,14 +95,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncReadOnlyUnavailable => 'Indisponible en mode lecture seule';
 
   @override
-  String get syncVerrouPose => 'Verrou posé — cave à jour depuis Drive';
+  String get syncVerrouPose => 'Verrou posé — cave à jour depuis le partage';
 
   @override
   String get syncModificationsAbandonnees =>
-      'Modifications abandonnées — version Drive restaurée';
+      'Modifications abandonnées — version partagée restaurée';
 
   @override
-  String get tooltipModePartage => 'Mode partagé — Google Drive';
+  String get tooltipModePartage => 'Mode partagé';
 
   @override
   String get tooltipModeLocal => 'Mode local — PC seul';
@@ -136,24 +136,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncCrashSendLocal => 'Envoyer mes données locales';
 
   @override
-  String get syncCrashDownloadDrive => 'Repartir depuis Google Drive';
+  String get syncCrashDownloadDrive => 'Repartir depuis le partage';
 
   @override
   String get syncCrashSendLocalConfirmTitle => 'Envoyer mes données locales ?';
 
   @override
   String get syncCrashSendLocalConfirmBody =>
-      'Votre base locale va remplacer la version sur Google Drive. Comme la cave était verrouillée, aucun autre appareil n\'a pu la modifier depuis la dernière synchronisation.';
+      'Votre base locale va remplacer la version partagée. Comme la cave était verrouillée, aucun autre appareil n\'a pu la modifier depuis la dernière synchronisation.';
 
   @override
   String get syncCrashConfirmSend => 'Envoyer';
 
   @override
-  String get syncCrashDownloadConfirmTitle => 'Repartir depuis Google Drive ?';
+  String get syncCrashDownloadConfirmTitle => 'Repartir depuis le partage ?';
 
   @override
   String get syncCrashDownloadConfirmBody =>
-      'La base Google Drive va remplacer votre base locale. Toutes vos modifications locales non sauvegardées seront perdues.';
+      'La version partagée va remplacer votre base locale. Toutes vos modifications locales non sauvegardées seront perdues.';
 
   @override
   String get syncCrashConfirmReplace => 'Remplacer ma base locale';
@@ -190,7 +190,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAcquireLockBodyDesktop =>
-      'La cave sera verrouillée pendant toute votre session. Le verrou sera automatiquement libéré et vos modifications sauvegardées sur Google Drive à la fermeture de l\'application ou via le bouton \"Sauvegarder\".';
+      'La cave sera verrouillée pendant toute votre session. Le verrou sera automatiquement libéré et vos modifications synchronisées à la fermeture de l\'application ou via le bouton \"Sauvegarder\".';
 
   @override
   String get syncPrendreLaMain => 'Prendre la main';
@@ -213,14 +213,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get quitDialogBody =>
-      'Vos modifications seront envoyées sur Drive et le verrou libéré.';
+      'Vos modifications seront synchronisées et le verrou libéré.';
 
   @override
   String get quitFailTitle => 'Impossible de sauvegarder';
 
   @override
   String get quitFailBody =>
-      'Les données n\'ont pas pu être envoyées sur Drive et le verrou n\'a pas été libéré.\n\nVos modifications restent disponibles localement sur cet appareil. Elles pourront être synchronisées lors d\'une prochaine connexion à Drive, sauf si le verrou a été libéré manuellement depuis un autre appareil entre-temps.\n\nTant que le verrou reste actif, l\'accès en écriture depuis d\'autres appareils sera bloqué.';
+      'Les données n\'ont pas pu être synchronisées et le verrou n\'a pas été libéré.\n\nVos modifications restent disponibles localement sur cet appareil. Elles pourront être synchronisées lors d\'une prochaine connexion, sauf si le verrou a été libéré manuellement depuis un autre appareil entre-temps.\n\nTant que le verrou reste actif, l\'accès en écriture depuis d\'autres appareils sera bloqué.';
 
   @override
   String get quitAnyway => 'Quitter quand même';
@@ -244,38 +244,38 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get driveMigrateTitle => 'Migrer vers Google Drive';
+  String get driveMigrateTitle => 'Migrer vers le partage';
 
   @override
   String get driveMigrateBodyExisting =>
-      'Une cave existe déjà sur Google Drive.\n\nQue souhaitez-vous faire ?';
+      'Une cave existe déjà dans le partage.\n\nQue souhaitez-vous faire ?';
 
   @override
   String get driveMigrateBodyNew =>
-      'Voulez-vous envoyer votre cave locale vers Google Drive ?';
+      'Voulez-vous envoyer votre cave locale vers le partage ?';
 
   @override
-  String get driveDownloadExisting => 'Récupérer la cave du Drive';
+  String get driveDownloadExisting => 'Récupérer la cave depuis le partage';
 
   @override
-  String get driveUploadOverwrite => 'Écraser le Drive avec ma cave locale';
+  String get driveUploadOverwrite => 'Écraser le partage avec ma cave locale';
 
   @override
-  String get driveSendNew => 'Envoyer ma cave vers Drive';
+  String get driveSendNew => 'Envoyer ma cave vers le partage';
 
   @override
   String get driveConfirmOverwriteLocalTitle => 'Écraser la base locale ?';
 
   @override
   String get driveConfirmOverwriteLocalBody =>
-      'Votre base locale sera remplacée par la version Google Drive. Toutes les données locales non présentes sur Drive seront perdues.';
+      'Votre base locale sera remplacée par la version partagée. Toutes les données locales non présentes dans le partage seront perdues.';
 
   @override
-  String get driveConfirmOverwriteDriveTitle => 'Écraser la version Drive ?';
+  String get driveConfirmOverwriteDriveTitle => 'Écraser la version partagée ?';
 
   @override
   String get driveConfirmOverwriteDriveBody =>
-      'La version sur Google Drive sera remplacée par votre base locale. Toutes les données Drive non présentes localement seront perdues.';
+      'La version partagée sera remplacée par votre base locale. Toutes les données du partage non présentes localement seront perdues.';
 
   @override
   String get driveDownloading => 'Téléchargement en cours…';
@@ -295,7 +295,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get driveModeActivated =>
-      'Mode 2 activé — synchronisation Google Drive disponible';
+      'Mode 2 activé — synchronisation disponible';
 
   @override
   String get driveDeactivateTitle => 'Revenir en mode local ?';
@@ -1036,7 +1036,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setupDropboxConnectedTitle => 'Dropbox connecté';
 
   @override
-  String get setupDropboxNoCave => "Aucune cave n'a été détectée sur Dropbox.";
+  String get setupDropboxNoCave => 'Aucune cave n\'a été détectée sur Dropbox.';
 
   @override
   String get setupDropboxCaveFound => 'Une cave a été détectée sur Dropbox.';
@@ -1131,7 +1131,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get setupOverwriteBody =>
-      'Cette action supprimera définitivement cave.db du Drive et le remplacera par une base vide. Toutes les données actuelles seront perdues.';
+      'Cette action supprimera définitivement cave.db du partage et le remplacera par une base vide. Toutes les données actuelles seront perdues.';
 
   @override
   String get setupFinalConfirmTitle => 'Confirmation finale';

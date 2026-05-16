@@ -77,7 +77,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get syncConnecting => 'Connecting to Google Drive…';
+  String get syncConnecting => 'Connecting to shared storage…';
 
   @override
   String get syncSaving => 'Saving…';
@@ -86,7 +86,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncSyncing => 'Syncing…';
 
   @override
-  String get syncSavedToDrive => 'Cellar saved to Drive';
+  String get syncSavedToDrive => 'Cellar saved to shared storage';
 
   @override
   String get syncSavedAndUnlocked => 'Cellar saved and lock released';
@@ -95,14 +95,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncReadOnlyUnavailable => 'Unavailable in read-only mode';
 
   @override
-  String get syncVerrouPose => 'Lock acquired — cellar up to date from Drive';
+  String get syncVerrouPose => 'Lock acquired — cellar up to date from shared storage';
 
   @override
   String get syncModificationsAbandonnees =>
-      'Changes discarded — Drive version restored';
+      'Changes discarded — shared version restored';
 
   @override
-  String get tooltipModePartage => 'Shared mode — Google Drive';
+  String get tooltipModePartage => 'Shared mode';
 
   @override
   String get tooltipModeLocal => 'Local mode — PC only';
@@ -136,24 +136,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncCrashSendLocal => 'Send my local data';
 
   @override
-  String get syncCrashDownloadDrive => 'Restore from Google Drive';
+  String get syncCrashDownloadDrive => 'Restore from shared storage';
 
   @override
   String get syncCrashSendLocalConfirmTitle => 'Send my local data?';
 
   @override
   String get syncCrashSendLocalConfirmBody =>
-      'Your local database will replace the version on Google Drive. Since the cellar was locked, no other device could have modified it since the last sync.';
+      'Your local database will replace the shared version. Since the cellar was locked, no other device could have modified it since the last sync.';
 
   @override
   String get syncCrashConfirmSend => 'Send';
 
   @override
-  String get syncCrashDownloadConfirmTitle => 'Restore from Google Drive?';
+  String get syncCrashDownloadConfirmTitle => 'Restore from shared storage?';
 
   @override
   String get syncCrashDownloadConfirmBody =>
-      'The Google Drive database will replace your local database. All unsaved local changes will be lost.';
+      'The shared database will replace your local database. All unsaved local changes will be lost.';
 
   @override
   String get syncCrashConfirmReplace => 'Replace my local database';
@@ -190,7 +190,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncAcquireLockBodyDesktop =>
-      'The cellar will be locked for your entire session. The lock will be automatically released and your changes saved to Google Drive when you close the app or click \"Save\".';
+      'The cellar will be locked for your entire session. The lock will be automatically released and your changes synced when you close the app or click \"Save\".';
 
   @override
   String get syncPrendreLaMain => 'Take control';
@@ -213,14 +213,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quitDialogBody =>
-      'Your changes will be sent to Drive and the lock released.';
+      'Your changes will be synced and the lock released.';
 
   @override
   String get quitFailTitle => 'Unable to save';
 
   @override
   String get quitFailBody =>
-      'Data could not be sent to Drive and the lock was not released.\n\nYour changes remain available locally on this device. They can be synced on your next Drive connection, unless the lock has been manually released from another device in the meantime.\n\nWhile the lock remains active, write access from other devices will be blocked.';
+      'Data could not be synced and the lock was not released.\n\nYour changes remain available locally on this device. They can be synced on your next connection, unless the lock has been manually released from another device in the meantime.\n\nWhile the lock remains active, write access from other devices will be blocked.';
 
   @override
   String get quitAnyway => 'Quit anyway';
@@ -244,38 +244,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get driveMigrateTitle => 'Migrate to Google Drive';
+  String get driveMigrateTitle => 'Migrate to shared storage';
 
   @override
   String get driveMigrateBodyExisting =>
-      'A cellar already exists on Google Drive.\n\nWhat would you like to do?';
+      'A cellar already exists in shared storage.\n\nWhat would you like to do?';
 
   @override
   String get driveMigrateBodyNew =>
-      'Do you want to send your local cellar to Google Drive?';
+      'Do you want to send your local cellar to shared storage?';
 
   @override
-  String get driveDownloadExisting => 'Download cellar from Drive';
+  String get driveDownloadExisting => 'Download cellar from shared storage';
 
   @override
-  String get driveUploadOverwrite => 'Overwrite Drive with my local cellar';
+  String get driveUploadOverwrite => 'Overwrite shared storage with my local cellar';
 
   @override
-  String get driveSendNew => 'Send my cellar to Drive';
+  String get driveSendNew => 'Send my cellar to shared storage';
 
   @override
   String get driveConfirmOverwriteLocalTitle => 'Overwrite local database?';
 
   @override
   String get driveConfirmOverwriteLocalBody =>
-      'Your local database will be replaced by the Google Drive version. All local data not present on Drive will be lost.';
+      'Your local database will be replaced by the shared version. All local data not in shared storage will be lost.';
 
   @override
-  String get driveConfirmOverwriteDriveTitle => 'Overwrite Drive version?';
+  String get driveConfirmOverwriteDriveTitle => 'Overwrite shared version?';
 
   @override
   String get driveConfirmOverwriteDriveBody =>
-      'The Google Drive version will be replaced by your local database. All Drive data not present locally will be lost.';
+      'The shared version will be replaced by your local database. All shared data not present locally will be lost.';
 
   @override
   String get driveDownloading => 'Downloading…';
@@ -295,7 +295,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get driveModeActivated =>
-      'Mode 2 activated — Google Drive sync available';
+      'Mode 2 activated — sync available';
 
   @override
   String get driveDeactivateTitle => 'Switch to local mode?';
@@ -1128,7 +1128,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupOverwriteBody =>
-      'This action will permanently delete cave.db from Drive and replace it with an empty database. All current data will be lost.';
+      'This action will permanently delete cave.db from shared storage and replace it with an empty database. All current data will be lost.';
 
   @override
   String get setupFinalConfirmTitle => 'Final confirmation';
