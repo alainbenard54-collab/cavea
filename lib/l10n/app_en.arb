@@ -100,6 +100,10 @@
   "driveDeactivateBody": "The app will switch to PC-only mode.\nYour local cave.db is kept as-is.\nThe Drive file is not deleted.",
   "driveModeDeactivated": "Local mode activated",
 
+  "dropboxSetupMissingTitle": "Missing Dropbox configuration file",
+  "dropboxSetupMissingBody": "Create dropbox_desktop_secrets.json next to the executable or at the project root, with fields app_key and app_secret.",
+  "dropboxAppKeyLabel": "App Key",
+
   "settingsSectionLangue": "Language",
   "settingsLangAuto": "Automatic",
 
@@ -128,6 +132,10 @@
   },
   "settingsRevenirLocal": "Switch to local",
   "settingsChangerFournisseur": "Change provider",
+  "settingsChangerFournisseurBody": "You are about to disconnect {provider}. Your local data will be preserved. You can then configure another provider.",
+  "@settingsChangerFournisseurBody": {
+    "placeholders": { "provider": { "type": "String" } }
+  },
   "settingsChoisirFournisseur": "Choose your provider",
   "settingsResetWriteWarning": "Android write mode warning",
   "settingsRestartTitle": "Restart required",

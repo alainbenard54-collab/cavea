@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/l10n.dart';
 import '../bulk_add_controller.dart';
 
 class RepartitionRow extends ConsumerStatefulWidget {
@@ -104,14 +105,14 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
   void _validateEmplacement() {
     final t = _emplacement.trim();
     if (t.isNotEmpty && !_levelRe.hasMatch(t)) {
-      setState(() => _emplacementError =
-          'Format : "Niveau1" ou "Niveau1 > Niveau2"\n(lettres, chiffres, espaces ; séparateur " > ")');
+      setState(() => _emplacementError = context.l10n.repartitionFormatError);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -126,9 +127,9 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
                 controller: _qtyCtrl,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  labelText: 'Qté',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.repartitionQte,
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
                 onChanged: _onQtyChanged,
@@ -140,7 +141,7 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
               child: TextField(
                 controller: _emplacementCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Emplacement',
+                  labelText: l10n.fieldEmplacement,
                   border: const OutlineInputBorder(),
                   isDense: true,
                   errorText: _emplacementError,
@@ -156,7 +157,7 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
                 icon: const Icon(Icons.remove_circle_outline),
                 color: theme.colorScheme.error,
                 onPressed: widget.onRemove,
-                tooltip: 'Supprimer',
+                tooltip: l10n.repartitionSupprimer,
               )
             else
               const SizedBox(width: 48),

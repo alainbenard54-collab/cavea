@@ -664,11 +664,8 @@ class _CloudActivationTile extends ConsumerWidget {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Fichier Dropbox manquant'),
-            content: Text(
-              'Créez dropbox_desktop_secrets.json avec {"app_key": "...", "app_secret": "..."} '
-              'à côté de l\'exécutable ou à la racine du projet.',
-            ),
+            title: Text(l10n.dropboxSetupMissingTitle),
+            content: Text(l10n.dropboxSetupMissingBody),
             actions: [
               FilledButton(
                 onPressed: () => Navigator.of(ctx).pop(),
@@ -687,12 +684,12 @@ class _CloudActivationTile extends ConsumerWidget {
       final appKey = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Dropbox App Key'),
+          title: Text(l10n.setupDropboxAppKey),
           content: TextField(
             controller: appKeyCtrl,
-            decoration: const InputDecoration(
-              labelText: 'App Key',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.dropboxAppKeyLabel,
+              border: const OutlineInputBorder(),
             ),
           ),
           actions: [
@@ -945,11 +942,7 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.settingsChangerFournisseur),
-        content: Text(
-          'Vous allez déconnecter $_providerLabel. '
-          'Vos données locales seront conservées. '
-          'Vous pourrez ensuite configurer un autre fournisseur.',
-        ),
+        content: Text(l10n.settingsChangerFournisseurBody(_providerLabel)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),

@@ -644,6 +644,24 @@ abstract class AppLocalizations {
   /// **'Mode local activé'**
   String get driveModeDeactivated;
 
+  /// No description provided for @dropboxSetupMissingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier de configuration Dropbox manquant'**
+  String get dropboxSetupMissingTitle;
+
+  /// No description provided for @dropboxSetupMissingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créez dropbox_desktop_secrets.json à côté de l\'exécutable ou à la racine du projet, avec les champs app_key et app_secret.'**
+  String get dropboxSetupMissingBody;
+
+  /// No description provided for @dropboxAppKeyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'App Key'**
+  String get dropboxAppKeyLabel;
+
   /// No description provided for @settingsSectionLangue.
   ///
   /// In fr, this message translates to:
@@ -787,6 +805,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Changer de fournisseur'**
   String get settingsChangerFournisseur;
+
+  /// No description provided for @settingsChangerFournisseurBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous allez déconnecter {provider}. Vos données locales seront conservées. Vous pourrez ensuite configurer un autre fournisseur.'**
+  String settingsChangerFournisseurBody(String provider);
 
   /// No description provided for @settingsChoisirFournisseur.
   ///

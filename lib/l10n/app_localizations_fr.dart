@@ -307,6 +307,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get driveModeDeactivated => 'Mode local activé';
 
   @override
+  String get dropboxSetupMissingTitle =>
+      'Fichier de configuration Dropbox manquant';
+
+  @override
+  String get dropboxSetupMissingBody =>
+      'Créez dropbox_desktop_secrets.json à côté de l\'exécutable ou à la racine du projet, avec les champs app_key et app_secret.';
+
+  @override
+  String get dropboxAppKeyLabel => 'App Key';
+
+  @override
   String get settingsSectionLangue => 'Langue';
 
   @override
@@ -387,6 +398,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsChangerFournisseur => 'Changer de fournisseur';
+
+  @override
+  String settingsChangerFournisseurBody(String provider) {
+    return 'Vous allez déconnecter $provider. Vos données locales seront conservées. Vous pourrez ensuite configurer un autre fournisseur.';
+  }
 
   @override
   String get settingsChoisirFournisseur => 'Choisissez votre fournisseur';
