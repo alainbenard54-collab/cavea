@@ -174,7 +174,7 @@ Fichiers : `lib/features/locations/location_tree_screen.dart`, `location_node.da
 
 ## Mode lecture seule — règles UI (Mode 2)
 
-Quand `SyncService` est en état `SyncReadOnly` (lock Drive détenu par un autre appareil) :
+Quand `SyncService` est en état `SyncReadOnly` (lock détenu par un autre appareil) :
 
 | Élément | Comportement |
 |---|---|
@@ -208,7 +208,7 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 2. Des sous-activités système (FilePicker, feuille de partage, basculement d'app) envoient aussi `paused` puis `resumed` : libérer/reprendre le lock à ces moments créait un yoyo inutile et des faux positifs "Cave utilisée par un autre appareil".
 
 **Comportement retenu :**
-- Le lock reste sur Drive après toute fermeture Android (bouton Home, task switcher, kill OS).
+- Le lock reste dans le partage après toute fermeture Android (bouton Home, task switcher, kill OS).
 - **Bouton "Quitter"** dans `_MobileBar` (mode écriture) = seul chemin de sortie propre sur Android : upload + unlock + `exit(0)`.
 - Au prochain démarrage, si le lock appartient à notre appareil, résolution silencieuse (upload local → lock conservé) sans dialog "Session interrompue". Le dialog crash recovery reste affiché uniquement sur PC (Windows), où `didRequestAppExit()` intercepte la fermeture et les requêtes ont le temps de terminer.
 
@@ -236,8 +236,8 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - Dans le formulaire bulk-add : liste affichée = union(liste de référence, valeurs existantes en base). Les valeurs de référence apparaissent en tête de liste.
 
 **4. Mode de synchronisation**
-- Activation/désactivation Google Drive (code existant préservé)
-- Support Dropbox prévu en V1 — sélecteur de fournisseur à ajouter quand DropboxStorageAdapter sera implémenté
+- Affichage du fournisseur actif : "Google Drive" ou "Dropbox" (Mode 2)
+- Bouton "Changer de fournisseur" : efface les tokens, remet `storageMode = 'local'`, relance le wizard
 
 **5. À propos**
 - Version, licence, lien vers les licences des dépendances
@@ -251,10 +251,10 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - ✅ **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Désactivé en SyncReadOnly (appui long ignoré). Voir section ci-dessous et ARCHITECTURE.md "Multi-sélection".
 - ✅ **Bouton quitter Android (Mode 2, mode écriture)** : quand `_MobileBar` est en mode écriture, bouton "Quitter" qui déclenche `releaseManual()` puis `exit(0)`. Dialogue de confirmation avec option "Sauvegarder et quitter" / "Annuler". Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
 - ✅ **Navigation par emplacement** : onglet "Emplacements" (`Icons.shelves`, index 2) dans `_DesktopRail` et `_MobileBar`. Voir ARCHITECTURE.md section "Navigation par emplacement".
-- **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
+- ✅ **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
 - ✅ **Historique des consommations** : liste bouteilles consommées, tri par date, recherche texte, BottomSheet détail + Réhabiliter, badge maturité masqué sur bouteilles consommées
 - ✅ **Export CSV** : onglet "Données" (index 4, accessible en SyncReadOnly) — export CSV UTF-8 BOM, tous les champs dont `updated_at`, séparateur configurable (`;` / `,` / tabulation), scope stock seul ou tout. Windows : FilePicker `saveFile()`. Android : FilePicker save + `share_plus` partage. Import mis à jour : séparateur configurable, `updated_at` préservé si présent. Fix Android : le verrou n'est plus libéré sur `AppLifecycleState.paused` (évitait le yoyo lock/unlock lors de FilePicker ou basculement d'app).
-- **Support Dropbox** : `DropboxStorageAdapter` + sélecteur fournisseur dans Settings
+- ✅ **Support Dropbox** : `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard et Settings, `storageMode = 'dropbox'`
 - **Support Linux** : Mode 1 sans changement majeur, Mode 2 via OAuth desktop, packaging AppImage/.deb
 - **Mise à jour Flutter** vers la version stable courante au démarrage V1
 

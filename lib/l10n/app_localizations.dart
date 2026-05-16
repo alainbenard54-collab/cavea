@@ -233,7 +233,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncConnecting.
   ///
   /// In fr, this message translates to:
-  /// **'Connexion à Google Drive…'**
+  /// **'Connexion au partage…'**
   String get syncConnecting;
 
   /// No description provided for @syncSaving.
@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncSavedToDrive.
   ///
   /// In fr, this message translates to:
-  /// **'Cave sauvegardée sur Drive'**
+  /// **'Cave sauvegardée dans le partage'**
   String get syncSavedToDrive;
 
   /// No description provided for @syncSavedAndUnlocked.
@@ -269,19 +269,19 @@ abstract class AppLocalizations {
   /// No description provided for @syncVerrouPose.
   ///
   /// In fr, this message translates to:
-  /// **'Verrou posé — cave à jour depuis Drive'**
+  /// **'Verrou posé — cave à jour depuis le partage'**
   String get syncVerrouPose;
 
   /// No description provided for @syncModificationsAbandonnees.
   ///
   /// In fr, this message translates to:
-  /// **'Modifications abandonnées — version Drive restaurée'**
+  /// **'Modifications abandonnées — version partagée restaurée'**
   String get syncModificationsAbandonnees;
 
   /// No description provided for @tooltipModePartage.
   ///
   /// In fr, this message translates to:
-  /// **'Mode partagé — Google Drive'**
+  /// **'Mode partagé'**
   String get tooltipModePartage;
 
   /// No description provided for @tooltipModeLocal.
@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncCrashDownloadDrive.
   ///
   /// In fr, this message translates to:
-  /// **'Repartir depuis Google Drive'**
+  /// **'Repartir depuis le partage'**
   String get syncCrashDownloadDrive;
 
   /// No description provided for @syncCrashSendLocalConfirmTitle.
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncCrashSendLocalConfirmBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre base locale va remplacer la version sur Google Drive. Comme la cave était verrouillée, aucun autre appareil n\'a pu la modifier depuis la dernière synchronisation.'**
+  /// **'Votre base locale va remplacer la version partagée. Comme la cave était verrouillée, aucun autre appareil n\'a pu la modifier depuis la dernière synchronisation.'**
   String get syncCrashSendLocalConfirmBody;
 
   /// No description provided for @syncCrashConfirmSend.
@@ -371,13 +371,13 @@ abstract class AppLocalizations {
   /// No description provided for @syncCrashDownloadConfirmTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Repartir depuis Google Drive ?'**
+  /// **'Repartir depuis le partage ?'**
   String get syncCrashDownloadConfirmTitle;
 
   /// No description provided for @syncCrashDownloadConfirmBody.
   ///
   /// In fr, this message translates to:
-  /// **'La base Google Drive va remplacer votre base locale. Toutes vos modifications locales non sauvegardées seront perdues.'**
+  /// **'La version partagée va remplacer votre base locale. Toutes vos modifications locales non sauvegardées seront perdues.'**
   String get syncCrashDownloadConfirmBody;
 
   /// No description provided for @syncCrashConfirmReplace.
@@ -443,7 +443,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncAcquireLockBodyDesktop.
   ///
   /// In fr, this message translates to:
-  /// **'La cave sera verrouillée pendant toute votre session. Le verrou sera automatiquement libéré et vos modifications sauvegardées sur Google Drive à la fermeture de l\'application ou via le bouton \"Sauvegarder\".'**
+  /// **'La cave sera verrouillée pendant toute votre session. Le verrou sera automatiquement libéré et vos modifications synchronisées à la fermeture de l\'application ou via le bouton \"Sauvegarder\".'**
   String get syncAcquireLockBodyDesktop;
 
   /// No description provided for @syncPrendreLaMain.
@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @quitDialogBody.
   ///
   /// In fr, this message translates to:
-  /// **'Vos modifications seront envoyées sur Drive et le verrou libéré.'**
+  /// **'Vos modifications seront synchronisées et le verrou libéré.'**
   String get quitDialogBody;
 
   /// No description provided for @quitFailTitle.
@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// No description provided for @quitFailBody.
   ///
   /// In fr, this message translates to:
-  /// **'Les données n\'ont pas pu être envoyées sur Drive et le verrou n\'a pas été libéré.\n\nVos modifications restent disponibles localement sur cet appareil. Elles pourront être synchronisées lors d\'une prochaine connexion à Drive, sauf si le verrou a été libéré manuellement depuis un autre appareil entre-temps.\n\nTant que le verrou reste actif, l\'accès en écriture depuis d\'autres appareils sera bloqué.'**
+  /// **'Les données n\'ont pas pu être synchronisées et le verrou n\'a pas été libéré.\n\nVos modifications restent disponibles localement sur cet appareil. Elles pourront être synchronisées lors d\'une prochaine connexion, sauf si le verrou a été libéré manuellement depuis un autre appareil entre-temps.\n\nTant que le verrou reste actif, l\'accès en écriture depuis d\'autres appareils sera bloqué.'**
   String get quitFailBody;
 
   /// No description provided for @quitAnyway.
@@ -539,37 +539,37 @@ abstract class AppLocalizations {
   /// No description provided for @driveMigrateTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Migrer vers Google Drive'**
+  /// **'Migrer vers le partage'**
   String get driveMigrateTitle;
 
   /// No description provided for @driveMigrateBodyExisting.
   ///
   /// In fr, this message translates to:
-  /// **'Une cave existe déjà sur Google Drive.\n\nQue souhaitez-vous faire ?'**
+  /// **'Une cave existe déjà dans le partage.\n\nQue souhaitez-vous faire ?'**
   String get driveMigrateBodyExisting;
 
   /// No description provided for @driveMigrateBodyNew.
   ///
   /// In fr, this message translates to:
-  /// **'Voulez-vous envoyer votre cave locale vers Google Drive ?'**
+  /// **'Voulez-vous envoyer votre cave locale vers le partage ?'**
   String get driveMigrateBodyNew;
 
   /// No description provided for @driveDownloadExisting.
   ///
   /// In fr, this message translates to:
-  /// **'Récupérer la cave du Drive'**
+  /// **'Récupérer la cave depuis le partage'**
   String get driveDownloadExisting;
 
   /// No description provided for @driveUploadOverwrite.
   ///
   /// In fr, this message translates to:
-  /// **'Écraser le Drive avec ma cave locale'**
+  /// **'Écraser le partage avec ma cave locale'**
   String get driveUploadOverwrite;
 
   /// No description provided for @driveSendNew.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyer ma cave vers Drive'**
+  /// **'Envoyer ma cave vers le partage'**
   String get driveSendNew;
 
   /// No description provided for @driveConfirmOverwriteLocalTitle.
@@ -581,19 +581,19 @@ abstract class AppLocalizations {
   /// No description provided for @driveConfirmOverwriteLocalBody.
   ///
   /// In fr, this message translates to:
-  /// **'Votre base locale sera remplacée par la version Google Drive. Toutes les données locales non présentes sur Drive seront perdues.'**
+  /// **'Votre base locale sera remplacée par la version partagée. Toutes les données locales non présentes dans le partage seront perdues.'**
   String get driveConfirmOverwriteLocalBody;
 
   /// No description provided for @driveConfirmOverwriteDriveTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Écraser la version Drive ?'**
+  /// **'Écraser la version partagée ?'**
   String get driveConfirmOverwriteDriveTitle;
 
   /// No description provided for @driveConfirmOverwriteDriveBody.
   ///
   /// In fr, this message translates to:
-  /// **'La version sur Google Drive sera remplacée par votre base locale. Toutes les données Drive non présentes localement seront perdues.'**
+  /// **'La version partagée sera remplacée par votre base locale. Toutes les données du partage non présentes localement seront perdues.'**
   String get driveConfirmOverwriteDriveBody;
 
   /// No description provided for @driveDownloading.
@@ -623,7 +623,7 @@ abstract class AppLocalizations {
   /// No description provided for @driveModeActivated.
   ///
   /// In fr, this message translates to:
-  /// **'Mode 2 activé — synchronisation Google Drive disponible'**
+  /// **'Mode 2 activé — synchronisation disponible'**
   String get driveModeActivated;
 
   /// No description provided for @driveDeactivateTitle.
@@ -1844,10 +1844,22 @@ abstract class AppLocalizations {
   /// **'Connecter Dropbox'**
   String get setupConnectDropbox;
 
+  /// No description provided for @setupDropboxConnectedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dropbox connecté'**
   String get setupDropboxConnectedTitle;
 
+  /// No description provided for @setupDropboxNoCave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune cave n\'a été détectée sur Dropbox.'**
   String get setupDropboxNoCave;
 
+  /// No description provided for @setupDropboxCaveFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une cave a été détectée sur Dropbox.'**
   String get setupDropboxCaveFound;
 
   /// No description provided for @setupModeMobile.
@@ -2021,7 +2033,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupOverwriteBody.
   ///
   /// In fr, this message translates to:
-  /// **'Cette action supprimera définitivement cave.db du Drive et le remplacera par une base vide. Toutes les données actuelles seront perdues.'**
+  /// **'Cette action supprimera définitivement cave.db du partage et le remplacera par une base vide. Toutes les données actuelles seront perdues.'**
   String get setupOverwriteBody;
 
   /// No description provided for @setupFinalConfirmTitle.

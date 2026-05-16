@@ -1,7 +1,7 @@
 ## 1. Préparation OAuth Dropbox
 
-- [ ] 1.1 Créer une app Dropbox dans la [Dropbox App Console](https://www.dropbox.com/developers/apps) : type "Scoped access", portée "Full Dropbox" (ou App folder), activer l'option "Allow localhost" dans les redirect URIs, copier App Key et App Secret
-- [ ] 1.2 Créer `dropbox_desktop_secrets.json` à côté de l'exécutable Windows avec `{"app_key": "...", "app_secret": "..."}` — ne pas committer ce fichier (déjà dans .gitignore via le pattern `*.json` hors `lib/`)
+- [x] 1.1 Créer une app Dropbox dans la [Dropbox App Console](https://www.dropbox.com/developers/apps) : type "Scoped access", portée "Full Dropbox" (ou App folder), activer l'option "Allow localhost" dans les redirect URIs, copier App Key et App Secret
+- [x] 1.2 Créer `dropbox_desktop_secrets.json` à côté de l'exécutable Windows avec `{"app_key": "...", "app_secret": "..."}` — ne pas committer ce fichier (déjà dans .gitignore via le pattern `*.json` hors `lib/`)
 - [x] 1.3 [N/A — localhost redirect utilisé à la place de App Link pour OAuth, aucune modification AndroidManifest requise]
 
 ## 2. DropboxStorageAdapter — Authentification Desktop (PC)
@@ -9,12 +9,12 @@
 - [x] 2.1 Créer `lib/services/dropbox_storage_adapter.dart` avec la classe `DropboxStorageAdapter implements StorageAdapter` — constantes : `_lockFileName`, `_dbFileName`, `_folderName = 'Cavea'`, `_secureStorage`, `_keyRefreshToken = 'dropbox_refresh_token'`, `_keyDeviceId = 'dropbox_device_id'` [PC]
 - [x] 2.2 Implémenter `_authenticateDesktop()` : lire `dropbox_desktop_secrets.json` via `dart:io`, générer PKCE (code_verifier + code_challenge SHA-256), ouvrir browser via `url_launcher`, écouter `HttpServer.bind('localhost', 0)` pour le callback, échanger le code contre access_token + refresh_token via POST `https://api.dropboxapi.com/oauth2/token` [PC]
 - [x] 2.3 Implémenter le refresh silencieux : si `dropbox_refresh_token` est présent dans secure storage, appeler `https://api.dropboxapi.com/oauth2/token` avec `grant_type=refresh_token` pour obtenir un access_token valide [PC]
-- [ ] 2.4 Tester manuellement l'authentification desktop : lancer l'app en Mode 1, passer en Mode 2 Dropbox via Settings/wizard, vérifier que le browser s'ouvre, que le callback est capturé et que le token est stocké [PC]
+- [x] 2.4 Tester manuellement l'authentification desktop : lancer l'app en Mode 1, passer en Mode 2 Dropbox via Settings/wizard, vérifier que le browser s'ouvre, que le callback est capturé et que le token est stocké [PC]
 
 ## 3. DropboxStorageAdapter — Authentification Android
 
 - [x] 3.1 Implémenter `_authenticateAndroid()` dans `DropboxStorageAdapter` : même flow PKCE localhost que desktop — redirect `http://localhost:PORT/callback`, HttpServer sur l'interface loopback accessible depuis Chrome Android [Android]
-- [ ] 3.2 Tester manuellement l'authentification Android : installer l'app, passer en Mode 2 Dropbox, vérifier que le browser Dropbox s'ouvre et que l'app reprend la main après autorisation avec token stocké [Android]
+- [x] 3.2 Tester manuellement l'authentification Android : installer l'app, passer en Mode 2 Dropbox, vérifier que le browser Dropbox s'ouvre et que l'app reprend la main après autorisation avec token stocké [Android]
 
 ## 4. DropboxStorageAdapter — API fichiers et verrou
 
@@ -44,9 +44,9 @@
 
 ## 8. Tests manuels
 
-- [ ] 8.1 Test PC : premier lancement Dropbox — choisir Dropbox dans wizard, s'authentifier, vérifier que `cave.db` et `cave.db.lock` apparaissent dans le dossier `/Cavea/` sur Dropbox
-- [ ] 8.2 Test PC : second lancement — token en cache, démarrage silencieux, lock repris, SyncIdle
-- [ ] 8.3 Test PC : lock tiers — créer manuellement un `cave.db.lock` avec un autre `deviceId`, vérifier que l'app passe en SyncReadOnly
-- [ ] 8.4 Test PC : upload/download — modifier des données, cliquer "Synchroniser", vérifier que `cave.db` sur Dropbox est mis à jour
-- [ ] 8.5 Test Android : premier lancement Dropbox — vérifier que le browser s'ouvre, que l'app reprend la main et que la sync fonctionne
+- [x] 8.1 Test PC : premier lancement Dropbox — choisir Dropbox dans wizard, s'authentifier, vérifier que `cave.db` et `cave.db.lock` apparaissent dans le dossier `/Cavea/` sur Dropbox
+- [x] 8.2 Test PC : second lancement — token en cache, démarrage silencieux, lock repris, SyncIdle
+- [x] 8.3 Test PC : lock tiers — créer manuellement un `cave.db.lock` avec un autre `deviceId`, vérifier que l'app passe en SyncReadOnly
+- [x] 8.4 Test PC : upload/download — modifier des données, cliquer "Synchroniser", vérifier que `cave.db` sur Dropbox est mis à jour
+- [x] 8.5 Test Android : premier lancement Dropbox — vérifier que le browser s'ouvre, que l'app reprend la main et que la sync fonctionne
 - [ ] 8.6 Test changement de fournisseur : Drive → Dropbox depuis Settings, vérifier que les tokens Drive sont effacés et que le wizard Dropbox s'affiche

@@ -294,8 +294,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get driveModeActivated =>
-      'Mode 2 activé — synchronisation disponible';
+  String get driveModeActivated => 'Mode 2 activé — synchronisation disponible';
 
   @override
   String get driveDeactivateTitle => 'Revenir en mode local ?';

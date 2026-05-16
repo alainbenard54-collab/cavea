@@ -237,9 +237,10 @@ lib/
 │           ├── deplacer_batch_sheet.dart # BottomSheet Déplacer en lot
 │           └── consommer_batch_sheet.dart # BottomSheet Consommer en lot
 ├── services/                    # couche cloud / sync (Mode 2)
-│   ├── storage_adapter.dart     # interface abstraite StorageAdapter
-│   ├── drive_storage_adapter.dart  # impl. Google Drive (drive.file scope, dossier Cavea)
-│   └── sync_service.dart        # états SyncState, syncOnStartup(), releaseIfNeeded()
+│   ├── storage_adapter.dart         # interface abstraite StorageAdapter
+│   ├── drive_storage_adapter.dart   # impl. Google Drive (drive.file scope, dossier Cavea)
+│   ├── dropbox_storage_adapter.dart # impl. Dropbox (PKCE OAuth, dossier Cavea)
+│   └── sync_service.dart            # états SyncState, syncOnStartup(), releaseIfNeeded()
 ├── shared/
 │   └── adaptive_layout.dart     # bascule desktop/mobile (600px), AppBar indicateurs
 └── widgets/
@@ -295,15 +296,25 @@ Si aucune configuration valide n'est trouvée → **wizard de premier lancement*
 
 ```
 Étape 1 : choix du mode
-  Mode 1 — PC seul (local)       → disponible
-  Mode 2 — PC + Android (cloud)  → "Non disponible dans cette version"
-  Mode 3 — Mobile seul           → "Non disponible dans cette version"
+  Mode 1 — PC seul (local)     → disponible
+  Mode 2 — Partagé (cloud)     → disponible (Google Drive ou Dropbox)
+  Mode 3 — Mobile seul         → "Non disponible dans cette version"
 
-Étape 2 (Mode 1) : chemin vers le répertoire contenant cave.db
+Étape 2a (Mode 1) : chemin vers le répertoire contenant cave.db
   → champ texte + bouton "Parcourir" (file picker dossier)
-  → valeur par défaut : Documents/cave
 
-Étape 3 : confirmation
+Étape 2b (Mode 2) : choix du fournisseur cloud
+  → "Google Drive" ou "Dropbox"
+
+Étape 3a (Mode 2 — Google Drive) : connexion Google
+  → bouton "Se connecter avec Google" → OAuth Drive
+  → persister storageMode = 'drive', appeler syncOnStartup()
+
+Étape 3b (Mode 2 — Dropbox) : connexion Dropbox
+  → bouton "Se connecter avec Dropbox" → PKCE OAuth Dropbox
+  → persister storageMode = 'dropbox', appeler syncOnStartup()
+
+Étape finale (Mode 1) : confirmation
   → créer cave.db si inexistant
   → persister la config dans SharedPreferences
   → proposer l'import CSV (ou "Commencer avec une base vide")
@@ -376,7 +387,7 @@ Données persistées dans SharedPreferences :
 
 | Clé | Type | Usage |
 |---|---|---|
-| `storage_mode` | String | `'local'` ou `'drive'` |
+| `storage_mode` | String | `'local'`, `'drive'` ou `'dropbox'` |
 | `db_path` | String | Chemin absolu vers cave.db |
 | `couleur_defaut` | String | Valeur pré-sélectionnée dans bulk-add |
 | `contenance_defaut` | String | Valeur pré-remplie dans bulk-add |
@@ -453,7 +464,7 @@ Fichiers : `lib/features/locations/` (4 fichiers). DAO : `watchLocationStats()`,
 Sur Android en Mode 2, le verrou n'est **jamais libéré automatiquement** sur les événements de cycle de vie (`paused`, `resumed`). Deux raisons : l'OS tue le process avant la fin des requêtes HTTP, et des sous-activités (FilePicker, share sheet) déclenchent aussi `paused`/`resumed` — libérer le lock dans ces cas causait des faux positifs "Cave utilisée par un autre appareil". Voir section dédiée dans CLAUDE.md.
 
 **Feature V1** : quand `_MobileBar` affiche le bouton "Sauvegarder et libérer" (`!isReadOnly && isAndroid && syncService.isActive`), afficher également un bouton **Quitter** (icône `exit_to_app`) qui :
-1. Déclenche `syncService.releaseManual()` (upload Drive + suppression lock)
+1. Déclenche `syncService.releaseManual()` (upload + suppression lock)
 2. Attend la fin de l'opération (état `SyncIdle` ou `SyncReadOnly`)
 3. Appelle `exit(0)` pour fermer le process proprement
 
@@ -468,7 +479,7 @@ Emplacement dans `_MobileBar` : dans la zone sync (gauche), aux côtés de `_Aba
 | # | Sujet | Impact |
 |---|---|---|
 | 1 | ~~Accès Google Drive depuis Android~~ | ✅ Résolu — Mode 2 Android opérationnel (android-lock-ux) |
-| 2 | Support Dropbox | V1 — StorageAdapter déjà abstrait, ajouter DropboxStorageAdapter + sélecteur fournisseur dans Settings |
+| 2 | ~~Support Dropbox~~ | ✅ Résolu — `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard + Settings (dropbox) |
 | 3 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
 | 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
 | 5 | Mise à jour Flutter vers version stable courante | V1 — vérifier compatibilité dépendances avant migration |

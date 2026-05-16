@@ -95,7 +95,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncReadOnlyUnavailable => 'Unavailable in read-only mode';
 
   @override
-  String get syncVerrouPose => 'Lock acquired — cellar up to date from shared storage';
+  String get syncVerrouPose =>
+      'Lock acquired — cellar up to date from shared storage';
 
   @override
   String get syncModificationsAbandonnees =>
@@ -258,7 +259,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driveDownloadExisting => 'Download cellar from shared storage';
 
   @override
-  String get driveUploadOverwrite => 'Overwrite shared storage with my local cellar';
+  String get driveUploadOverwrite =>
+      'Overwrite shared storage with my local cellar';
 
   @override
   String get driveSendNew => 'Send my cellar to shared storage';
@@ -294,8 +296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get driveModeActivated =>
-      'Mode 2 activated — sync available';
+  String get driveModeActivated => 'Mode 2 activated — sync available';
 
   @override
   String get driveDeactivateTitle => 'Switch to local mode?';
