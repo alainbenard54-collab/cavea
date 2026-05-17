@@ -1,3 +1,6 @@
+## Purpose
+Écran d'édition complète d'une bouteille, accessible depuis le BottomSheet d'actions. Permet de modifier tous les champs non-protégés avec autocomplétion et validation.
+## Requirements
 ### Requirement: Ouverture de l'écran d'édition
 L'application SHALL naviguer vers l'écran `BottleEditScreen` depuis le BottomSheet d'actions. L'écran SHALL se charger en plein écran sans barre de navigation, avec un bouton de retour.
 
@@ -95,3 +98,15 @@ Le champ `emplacement` SHALL valider le format hiérarchique : `Niveau1` ou `Niv
 #### Scenario: Retour sans sauvegarde
 - **WHEN** l'utilisateur appuie sur le bouton retour ou "Annuler"
 - **THEN** aucune modification n'est persistée et l'écran se ferme
+
+### Requirement: Suggestions autocomplétion ouvertes vers le haut en paysage Android
+En orientation paysage sur Android, les suggestions `RawAutocomplete` de `BottleEditScreen` SHALL s'ouvrir au-dessus du champ pour ne pas être masquées par le clavier.
+
+#### Scenario: Ouverture vers le haut en paysage
+- **WHEN** `Platform.isAndroid` ET `MediaQuery.orientation == Orientation.landscape`
+- **THEN** `RawAutocomplete` SHALL utiliser `optionsViewOpenDirection: OptionsViewOpenDirection.up` et `alignment: Alignment.bottomLeft`
+
+#### Scenario: Ouverture vers le bas hors paysage Android
+- **WHEN** Windows/Linux OU orientation portrait
+- **THEN** `RawAutocomplete` SHALL utiliser `OptionsViewOpenDirection.down` (comportement par défaut)
+

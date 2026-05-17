@@ -1,5 +1,6 @@
+## Purpose
+Formulaire d'ajout en lot permettant de créer N bouteilles identiques avec répartition multi-emplacement et autocomplétion des champs texte.
 ## Requirements
-
 ### Requirement: Formulaire d'ajout en lot
 L'application SHALL fournir un écran d'ajout manuel accessible depuis la navigation principale. Le formulaire SHALL exposer tous les champs non-protégés de la bouteille et permettre d'indiquer une quantité totale avec une répartition multi-emplacement.
 
@@ -86,3 +87,22 @@ L'application SHALL insérer les N bouteilles en une transaction atomique. Chaqu
 #### Scenario: Annulation
 - **WHEN** l'utilisateur quitte l'écran sans confirmer
 - **THEN** aucune bouteille n'est créée
+
+### Requirement: Suggestions autocomplétion via overlay flottant (RawAutocomplete)
+`_AutocompleteField` et le champ emplacement de `RepartitionRow` SHALL utiliser `RawAutocomplete` avec overlay flottant, non un `Column` avec liste inline.
+
+#### Scenario: Suggestions devant l'AppBar
+- **WHEN** des suggestions sont disponibles
+- **THEN** elles SHALL apparaître dans un overlay Material flottant par-dessus tous les widgets, y compris l'AppBar
+
+### Requirement: Ouverture vers le haut en paysage Android
+En orientation paysage sur Android, les suggestions SHALL s'ouvrir au-dessus du champ.
+
+#### Scenario: Overlay vers le haut en paysage
+- **WHEN** `Platform.isAndroid` ET `MediaQuery.orientation == Orientation.landscape`
+- **THEN** `RawAutocomplete` SHALL utiliser `optionsViewOpenDirection: OptionsViewOpenDirection.up` et `alignment: Alignment.bottomLeft`
+
+#### Scenario: Overlay vers le bas hors paysage Android
+- **WHEN** Windows/Linux OU orientation portrait
+- **THEN** `optionsViewOpenDirection: OptionsViewOpenDirection.down` (comportement par défaut)
+
