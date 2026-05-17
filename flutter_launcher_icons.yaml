@@ -1,0 +1,16 @@
+flutter_launcher_icons:
+  # Source unique pour toutes les plateformes
+  image_path: "assets/icons/cave_simple.png"
+
+  # Android — génère toutes les densités (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi)
+  # + icône adaptative (API 26+) : fond bordeaux, image en foreground
+  android: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#4A0E1E"
+  adaptive_icon_foreground: "assets/icons/cave_simple.png"
+
+  # Windows — génère windows/runner/resources/app_icon.ico (16/32/48/256 px)
+  windows:
+    generate: true
+    image_path: "assets/icons/cave_simple.png"
+    icon_size: 48
