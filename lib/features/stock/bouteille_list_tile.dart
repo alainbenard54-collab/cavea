@@ -59,6 +59,7 @@ class BouteilleListTile extends StatelessWidget {
     ];
 
     return ListTile(
+      dense: true,
       onTap: onTap,
       onLongPress: onLongPress,
       selected: isSelected,

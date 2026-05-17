@@ -262,6 +262,7 @@ class StockTable extends StatelessWidget {
         const Divider(height: 1, thickness: 1),
         Expanded(
           child: ListView.separated(
+            padding: EdgeInsets.zero,
             itemCount: bouteilles.length,
             separatorBuilder: (_, i) => const Divider(height: 1),
             itemBuilder: (context, i) => _dataRow(context, bouteilles[i], vPad),

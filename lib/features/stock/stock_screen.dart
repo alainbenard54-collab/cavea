@@ -83,12 +83,14 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     // En paysage mobile, les filtres sont collapsés par défaut
     final showFilters = !isLandscapeMobile || _filtersExpanded;
 
-    return Column(
+    return LayoutBuilder(
+      builder: (_, constraints) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // En paysage avec filtres étendus, le header peut dépasser la hauteur disponible.
-        // Flexible + SingleChildScrollView permettent de scroller le header sans overflow.
-        Flexible(
+        // Filtres : prennent au plus la moitié de la hauteur disponible, scroll si débordement.
+        // ConstrainedBox + LayoutBuilder : Expanded prend H − taille_réelle (pas H/2 fixe).
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: constraints.maxHeight / 2),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -362,7 +364,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               ], // fin inner Column children
             ),   // fin inner Column
           ),     // fin SingleChildScrollView
-        ),       // fin Flexible
+        ),       // fin ConstrainedBox
 
         // Liste ou tableau
         Expanded(
@@ -391,6 +393,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                     );
                   }
                   return ListView.builder(
+                    padding: EdgeInsets.zero,
                     itemCount: bouteilles.length,
                     itemBuilder: (context, i) {
                       final b = bouteilles[i];
@@ -429,7 +432,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             onCancel: _cancelSelect,
           ),
       ],
-    );
+    ));
   }
 }
 
