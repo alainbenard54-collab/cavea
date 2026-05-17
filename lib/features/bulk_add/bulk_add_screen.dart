@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -210,6 +212,8 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     final state = ref.watch(bulkAddProvider);
     final notifier = ref.read(bulkAddProvider.notifier);
     final theme = Theme.of(context);
+    final isLandscapeMobile = Platform.isAndroid &&
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bulkAddTitle)),
@@ -224,6 +228,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               initialValue: state.domaine,
               suggestions: _domaines,
               onChanged: (v) => notifier.set((s) => s.copyWith(domaine: v)),
+              openUp: isLandscapeMobile,
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
@@ -233,6 +238,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               initialValue: state.appellation,
               suggestions: _appellations,
               onChanged: (v) => notifier.set((s) => s.copyWith(appellation: v)),
+              openUp: isLandscapeMobile,
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? l10n.validationObligatoire : null,
             ),
@@ -320,6 +326,7 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
               suggestions: _fournisseurs,
               onChanged: (v) =>
                   notifier.set((s) => s.copyWith(fournisseurNom: v)),
+              openUp: isLandscapeMobile,
             ),
             const SizedBox(height: 10),
             _field(
@@ -638,6 +645,7 @@ class _AutocompleteField extends StatefulWidget {
   final List<String> suggestions;
   final ValueChanged<String> onChanged;
   final String? Function(String?)? validator;
+  final bool openUp;
 
   const _AutocompleteField({
     required this.label,
@@ -645,6 +653,7 @@ class _AutocompleteField extends StatefulWidget {
     required this.suggestions,
     required this.onChanged,
     this.validator,
+    this.openUp = false,
   });
 
   @override
@@ -653,82 +662,89 @@ class _AutocompleteField extends StatefulWidget {
 
 class _AutocompleteFieldState extends State<_AutocompleteField> {
   late final TextEditingController _ctrl;
-  List<String> _filtered = [];
+  late final FocusNode _focusNode;
+  final _fieldKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _ctrl = TextEditingController(text: widget.initialValue);
+    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _focusNode.dispose();
     super.dispose();
-  }
-
-  void _onChanged(String v) {
-    final q = v.toLowerCase();
-    setState(() {
-      _filtered = q.isEmpty
-          ? []
-          : widget.suggestions
-              .where((s) => s.toLowerCase().contains(q) && s != v)
-              .toList();
-    });
-    widget.onChanged(v);
-  }
-
-  void _select(String s) {
-    _ctrl.text = s;
-    _ctrl.selection =
-        TextSelection.fromPosition(TextPosition(offset: s.length));
-    setState(() => _filtered = []);
-    widget.onChanged(s);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextFormField(
-          controller: _ctrl,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
-          validator: widget.validator,
-          onChanged: _onChanged,
+    return RawAutocomplete<String>(
+      textEditingController: _ctrl,
+      focusNode: _focusNode,
+      optionsViewOpenDirection: widget.openUp
+          ? OptionsViewOpenDirection.up
+          : OptionsViewOpenDirection.down,
+      optionsBuilder: (textEditingValue) {
+        final q = textEditingValue.text.toLowerCase();
+        if (q.isEmpty) return const Iterable<String>.empty();
+        return widget.suggestions.where(
+          (s) => s.toLowerCase().contains(q) && s != textEditingValue.text,
+        );
+      },
+      displayStringForOption: (s) => s,
+      fieldViewBuilder: (_, __, ___, onFieldSubmitted) => TextFormField(
+        key: _fieldKey,
+        controller: _ctrl,
+        focusNode: _focusNode,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          border: const OutlineInputBorder(),
+          isDense: true,
         ),
-        if (_filtered.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 160),
-            decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              children: _filtered
-                  .map(
-                    (s) => InkWell(
-                      onTap: () => _select(s),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        child: Text(s, style: theme.textTheme.bodyMedium),
-                      ),
+        validator: widget.validator,
+        onChanged: widget.onChanged,
+        onFieldSubmitted: (_) => onFieldSubmitted(),
+      ),
+      optionsViewBuilder: (_, onSelected, options) {
+        final fieldBox =
+            _fieldKey.currentContext?.findRenderObject() as RenderBox?;
+        final fieldWidth = fieldBox?.size.width ?? 240.0;
+        return Align(
+          alignment:
+              widget.openUp ? Alignment.bottomLeft : Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(4),
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxWidth: fieldWidth, maxHeight: 160),
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: options.length,
+                itemBuilder: (_, i) {
+                  final option = options.elementAt(i);
+                  return InkWell(
+                    onTap: () {
+                      onSelected(option);
+                      widget.onChanged(option);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      child: Text(option,
+                          style: Theme.of(context).textTheme.bodyMedium),
                     ),
-                  )
-                  .toList(),
+                  );
+                },
+              ),
             ),
           ),
-      ],
+        );
+      },
     );
   }
 }

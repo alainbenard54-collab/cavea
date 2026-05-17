@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -621,9 +623,14 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscapeMobile = Platform.isAndroid &&
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return RawAutocomplete<String>(
       textEditingController: widget.controller,
       focusNode: _focusNode,
+      optionsViewOpenDirection: isLandscapeMobile
+          ? OptionsViewOpenDirection.up
+          : OptionsViewOpenDirection.down,
       optionsBuilder: (textEditingValue) {
         final q = textEditingValue.text.toLowerCase();
         if (q.isEmpty) return const Iterable<String>.empty();
@@ -660,7 +667,7 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
             _fieldKey.currentContext?.findRenderObject() as RenderBox?;
         final fieldWidth = fieldBox?.size.width ?? 240.0;
         return Align(
-          alignment: Alignment.topLeft,
+          alignment: isLandscapeMobile ? Alignment.bottomLeft : Alignment.topLeft,
           child: Material(
             elevation: 4,
             borderRadius: BorderRadius.circular(4),

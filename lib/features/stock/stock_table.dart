@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../core/locale_formatting.dart';
 import '../../core/maturity/maturity_service.dart';
@@ -55,7 +57,8 @@ class StockTable extends StatelessWidget {
   Widget _headerCell(
     BuildContext context,
     String label,
-    String column, {
+    String column,
+    double vPad, {
     TextAlign align = TextAlign.left,
   }) {
     final theme = Theme.of(context);
@@ -63,7 +66,7 @@ class StockTable extends StatelessWidget {
     return InkWell(
       onTap: () => onSort(column),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Row(
           mainAxisAlignment: align == TextAlign.right
               ? MainAxisAlignment.end
@@ -95,13 +98,13 @@ class StockTable extends StatelessWidget {
     );
   }
 
-  Widget _gardeCell(BuildContext context, Bouteille b) {
+  Widget _gardeCell(BuildContext context, Bouteille b, double vPad) {
     final l10n = context.l10n;
     final style = Theme.of(context).textTheme.bodySmall;
 
     if (b.gardeMin == null && b.gardeMax == null) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text('—', style: style, textAlign: TextAlign.center),
       );
     }
@@ -165,7 +168,7 @@ class StockTable extends StatelessWidget {
     );
   }
 
-  Widget _dataRow(BuildContext context, Bouteille b) {
+  Widget _dataRow(BuildContext context, Bouteille b, double vPad) {
     final theme = Theme.of(context);
     final style = theme.textTheme.bodySmall;
     final isSelected = selectedIds.contains(b.id);
@@ -181,15 +184,15 @@ class StockTable extends StatelessWidget {
         child: Icon(Icons.wine_bar, color: couleurVin(b.couleur), size: 22),
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text(b.domaine, style: style, overflow: TextOverflow.ellipsis),
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text(b.appellation, style: style, overflow: TextOverflow.ellipsis),
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text(
           b.millesime > 0 ? b.millesime.toString() : '—',
           style: style,
@@ -197,12 +200,12 @@ class StockTable extends StatelessWidget {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text(b.emplacement, style: style, overflow: TextOverflow.ellipsis),
       ),
-      _gardeCell(context, b),
+      _gardeCell(context, b, vPad),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
         child: Text(
           formatCurrency(b.prixAchat, context),
           style: style,
@@ -231,6 +234,10 @@ class StockTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final double vPad = Platform.isAndroid &&
+            MediaQuery.of(context).orientation == Orientation.landscape
+        ? 4.0
+        : 10.0;
 
     final header = Container(
       color: theme.colorScheme.surfaceContainerHighest,
@@ -238,12 +245,12 @@ class StockTable extends StatelessWidget {
         [
           if (isSelectMode) const SizedBox(),
           const SizedBox(),
-          _headerCell(context, l10n.tableHeaderDomaine, 'domaine'),
-          _headerCell(context, l10n.tableHeaderAppellation, 'appellation'),
-          _headerCell(context, l10n.tableHeaderMillesime, 'millesime', align: TextAlign.center),
-          _headerCell(context, l10n.tableHeaderEmplacement, 'emplacement'),
-          _headerCell(context, l10n.tableHeaderGarde, 'gardeMin', align: TextAlign.center),
-          _headerCell(context, l10n.tableHeaderPrix, 'prixAchat', align: TextAlign.right),
+          _headerCell(context, l10n.tableHeaderDomaine, 'domaine', vPad),
+          _headerCell(context, l10n.tableHeaderAppellation, 'appellation', vPad),
+          _headerCell(context, l10n.tableHeaderMillesime, 'millesime', vPad, align: TextAlign.center),
+          _headerCell(context, l10n.tableHeaderEmplacement, 'emplacement', vPad),
+          _headerCell(context, l10n.tableHeaderGarde, 'gardeMin', vPad, align: TextAlign.center),
+          _headerCell(context, l10n.tableHeaderPrix, 'prixAchat', vPad, align: TextAlign.right),
         ],
         withCheckbox: isSelectMode,
       ),
@@ -257,7 +264,7 @@ class StockTable extends StatelessWidget {
           child: ListView.separated(
             itemCount: bouteilles.length,
             separatorBuilder: (_, i) => const Divider(height: 1),
-            itemBuilder: (context, i) => _dataRow(context, bouteilles[i]),
+            itemBuilder: (context, i) => _dataRow(context, bouteilles[i], vPad),
           ),
         ),
       ],
