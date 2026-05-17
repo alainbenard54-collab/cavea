@@ -83,6 +83,7 @@
   "driveSetupMissingBody": "Le fichier de configuration Google Drive est introuvable à côté de l'application.\n\nSi vous avez installé Cavea via l'installateur, veuillez le désinstaller puis réinstaller une version récente.\n\nSi vous avez copié l'application manuellement, consultez le guide de configuration en ligne.",
   "driveGuideEnLigne": "Guide en ligne",
   "driveAuthOpening": "Ouverture de l'authentification Google…",
+  "dropboxAuthOpening": "Ouverture de l'authentification Dropbox…",
   "driveAuthFailed": "Authentification échouée : {error}",
   "@driveAuthFailed": {
     "placeholders": { "error": { "type": "String" } }

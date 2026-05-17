@@ -712,7 +712,7 @@ class _CloudActivationTile extends ConsumerWidget {
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.driveAuthOpening)),
+      SnackBar(content: Text(l10n.dropboxAuthOpening)),
     );
 
     try {

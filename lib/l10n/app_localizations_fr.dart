@@ -239,6 +239,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get driveAuthOpening => 'Ouverture de l\'authentification Google…';
 
   @override
+  String get dropboxAuthOpening => 'Ouverture de l\'authentification Dropbox…';
+
+  @override
   String driveAuthFailed(String error) {
     return 'Authentification échouée : $error';
   }

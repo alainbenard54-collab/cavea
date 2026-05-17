@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'Ouverture de l\'authentification Google…'**
   String get driveAuthOpening;
 
+  /// No description provided for @dropboxAuthOpening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouverture de l\'authentification Dropbox…'**
+  String get dropboxAuthOpening;
+
   /// No description provided for @driveAuthFailed.
   ///
   /// In fr, this message translates to:

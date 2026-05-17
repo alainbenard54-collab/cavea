@@ -33,8 +33,9 @@ stock.csv
 historique.csv
 clean_stock_archive.py
 
-# Identifiants OAuth Google Drive (ne jamais committer)
+# Identifiants OAuth (ne jamais committer)
 google_desktop_secrets.json
+dropbox_desktop_secrets.json
 android/app/google-services.json
 
 # Keystore Android et config de signature (ne jamais committer)

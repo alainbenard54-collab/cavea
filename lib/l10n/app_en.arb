@@ -80,6 +80,7 @@
   "driveSetupMissingBody": "The Google Drive configuration file was not found next to the application.\n\nIf you installed Cavea using the installer, please uninstall and reinstall a recent version.\n\nIf you copied the application manually, consult the online configuration guide.",
   "driveGuideEnLigne": "Online guide",
   "driveAuthOpening": "Opening Google authentication…",
+  "dropboxAuthOpening": "Opening Dropbox authentication…",
   "driveAuthFailed": "Authentication failed: {error}",
   "driveMigrateTitle": "Migrate to shared storage",
   "driveMigrateBodyExisting": "A cellar already exists in shared storage.\n\nWhat would you like to do?",
