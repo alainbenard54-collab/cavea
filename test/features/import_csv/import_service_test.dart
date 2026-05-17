@@ -121,21 +121,21 @@ void main() {
   // ── rapport compteurs ────────────────────────────────────────────────────
 
   group('rapport compteurs', () {
-    test('1 insert + 1 update + 1 skip → compteurs corrects', () async {
+    test('1 insert + 2 updates + overwrite=true → compteurs corrects', () async {
       await db.bouteilleDao.insertBouteille(_companion(id: 'r-update'));
-      await db.bouteilleDao.insertBouteille(_companion(id: 'r-skip'));
+      await db.bouteilleDao.insertBouteille(_companion(id: 'r-update2'));
 
       final result = await service.run(
         [
           _companion(id: 'r-new'),
           _companion(id: 'r-update', domaine: 'Modifié'),
-          _companion(id: 'r-skip'),
+          _companion(id: 'r-update2', domaine: 'Modifié2'),
         ],
         overwrite: true,
       );
 
       expect(result.inserted, 1);
-      expect(result.updated, 1);
+      expect(result.updated, 2);
       expect(result.skipped, 0);
       expect(result.errors, 0);
     });

@@ -585,6 +585,7 @@ void main() {
           appellation: const Value('A'),
           millesime: const Value(2020),
           couleur: const Value('Rouge'),
+          contenance: const Value(''),
           emplacement: const Value('Cave A'),
           dateEntree: const Value('2026-01-01'),
           updatedAt: const Value('2026-01-01T00:00:00Z'),
