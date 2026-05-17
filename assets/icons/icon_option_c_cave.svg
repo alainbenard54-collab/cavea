@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Option C : Cave voûtée avec étagères de bouteilles, vue frontale -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-stone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2A1F35"/>
+      <stop offset="100%" stop-color="#1A1020"/>
+    </linearGradient>
+    <linearGradient id="arch-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A3555"/>
+      <stop offset="100%" stop-color="#2A1F35"/>
+    </linearGradient>
+    <linearGradient id="shelf-wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8B5A2B"/>
+      <stop offset="100%" stop-color="#5C3A18"/>
+    </linearGradient>
+    <linearGradient id="candle-flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF176"/>
+      <stop offset="100%" stop-color="#FF8C00"/>
+    </linearGradient>
+    <filter id="candleglow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fond pierre sombre -->
+  <rect width="512" height="512" rx="80" fill="url(#bg-stone)"/>
+
+  <!-- Texture pierres (lignes discrètes) -->
+  <g stroke="#3A2A45" stroke-width="1" opacity="0.4">
+    <line x1="0" y1="120" x2="512" y2="120"/>
+    <line x1="0" y1="200" x2="512" y2="200"/>
+    <line x1="0" y1="280" x2="512" y2="280"/>
+    <line x1="0" y1="360" x2="512" y2="360"/>
+    <line x1="0" y1="440" x2="512" y2="440"/>
+    <line x1="80" y1="0" x2="80" y2="512"/>
+    <line x1="180" y1="0" x2="180" y2="512"/>
+    <line x1="280" y1="0" x2="280" y2="512"/>
+    <line x1="380" y1="0" x2="380" y2="512"/>
+    <line x1="460" y1="0" x2="460" y2="512"/>
+  </g>
+
+  <!-- Voûte (arche intérieure lumineuse) -->
+  <path d="M 70 512 L 70 270 Q 70 80 256 80 Q 442 80 442 270 L 442 512 Z"
+        fill="url(#arch-grad)"/>
+
+  <!-- Intérieur de la cave (plus clair, éclairé) -->
+  <path d="M 90 512 L 90 275 Q 90 105 256 105 Q 422 105 422 275 L 422 512 Z"
+        fill="#241830" opacity="0.8"/>
+
+  <!-- Halo bougie (lumière chaude au centre bas) -->
+  <radialGradient id="candlelight" cx="50%" cy="85%" r="45%">
+    <stop offset="0%" stop-color="#FF8C00" stop-opacity="0.25"/>
+    <stop offset="60%" stop-color="#8B4513" stop-opacity="0.08"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </radialGradient>
+  <ellipse cx="256" cy="440" rx="180" ry="100" fill="url(#candlelight)"/>
+
+  <!-- ── Étagères ── -->
+
+  <!-- Étagère 1 (haute) -->
+  <rect x="100" y="195" width="312" height="12" rx="3" fill="url(#shelf-wood)"/>
+  <rect x="100" y="195" width="312" height="3" rx="1" fill="#C8884A" opacity="0.5"/>
+
+  <!-- Étagère 2 (milieu) -->
+  <rect x="100" y="300" width="312" height="12" rx="3" fill="url(#shelf-wood)"/>
+  <rect x="100" y="300" width="312" height="3" rx="1" fill="#C8884A" opacity="0.5"/>
+
+  <!-- Étagère 3 (basse) -->
+  <rect x="100" y="405" width="312" height="12" rx="3" fill="url(#shelf-wood)"/>
+  <rect x="100" y="405" width="312" height="3" rx="1" fill="#C8884A" opacity="0.5"/>
+
+  <!-- ── Bouteilles étagère 1 ── (vue de côté, couchées) -->
+  <!-- Bouteille = ellipse (bout) + rectangle -->
+  <g>
+    <!-- b1 -->
+    <rect x="108" y="165" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="108" cy="179" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="140" y="170" width="12" height="18" rx="2" fill="#C4A24A"/>
+    <!-- b2 -->
+    <rect x="168" y="165" width="46" height="28" rx="5" fill="#2D5A2D"/>
+    <ellipse cx="168" cy="179" rx="8" ry="14" fill="#1A3A1A"/>
+    <rect x="200" y="170" width="12" height="18" rx="2" fill="#C4A24A"/>
+    <!-- b3 -->
+    <rect x="228" y="165" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="228" cy="179" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="260" y="170" width="12" height="18" rx="2" fill="#C4A24A"/>
+    <!-- b4 -->
+    <rect x="288" y="165" width="46" height="28" rx="5" fill="#1A3A5C"/>
+    <ellipse cx="288" cy="179" rx="8" ry="14" fill="#0F2540"/>
+    <rect x="320" y="170" width="12" height="18" rx="2" fill="#C4A24A"/>
+    <!-- b5 -->
+    <rect x="348" y="165" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="348" cy="179" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="380" y="170" width="12" height="18" rx="2" fill="#C4A24A"/>
+  </g>
+
+  <!-- ── Bouteilles étagère 2 ── -->
+  <g>
+    <rect x="108" y="270" width="46" height="28" rx="5" fill="#2D5A2D"/>
+    <ellipse cx="108" cy="284" rx="8" ry="14" fill="#1A3A1A"/>
+    <rect x="140" y="275" width="12" height="18" rx="2" fill="#A08020"/>
+    <rect x="168" y="270" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="168" cy="284" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="200" y="275" width="12" height="18" rx="2" fill="#A08020"/>
+    <rect x="228" y="270" width="46" height="28" rx="5" fill="#1A3A5C"/>
+    <ellipse cx="228" cy="284" rx="8" ry="14" fill="#0F2540"/>
+    <rect x="260" y="275" width="12" height="18" rx="2" fill="#A08020"/>
+    <rect x="288" y="270" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="288" cy="284" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="320" y="275" width="12" height="18" rx="2" fill="#A08020"/>
+    <rect x="348" y="270" width="46" height="28" rx="5" fill="#2D5A2D"/>
+    <ellipse cx="348" cy="284" rx="8" ry="14" fill="#1A3A1A"/>
+    <rect x="380" y="275" width="12" height="18" rx="2" fill="#A08020"/>
+  </g>
+
+  <!-- ── Bouteilles étagère 3 ── -->
+  <g>
+    <rect x="108" y="375" width="46" height="28" rx="5" fill="#7B2D42"/>
+    <ellipse cx="108" cy="389" rx="8" ry="14" fill="#5C1A28"/>
+    <rect x="228" y="375" width="46" height="28" rx="5" fill="#2D5A2D"/>
+    <ellipse cx="228" cy="389" rx="8" ry="14" fill="#1A3A1A"/>
+    <rect x="348" y="375" width="46" height="28" rx="5" fill="#1A3A5C"/>
+    <ellipse cx="348" cy="389" rx="8" ry="14" fill="#0F2540"/>
+  </g>
+
+  <!-- ── Bougie au premier plan ── -->
+  <!-- Corps de la bougie -->
+  <rect x="242" y="440" width="28" height="52" rx="4" fill="#F5F0E0"/>
+  <rect x="242" y="440" width="28" height="6" rx="2" fill="#E0D0C0"/>
+  <!-- Mèche -->
+  <line x1="256" y1="440" x2="256" y2="430" stroke="#4A3A2A" stroke-width="2"/>
+  <!-- Flamme -->
+  <ellipse cx="256" cy="424" rx="6" ry="10" fill="url(#candle-flame)" filter="url(#candleglow)"/>
+  <ellipse cx="256" cy="428" rx="3" ry="5" fill="#FFF9C4"/>
+
+  <!-- Reflets clé de voûte -->
+  <path d="M 220 110 Q 256 90 292 110" fill="none" stroke="#6A4A7A" stroke-width="3" stroke-opacity="0.5"/>
+
+  <!-- Clés de voûte (pierres apparentes) -->
+  <path d="M 230 107 Q 256 88 282 107 L 278 118 Q 256 100 234 118 Z" fill="#3D2A50" stroke="#5A4060" stroke-width="1"/>
+</svg>
