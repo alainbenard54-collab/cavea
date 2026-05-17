@@ -263,7 +263,8 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - ✅ **Export CSV** : onglet "Données" (index 4, accessible en SyncReadOnly) — export CSV UTF-8 BOM, tous les champs dont `updated_at`, séparateur configurable (`;` / `,` / tabulation), scope stock seul ou tout. Windows : FilePicker `saveFile()`. Android : FilePicker save + `share_plus` partage. Import mis à jour : séparateur configurable, `updated_at` préservé si présent. Fix Android : le verrou n'est plus libéré sur `AppLifecycleState.paused` (évitait le yoyo lock/unlock lors de FilePicker ou basculement d'app).
 - ✅ **Support Dropbox** : `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard et Settings, `storageMode = 'dropbox'`
 - ✅ **Support Linux** : Mode 1 (dart:io direct) + Mode 2 (OAuth loopback Drive + Dropbox, libsecret). Scaffold `linux/` généré via `flutter create --platforms=linux .` + `libsecret-1-dev` dans CMakeLists. Packaging : `./scripts/build_linux.sh [appimage|deb|all]`.
-- **Mise à jour Flutter** vers la version stable courante au démarrage V1
+- ✅ **Tests unitaires et d'intégration** : couverture complète des couches logiques non-UI. 8 fichiers de test, 78+ cas. Périmètre : `bouteille_dao` (méthodes batch, streams, distinct), `csv_parser`, `import_service`, `csv_export_service`, `bulk_add_controller`, `location_node`, `locale_formatting`, `stock_controller`, `maturity_service`. Helpers : `test/helpers/fake_app_localizations.dart`. Icône app générée via `flutter_launcher_icons` + Pillow : `assets/icons/cave_simple_fullbg.png` (bordeaux sans coins blancs), multi-size ICO Windows (16/32/48/64/128/256 px).
+- **Mise à jour Flutter** vers la version stable courante
 
 ---
 
