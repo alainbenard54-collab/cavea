@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project purpose
 
-Flutter application for personal wine cellar management. Single codebase compiled for Windows desktop (primary) and Android (mobile). No backend server, no cloud hosting — data lives in a local SQLite file (`cave.db`), optionally shared via a cloud storage API.
+Flutter application for personal wine cellar management. Single codebase compiled for Windows desktop (primary), Linux desktop (V1), and Android (mobile). No backend server, no cloud hosting — data lives in a local SQLite file (`cave.db`), optionally shared via a cloud storage API.
 
 Full specifications are in `PRD.md` (features and priorities) and `ARCHITECTURE.md` (technical decisions). Read those files before proposing any significant change.
 
@@ -26,13 +26,14 @@ Do not introduce alternative state management (Provider, BLoC, GetX) or navigati
 
 ## Deployment modes — critical for storage decisions
 
-### Mode 1 — Windows only (full local)
+### Mode 1 — Desktop local (Windows + Linux)
 - `dart:io` direct access to `cave.db` on the local filesystem
 - No StorageAdapter, no sync, no lock — single copy, always open directly
 - No cloud dependency, no credentials required
+- Linux: requires `flutter create --platforms=linux .` scaffold + `libsecret-1-dev` in `linux/CMakeLists.txt`
 
 ### Mode 2 — Shared (any device combination)
-- **Any combination** of devices sharing the same `cave.db` via cloud API: Windows+Windows, Android+Android, or Windows+Android
+- **Any combination** of devices sharing the same `cave.db` via cloud API: Windows+Windows, Android+Android, Windows+Android, Linux+Windows, etc.
 - Sync is semi-automatic: download + lock auto au démarrage, upload + unlock auto à la fermeture. Sync manuelle disponible en cours de session via bouton.
 - `StorageAdapter` interface abstracts the cloud backend (Google Drive MVP, Dropbox V1)
 - Requires OAuth credentials setup on every participating device (GCP project + per-platform credentials)
@@ -255,7 +256,7 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - ✅ **Historique des consommations** : liste bouteilles consommées, tri par date, recherche texte, BottomSheet détail + Réhabiliter, badge maturité masqué sur bouteilles consommées
 - ✅ **Export CSV** : onglet "Données" (index 4, accessible en SyncReadOnly) — export CSV UTF-8 BOM, tous les champs dont `updated_at`, séparateur configurable (`;` / `,` / tabulation), scope stock seul ou tout. Windows : FilePicker `saveFile()`. Android : FilePicker save + `share_plus` partage. Import mis à jour : séparateur configurable, `updated_at` préservé si présent. Fix Android : le verrou n'est plus libéré sur `AppLifecycleState.paused` (évitait le yoyo lock/unlock lors de FilePicker ou basculement d'app).
 - ✅ **Support Dropbox** : `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard et Settings, `storageMode = 'dropbox'`
-- **Support Linux** : Mode 1 sans changement majeur, Mode 2 via OAuth desktop, packaging AppImage/.deb
+- ✅ **Support Linux** : Mode 1 (dart:io direct) + Mode 2 (OAuth loopback Drive + Dropbox, libsecret). Scaffold `linux/` généré via `flutter create --platforms=linux .` + `libsecret-1-dev` dans CMakeLists. Packaging : `./scripts/build_linux.sh [appimage|deb|all]`.
 - **Mise à jour Flutter** vers la version stable courante au démarrage V1
 
 ---

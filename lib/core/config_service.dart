@@ -77,7 +77,7 @@ class ConfigService {
 
   Future<void> load() async {
     // 1. .env à côté de l'exe (Windows desktop uniquement)
-    if (!kIsWeb && Platform.isWindows) {
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
       await _tryLoadFromEnv();
       if (_config != null) return;
     }

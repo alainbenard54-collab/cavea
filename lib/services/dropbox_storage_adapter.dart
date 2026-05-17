@@ -23,6 +23,7 @@ const _remotePath = '/Cavea';
 const _secureStorage = FlutterSecureStorage(
   aOptions: AndroidOptions(encryptedSharedPreferences: true),
   wOptions: WindowsOptions(),
+  lOptions: LinuxOptions(),
 );
 
 const _keyRefreshToken = 'dropbox_refresh_token';
@@ -345,7 +346,7 @@ class DropboxStorageAdapter implements StorageAdapter {
   /// 1. À côté de l'exécutable — pour les builds packagés
   /// 2. À la racine du projet — survit à flutter clean
   static String get desktopSecretsPath {
-    if (kIsWeb || !Platform.isWindows) return '';
+    if (kIsWeb || (!Platform.isWindows && !Platform.isLinux)) return '';
     const fileName = 'dropbox_desktop_secrets.json';
     final exeDir = File(Platform.resolvedExecutable).parent.path;
     final nextToExe = p.join(exeDir, fileName);

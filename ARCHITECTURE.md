@@ -10,7 +10,7 @@ Décisions techniques retenues pour l'application de gestion de cave à vin.
 |---|---|
 | Windows | Cible principale (desktop) — MVP ✅ |
 | Android | Cible mobile — MVP ✅ |
-| Linux | V1 — effort modéré (Mode 1 sans changement, Mode 2 via OAuth desktop, packaging AppImage/.deb) |
+| Linux | V1 ✅ — Mode 1 (dart:io direct), Mode 2 (OAuth loopback Drive + Dropbox), packaging AppImage/.deb |
 | macOS | Non prioritaire |
 | iOS | Hors périmètre (coût Apple Developer) |
 
@@ -474,6 +474,49 @@ Emplacement dans `_MobileBar` : dans la zone sync (gauche), aux côtés de `_Aba
 
 ---
 
+## Support Linux (V1 ✅)
+
+Linux desktop utilise le même codebase que Windows — seules quelques gardes `Platform` étaient Windows-spécifiques et ont été étendues.
+
+**Changements apportés :**
+
+| Fichier | Changement |
+|---|---|
+| `lib/services/drive_storage_adapter.dart` | `desktopSecretsPath` : `!Platform.isWindows` → `(!Platform.isWindows && !Platform.isLinux)` ; `FlutterSecureStorage` : ajout `lOptions: LinuxOptions()` |
+| `lib/services/dropbox_storage_adapter.dart` | Idem |
+| `lib/core/config_service.dart` | Chargement `.env` : `Platform.isWindows` → `Platform.isWindows \|\| Platform.isLinux` |
+| `linux/CMakeLists.txt` | Ajouter `pkg_check_modules(LIBSECRET REQUIRED libsecret-1)` + `target_link_libraries` pour `flutter_secure_storage` |
+
+**Dépendances système (VM Ubuntu 22.04+ / 24.04+) :**
+```
+sudo apt install clang cmake ninja-build libgtk-3-dev pkg-config libsecret-1-dev
+```
+
+**Génération du scaffold Linux :**
+```
+flutter config --enable-linux-desktop
+flutter create --platforms=linux .
+```
+
+**OAuth Mode 2 sur Linux :**
+- Drive : `googleapis_auth clientViaUserConsent` — loopback HTTP, ouvre le navigateur via `xdg-open` (url_launcher)
+- Dropbox : PKCE via `HttpServer.bind(InternetAddress.loopbackIPv4, 0)` — déjà cross-platform, aucun changement
+
+**Emplacement des secrets JSON (Mode 2) :**
+- À côté de l'exécutable : `google_desktop_secrets.json` / `dropbox_desktop_secrets.json`
+- Fallback : répertoire de travail courant (racine projet en dev)
+
+**Packaging :**
+```bash
+flutter build linux --release
+./scripts/build_linux.sh appimage   # → build/linux/Cavea-x86_64.AppImage
+./scripts/build_linux.sh deb        # → build/linux/cavea_0.1.0_amd64.deb
+```
+
+**Guide de déploiement utilisateur :** `DEPLOY_LINUX.md` — installation .deb / AppImage, configuration Mode 1 et Mode 2, secrets OAuth, dépannage Wayland / trousseau.
+
+---
+
 ## Points ouverts
 
 | # | Sujet | Impact |
@@ -483,4 +526,4 @@ Emplacement dans `_MobileBar` : dans la zone sync (gauche), aux côtés de `_Aba
 | 3 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
 | 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
 | 5 | Mise à jour Flutter vers version stable courante | V1 — vérifier compatibilité dépendances avant migration |
-| 6 | Support Linux — packaging AppImage/.deb | V1 |
+| 6 | ~~Support Linux~~ | ✅ Résolu — Mode 1 + Mode 2, packaging AppImage/.deb (`scripts/build_linux.sh`) |
