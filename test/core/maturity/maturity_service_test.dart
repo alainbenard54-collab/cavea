@@ -21,10 +21,12 @@ void main() {
         );
       });
 
-      test('gardeMin égal à 0', () {
+      test('gardeMin égal à 0 — valeur légitime, buvable dès le millésime', () {
+        // garde_min=0 est valide depuis V1 (buvable dès la mise en cave)
+        // age=16 > gardeMax=10 → aBoireUrgent
         expect(
           computeMaturity(millesime: 2010, gardeMin: 0, gardeMax: 10, annee: 2026),
-          MaturityLevel.sansDonnee,
+          MaturityLevel.aBoireUrgent,
         );
       });
 
