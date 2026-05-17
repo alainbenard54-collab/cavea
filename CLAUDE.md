@@ -201,6 +201,12 @@ En orientation paysage sur mobile, les filtres (couleur, maturité, appellation,
 
 Détection dans `stock_screen.dart` : `Platform.isAndroid && MediaQuery.of(context).orientation == Orientation.landscape`. **Ne pas utiliser `!isDesktop(context)`** : en paysage un téléphone Android a une largeur ≥ 600 dp, ce qui fait retourner `true` à `isDesktop()` et empêche la détection.
 
+## Stock screen — layout filtres/liste
+
+Le `Column` de `stock_screen.dart` utilise **`LayoutBuilder` + `ConstrainedBox(maxHeight: constraints.maxHeight / 2)`** pour la zone filtres, et `Expanded` pour la liste. **Ne jamais revenir à `Flexible(flex:1)` + `Expanded(flex:1)`** : ce pattern partage l'espace 50/50 fixe — quand les filtres prennent moins que la moitié, l'excédent devient une zone blanche en bas de liste plutôt que d'agrandir la liste.
+
+`BouteilleListTile` utilise `dense: true` (52 dp/ligne au lieu de 72 dp par défaut). `ListView.builder` (portrait) et `ListView.separated` (table desktop) ont `padding: EdgeInsets.zero` pour éviter les insets automatiques de `MediaQuery`.
+
 ## Android — libération du lock à la fermeture
 
 Le verrou n'est **jamais libéré sur les événements de cycle de vie Android** (`paused`, `resumed`, `detached`). Raisons :

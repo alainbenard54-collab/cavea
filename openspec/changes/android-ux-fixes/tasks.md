@@ -2,7 +2,7 @@
 
 - [x] 1.1 Dans `stock_table.dart`, calculer `isLandscapeMobile` via `MediaQuery.of(context).orientation` + `Platform.isAndroid` (Android uniquement)
 - [x] 1.2 Remplacer le padding vertical fixe (`vertical: 10`) par une valeur conditionnelle : `vertical: isLandscapeMobile ? 4 : 10` sur toutes les cellules concernées (Android uniquement)
-- [ ] 1.3 Vérifier visuellement en paysage Android : davantage de lignes visibles, contenu lisible, tap cible suffisant
+- [x] 1.3 Vérifier visuellement en paysage Android : davantage de lignes visibles, contenu lisible, tap cible suffisant
 
 ## 2. Autocomplétion — direction d'ouverture en paysage Android
 
@@ -14,7 +14,7 @@
 
 ## 3. Validation
 
-- [ ] 3.1 Tester table stock en paysage Android : densité correcte, scroll fluide, tap sur ligne fonctionnel
-- [ ] 3.2 Tester autocomplétion `BottleEditScreen` en paysage Android : suggestions visibles au-dessus du clavier
-- [ ] 3.3 Tester autocomplétion `BulkAddScreen` en paysage Android : suggestions visibles sur tous les champs (domaine, appellation, cru, contenance, fournisseur, emplacement)
-- [ ] 3.4 Vérifier que le comportement portrait et Windows/Linux est inchangé
+- [x] 3.1 Tester table stock en paysage Android : densité correcte, scroll fluide, tap sur ligne fonctionnel
+- [x] 3.2 Tester autocomplétion `BottleEditScreen` en paysage Android : suggestions visibles au-dessus du clavier
+- [x] 3.3 Tester autocomplétion `BulkAddScreen` en paysage Android : suggestions visibles sur tous les champs (domaine, appellation, cru, contenance, fournisseur, emplacement)
+- [x] 3.4 Vérifier que le comportement portrait et Windows/Linux est inchangé

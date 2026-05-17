@@ -264,6 +264,8 @@ final useRail = isDesktop(context) && !Platform.isAndroid;
 
 Les vues elles-mêmes sont les mêmes — seule la navigation change.
 
+**Layout filtres/liste dans `stock_screen.dart`** : `LayoutBuilder` + `ConstrainedBox(maxHeight: constraints.maxHeight / 2)` pour les filtres, `Expanded` pour la liste. Le pattern `Flexible(flex:1)` + `Expanded(flex:1)` a été abandonné : il distribue l'espace 50/50 fixe et génère une zone blanche quand les filtres sont plus courts que la moitié de l'écran. Avec `LayoutBuilder`, `Expanded` prend `H − taille_réelle_filtres`.
+
 **Destinations** (index 0→5) : Stock, Ajouter, Emplacements, Historique, Données, Paramètres. `_writeOnlyIndices = {1}` (Ajouter uniquement). Emplacements (2), Historique (3) et Données (4) sont toujours accessibles même en SyncReadOnly.
 
 ---
