@@ -9,4 +9,11 @@ final historyProvider = StreamProvider<List<Bouteille>>((ref) {
   return ref.watch(bouteillesDaoProvider).watchHistorique();
 });
 
-final historySearchProvider = StateProvider<String>((ref) => '');
+class _HistorySearchNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+  void set(String value) => state = value;
+}
+
+final historySearchProvider =
+    NotifierProvider<_HistorySearchNotifier, String>(_HistorySearchNotifier.new);

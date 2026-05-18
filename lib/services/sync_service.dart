@@ -97,23 +97,32 @@ SyncService? activeSyncService;
 
 // ── Service ───────────────────────────────────────────────────────────────────
 
-class SyncService extends StateNotifier<SyncState> {
-  final StorageAdapter? _adapter;
+class SyncService extends Notifier<SyncState> {
+  StorageAdapter? _adapter;
   bool _isDisposed = false;
   bool _lockHeldByUs = false;
 
-  SyncService(this._adapter)
-      : super(_startAsReadOnly ? const SyncReadOnly() : const SyncIdle()) {
+  @override
+  SyncState build() {
+    _isDisposed = false;
+    final mode = ref.watch(storageModeProvider);
+    _adapter = switch (mode) {
+      'drive' => DriveStorageAdapter(),
+      'dropbox' => DropboxStorageAdapter(),
+      _ => null,
+    };
     _lockHeldByUs = _startWithLock;
     _startWithLock = false;
+    final initialState =
+        _startAsReadOnly ? const SyncReadOnly() : const SyncIdle();
     _startAsReadOnly = false;
-  }
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _lockHeldByUs = false;
-    super.dispose();
+    activeSyncService = this;
+    ref.onDispose(() {
+      _isDisposed = true;
+      _lockHeldByUs = false;
+      if (identical(activeSyncService, this)) activeSyncService = null;
+    });
+    return initialState;
   }
 
   bool get isActive => _adapter != null;
@@ -472,20 +481,14 @@ class SyncService extends StateNotifier<SyncState> {
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
-final storageModeProvider = StateProvider<String>((ref) {
-  return configService.config?.storageMode ?? 'local';
-});
+class _StorageModeNotifier extends Notifier<String> {
+  @override
+  String build() => configService.config?.storageMode ?? 'local';
+  void set(String mode) => state = mode;
+}
 
-final syncServiceProvider = StateNotifierProvider<SyncService, SyncState>((ref) {
-  final mode = ref.watch(storageModeProvider);
-  final service = switch (mode) {
-    'drive' => SyncService(DriveStorageAdapter()),
-    'dropbox' => SyncService(DropboxStorageAdapter()),
-    _ => SyncService(null),
-  };
-  activeSyncService = service;
-  ref.onDispose(() {
-    if (identical(activeSyncService, service)) activeSyncService = null;
-  });
-  return service;
-});
+final storageModeProvider =
+    NotifierProvider<_StorageModeNotifier, String>(_StorageModeNotifier.new);
+
+final syncServiceProvider =
+    NotifierProvider<SyncService, SyncState>(SyncService.new);

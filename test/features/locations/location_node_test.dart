@@ -6,7 +6,7 @@ import 'package:cavea/data/daos/bouteille_dao.dart';
 import 'package:cavea/features/locations/location_node.dart';
 
 void main() {
-  LocationLeaf _leaf(String emplacement, {int count = 1, double? sumPrix, int nullPrixCount = 0}) =>
+  LocationLeaf leaf(String emplacement, {int count = 1, double? sumPrix, int nullPrixCount = 0}) =>
       LocationLeaf(
         emplacement: emplacement,
         count: count,
@@ -23,7 +23,7 @@ void main() {
 
     test('emplacement simple → 1 nœud racine avec directCount', () {
       // SQL renvoie 1 feuille unique par emplacement (GROUP BY)
-      final nodes = buildTree([_leaf('Cave A', count: 2)]);
+      final nodes = buildTree([leaf('Cave A', count: 2)]);
 
       expect(nodes.length, 1);
       expect(nodes.first.label, 'Cave A');
@@ -33,8 +33,8 @@ void main() {
 
     test('hiérarchie 2 niveaux → nœud racine avec 2 enfants', () {
       final nodes = buildTree([
-        _leaf('Cave A > Étagère 1', count: 2),
-        _leaf('Cave A > Étagère 2', count: 3),
+        leaf('Cave A > Étagère 1', count: 2),
+        leaf('Cave A > Étagère 2', count: 3),
       ]);
 
       expect(nodes.length, 1);
@@ -48,8 +48,8 @@ void main() {
 
     test('mix direct + enfants → directCount correct', () {
       final nodes = buildTree([
-        _leaf('Cave A', count: 1),
-        _leaf('Cave A > Étagère 1', count: 2),
+        leaf('Cave A', count: 1),
+        leaf('Cave A > Étagère 1', count: 2),
       ]);
 
       expect(nodes.length, 1);
@@ -61,8 +61,8 @@ void main() {
 
     test('plusieurs nœuds racine → triés par label', () {
       final nodes = buildTree([
-        _leaf('Cave Z', count: 1),
-        _leaf('Cave A', count: 1),
+        leaf('Cave Z', count: 1),
+        leaf('Cave A', count: 1),
       ]);
 
       expect(nodes.length, 2);
@@ -111,7 +111,7 @@ void main() {
         directCount: 1,
       );
 
-      final (count, _, __) = nodeStats(parent, true);
+      final (count, _, _) = nodeStats(parent, true);
       expect(count, 3);
     });
 
@@ -132,7 +132,7 @@ void main() {
         directSumPrix: 10.0,
       );
 
-      final (_, sumPrix, __) = nodeStats(parent, true);
+      final (_, sumPrix, _) = nodeStats(parent, true);
       expect(sumPrix, 15.0);
     });
 
@@ -153,7 +153,7 @@ void main() {
         directNullPrixCount: 1,
       );
 
-      final (_, __, nullCount) = nodeStats(parent, true);
+      final (_, _, nullCount) = nodeStats(parent, true);
       expect(nullCount, 3);
     });
   });

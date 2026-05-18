@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cavea/features/bulk_add/bulk_add_controller.dart';
 
 void main() {
-  BulkAddState _validState() => BulkAddState(
+  BulkAddNotifier makeNotifier() {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    return container.read(bulkAddProvider.notifier);
+  }
+
+  BulkAddState validState() => BulkAddState(
         domaine: 'Dom',
         appellation: 'App',
         millesime: '2018',
@@ -34,34 +41,34 @@ void main() {
 
   group('isValid', () {
     test('true quand tous les champs obligatoires remplis et somme correcte', () {
-      expect(_validState().isValid, isTrue);
+      expect(validState().isValid, isTrue);
     });
 
     test('false si domaine vide', () {
-      expect(_validState().copyWith(domaine: '').isValid, isFalse);
+      expect(validState().copyWith(domaine: '').isValid, isFalse);
     });
 
     test('false si appellation vide', () {
-      expect(_validState().copyWith(appellation: '').isValid, isFalse);
+      expect(validState().copyWith(appellation: '').isValid, isFalse);
     });
 
     test('false si millesime vide', () {
-      expect(_validState().copyWith(millesime: '').isValid, isFalse);
+      expect(validState().copyWith(millesime: '').isValid, isFalse);
     });
 
     test('false si couleur vide', () {
-      expect(_validState().copyWith(couleur: '').isValid, isFalse);
+      expect(validState().copyWith(couleur: '').isValid, isFalse);
     });
 
     test('false si emplacement invalide', () {
-      final state = _validState().copyWith(
+      final state = validState().copyWith(
         groupes: const [RepartitionGroup(quantite: 1, emplacement: 'Cave>>Mauvais')],
       );
       expect(state.isValid, isFalse);
     });
 
     test('false si somme groupes ≠ quantiteTotal', () {
-      final state = _validState().copyWith(
+      final state = validState().copyWith(
         quantiteTotal: 3,
         groupes: const [
           RepartitionGroup(quantite: 1, emplacement: 'Cave A'),
@@ -76,23 +83,23 @@ void main() {
 
   group('setQuantiteTotal', () {
     test('1 seul groupe → quantite du groupe ajustée', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.setQuantiteTotal(3);
 
-      expect(notifier.state.quantiteTotal, 3);
-      expect(notifier.state.groupes[0].quantite, 3);
-      expect(notifier.state.sommeGroupes, 3);
+      expect(notifier.stateOrNull!.quantiteTotal, 3);
+      expect(notifier.stateOrNull!.groupes[0].quantite, 3);
+      expect(notifier.stateOrNull!.sommeGroupes, 3);
     });
 
     test('2 groupes → répartition conservée', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.addGroupe();
-      expect(notifier.state.groupes.length, 2);
+      expect(notifier.stateOrNull!.groupes.length, 2);
 
       notifier.setQuantiteTotal(5);
 
-      expect(notifier.state.groupes[0].quantite, 1);
-      expect(notifier.state.groupes[1].quantite, 1);
+      expect(notifier.stateOrNull!.groupes[0].quantite, 1);
+      expect(notifier.stateOrNull!.groupes[1].quantite, 1);
     });
   });
 
@@ -100,12 +107,12 @@ void main() {
 
   group('addGroupe', () {
     test('ajoute un groupe vide', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.addGroupe();
 
-      expect(notifier.state.groupes.length, 2);
-      expect(notifier.state.groupes.last.quantite, 1);
-      expect(notifier.state.groupes.last.emplacement, '');
+      expect(notifier.stateOrNull!.groupes.length, 2);
+      expect(notifier.stateOrNull!.groupes.last.quantite, 1);
+      expect(notifier.stateOrNull!.groupes.last.emplacement, '');
     });
   });
 
@@ -113,20 +120,20 @@ void main() {
 
   group('removeGroupe', () {
     test('supprime le groupe à l\'index donné', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.addGroupe();
-      expect(notifier.state.groupes.length, 2);
+      expect(notifier.stateOrNull!.groupes.length, 2);
 
       notifier.removeGroupe(0);
 
-      expect(notifier.state.groupes.length, 1);
+      expect(notifier.stateOrNull!.groupes.length, 1);
     });
 
     test('ignoré si 1 seul groupe', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.removeGroupe(0);
 
-      expect(notifier.state.groupes.length, 1);
+      expect(notifier.stateOrNull!.groupes.length, 1);
     });
   });
 
@@ -134,14 +141,14 @@ void main() {
 
   group('updateGroupe', () {
     test('met à jour quantite et emplacement', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.updateGroupe(
         0,
         const RepartitionGroup(quantite: 2, emplacement: 'Cave A'),
       );
 
-      expect(notifier.state.groupes[0].quantite, 2);
-      expect(notifier.state.groupes[0].emplacement, 'Cave A');
+      expect(notifier.stateOrNull!.groupes[0].quantite, 2);
+      expect(notifier.stateOrNull!.groupes[0].emplacement, 'Cave A');
     });
   });
 
@@ -149,12 +156,12 @@ void main() {
 
   group('sommeGroupes', () {
     test('somme des quantités de tous les groupes', () {
-      final notifier = BulkAddNotifier();
+      final notifier = makeNotifier();
       notifier.addGroupe();
       notifier.updateGroupe(0, const RepartitionGroup(quantite: 3, emplacement: ''));
       notifier.updateGroupe(1, const RepartitionGroup(quantite: 2, emplacement: ''));
 
-      expect(notifier.state.sommeGroupes, 5);
+      expect(notifier.stateOrNull!.sommeGroupes, 5);
     });
   });
 }

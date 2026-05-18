@@ -115,12 +115,12 @@ class BulkAddState {
   );
 }
 
-class BulkAddNotifier extends StateNotifier<BulkAddState> {
-  BulkAddNotifier()
-      : super(BulkAddState(
-          dateEntree: DateTime.now(),
-          contenance: configService.contenanceDefaut,
-        ));
+class BulkAddNotifier extends Notifier<BulkAddState> {
+  @override
+  BulkAddState build() => BulkAddState(
+        dateEntree: DateTime.now(),
+        contenance: configService.contenanceDefaut,
+      );
 
   void set(BulkAddState Function(BulkAddState) updater) {
     state = updater(state);
@@ -155,6 +155,6 @@ class BulkAddNotifier extends StateNotifier<BulkAddState> {
 }
 
 final bulkAddProvider =
-    StateNotifierProvider.autoDispose<BulkAddNotifier, BulkAddState>(
-  (_) => BulkAddNotifier(),
+    NotifierProvider.autoDispose<BulkAddNotifier, BulkAddState>(
+  BulkAddNotifier.new,
 );

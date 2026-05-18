@@ -21,7 +21,7 @@ const _dbFileName = 'cave.db';
 const _remotePath = '/Cavea';
 
 const _secureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  aOptions: AndroidOptions(),
   wOptions: WindowsOptions(),
   lOptions: LinuxOptions(),
 );

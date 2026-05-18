@@ -18,7 +18,7 @@ void main() {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  BouteillesCompanion _b({
+  BouteillesCompanion newBottle({
     required String id,
     String domaine = 'Domaine Test',
     String appellation = 'Bordeaux',
@@ -52,9 +52,9 @@ void main() {
 
   group('watchStock', () {
     test('exclut les bouteilles avec date_sortie renseignée', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'b1'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'b1'));
       await db.bouteilleDao.insertBouteille(
-        _b(id: 'b2', dateSortie: '2026-04-01'),
+        newBottle(id: 'b2', dateSortie: '2026-04-01'),
       );
 
       final stock = await db.bouteilleDao.watchStock().first;
@@ -65,7 +65,7 @@ void main() {
 
     test('liste vide si toutes les bouteilles sont consommées', () async {
       await db.bouteilleDao.insertBouteille(
-        _b(id: 'b1', dateSortie: '2026-04-01'),
+        newBottle(id: 'b1', dateSortie: '2026-04-01'),
       );
 
       final stock = await db.bouteilleDao.watchStock().first;
@@ -79,11 +79,11 @@ void main() {
   group('watchStockFiltered', () {
     setUp(() async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: '1', couleur: 'Rouge', appellation: 'Pomerol', millesime: 2015,
+        newBottle(id: '1', couleur: 'Rouge', appellation: 'Pomerol', millesime: 2015,
             domaine: 'Petrus'),
-        _b(id: '2', couleur: 'Blanc', appellation: 'Chablis', millesime: 2018,
+        newBottle(id: '2', couleur: 'Blanc', appellation: 'Chablis', millesime: 2018,
             domaine: 'Dauvissat'),
-        _b(id: '3', couleur: 'Rosé', appellation: 'Bandol', millesime: 2020,
+        newBottle(id: '3', couleur: 'Rosé', appellation: 'Bandol', millesime: 2020,
             domaine: 'Tempier'),
       ]);
     });
@@ -140,7 +140,7 @@ void main() {
 
   group('insertBouteille', () {
     test('la bouteille apparaît dans watchStock', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'x1'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'x1'));
 
       final stock = await db.bouteilleDao.watchStock().first;
 
@@ -153,9 +153,9 @@ void main() {
   group('insertBouteilles', () {
     test('N bouteilles insérées en transaction', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'a1'),
-        _b(id: 'a2'),
-        _b(id: 'a3'),
+        newBottle(id: 'a1'),
+        newBottle(id: 'a2'),
+        newBottle(id: 'a3'),
       ]);
 
       final stock = await db.bouteilleDao.watchStock().first;
@@ -169,7 +169,7 @@ void main() {
 
   group('deplacerBouteille', () {
     test('met à jour emplacement, date_sortie reste null', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'd1'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'd1'));
       await db.bouteilleDao.deplacerBouteille('d1', 'Cave > Étagère 2');
 
       final b = await db.bouteilleDao.getBouteilleById('d1');
@@ -179,7 +179,7 @@ void main() {
     });
 
     test('la bouteille reste dans le stock après déplacement', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'd2'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'd2'));
       await db.bouteilleDao.deplacerBouteille('d2', 'Cave B');
 
       final stock = await db.bouteilleDao.watchStock().first;
@@ -192,7 +192,7 @@ void main() {
 
   group('consommerBouteille', () {
     test('avec note et commentaire', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'c1'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'c1'));
       await db.bouteilleDao.consommerBouteille(
         'c1',
         dateSortie: '2026-05-07',
@@ -208,7 +208,7 @@ void main() {
     });
 
     test('sans note ni commentaire — champs restent null', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'c2'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'c2'));
       await db.bouteilleDao.consommerBouteille(
         'c2',
         dateSortie: '2026-05-07',
@@ -222,7 +222,7 @@ void main() {
     });
 
     test('la bouteille disparaît du stock', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'c3'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'c3'));
       await db.bouteilleDao.consommerBouteille('c3', dateSortie: '2026-05-07');
 
       final stock = await db.bouteilleDao.watchStock().first;
@@ -236,10 +236,10 @@ void main() {
   group('getDistinctEmplacements', () {
     test('valeurs distinctes triées, consommées exclues', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'e1', emplacement: 'Cave B'),
-        _b(id: 'e2', emplacement: 'Cave A'),
-        _b(id: 'e3', emplacement: 'Cave A'),
-        _b(id: 'e4', emplacement: 'Chambre', dateSortie: '2026-01-01'),
+        newBottle(id: 'e1', emplacement: 'Cave B'),
+        newBottle(id: 'e2', emplacement: 'Cave A'),
+        newBottle(id: 'e3', emplacement: 'Cave A'),
+        newBottle(id: 'e4', emplacement: 'Chambre', dateSortie: '2026-01-01'),
       ]);
 
       final emplacements = await db.bouteilleDao.getDistinctEmplacements();
@@ -253,9 +253,9 @@ void main() {
   group('getDistinctCouleurs', () {
     test('valeurs distinctes triées (stock uniquement)', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'col1', couleur: 'Rouge'),
-        _b(id: 'col2', couleur: 'Blanc'),
-        _b(id: 'col3', couleur: 'Rouge'),
+        newBottle(id: 'col1', couleur: 'Rouge'),
+        newBottle(id: 'col2', couleur: 'Blanc'),
+        newBottle(id: 'col3', couleur: 'Rouge'),
       ]);
 
       final couleurs = await db.bouteilleDao.getDistinctCouleurs();
@@ -268,7 +268,7 @@ void main() {
 
   group('getBouteilleById', () {
     test('retourne la bouteille si elle existe', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'found1'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'found1'));
 
       final b = await db.bouteilleDao.getBouteilleById('found1');
 
@@ -288,11 +288,11 @@ void main() {
   group('updateBouteille', () {
     test('met à jour le domaine, autres champs inchangés', () async {
       await db.bouteilleDao.insertBouteille(
-        _b(id: 'u1', domaine: 'DomA', appellation: 'AppX'),
+        newBottle(id: 'u1', domaine: 'DomA', appellation: 'AppX'),
       );
 
       await db.bouteilleDao.updateBouteille(
-        _b(id: 'u1', domaine: 'DomB', appellation: 'AppX'),
+        newBottle(id: 'u1', domaine: 'DomB', appellation: 'AppX'),
       );
 
       final b = await db.bouteilleDao.getBouteilleById('u1');
@@ -301,7 +301,7 @@ void main() {
     });
 
     test('met à jour updatedAt', () async {
-      await db.bouteilleDao.insertBouteille(_b(id: 'u2'));
+      await db.bouteilleDao.insertBouteille(newBottle(id: 'u2'));
 
       await db.bouteilleDao.updateBouteille(
         BouteillesCompanion(
@@ -327,8 +327,8 @@ void main() {
   group('deplacerBouteilles', () {
     test('déplace tous les ids, date_sortie reste null', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'db1', emplacement: 'Cave A'),
-        _b(id: 'db2', emplacement: 'Cave A'),
+        newBottle(id: 'db1', emplacement: 'Cave A'),
+        newBottle(id: 'db2', emplacement: 'Cave A'),
       ]);
 
       await db.bouteilleDao.deplacerBouteilles(['db1', 'db2'], 'Cave B');
@@ -347,8 +347,8 @@ void main() {
   group('consommerBouteilles', () {
     test('consomme tous les ids avec date et note', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'cb1'),
-        _b(id: 'cb2'),
+        newBottle(id: 'cb1'),
+        newBottle(id: 'cb2'),
       ]);
 
       await db.bouteilleDao.consommerBouteilles(
@@ -367,8 +367,8 @@ void main() {
 
     test('les bouteilles disparaissent du stock', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'cb3'),
-        _b(id: 'cb4'),
+        newBottle(id: 'cb3'),
+        newBottle(id: 'cb4'),
       ]);
 
       await db.bouteilleDao.consommerBouteilles(
@@ -388,7 +388,7 @@ void main() {
     test('efface date_sortie, note et commentaire, réapparaît dans le stock',
         () async {
       await db.bouteilleDao.insertBouteille(
-        _b(
+        newBottle(
           id: 'rh1',
           dateSortie: '2026-04-01',
           noteDegus: 8.0,
@@ -413,9 +413,9 @@ void main() {
   group('watchHistorique', () {
     test('triée date_sortie desc, exclut le stock', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'h1', dateSortie: '2026-03-01'),
-        _b(id: 'h2', dateSortie: '2026-05-01'),
-        _b(id: 'h3'),
+        newBottle(id: 'h1', dateSortie: '2026-03-01'),
+        newBottle(id: 'h2', dateSortie: '2026-05-01'),
+        newBottle(id: 'h3'),
       ]);
 
       final histo = await db.bouteilleDao.watchHistorique().first;
@@ -432,8 +432,8 @@ void main() {
   group('watchBouteillesParEmplacement', () {
     test('match exact — exclut sous-emplacements', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'wp1', emplacement: 'Cave A'),
-        _b(id: 'wp2', emplacement: 'Cave A > Étagère 1'),
+        newBottle(id: 'wp1', emplacement: 'Cave A'),
+        newBottle(id: 'wp2', emplacement: 'Cave A > Étagère 1'),
       ]);
 
       final result = await db.bouteilleDao
@@ -446,8 +446,8 @@ void main() {
 
     test('includeSublocations=true — inclut les sous-emplacements', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'ws1', emplacement: 'Cave A'),
-        _b(id: 'ws2', emplacement: 'Cave A > Étagère 1'),
+        newBottle(id: 'ws1', emplacement: 'Cave A'),
+        newBottle(id: 'ws2', emplacement: 'Cave A > Étagère 1'),
       ]);
 
       final result = await db.bouteilleDao
@@ -500,7 +500,7 @@ void main() {
           updatedAt: const Value('2026-01-01T00:00:00Z'),
           prixAchat: const Value(5.0),
         ),
-        _b(id: 'ls4', emplacement: 'Cave A', dateSortie: '2026-01-15'),
+        newBottle(id: 'ls4', emplacement: 'Cave A', dateSortie: '2026-01-15'),
       ]);
 
       final leaves = await db.bouteilleDao.watchLocationStats().first;
@@ -525,9 +525,9 @@ void main() {
   group('getDistinctDomaines', () {
     test('retourne toutes bouteilles (stock + consommées), triées', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'gd1', domaine: 'Petrus'),
-        _b(id: 'gd2', domaine: 'Mouton'),
-        _b(id: 'gd3', domaine: 'Ausone', dateSortie: '2026-01-01'),
+        newBottle(id: 'gd1', domaine: 'Petrus'),
+        newBottle(id: 'gd2', domaine: 'Mouton'),
+        newBottle(id: 'gd3', domaine: 'Ausone', dateSortie: '2026-01-01'),
       ]);
 
       final domaines = await db.bouteilleDao.getDistinctDomaines();
@@ -541,9 +541,9 @@ void main() {
   group('getAllDistinctAppellations', () {
     test('retourne toutes bouteilles (stock + consommées), triées', () async {
       await db.bouteilleDao.insertBouteilles([
-        _b(id: 'ga1', appellation: 'Pomerol'),
-        _b(id: 'ga2', appellation: 'Chablis'),
-        _b(id: 'ga3', appellation: 'Bandol', dateSortie: '2026-01-01'),
+        newBottle(id: 'ga1', appellation: 'Pomerol'),
+        newBottle(id: 'ga2', appellation: 'Chablis'),
+        newBottle(id: 'ga3', appellation: 'Bandol', dateSortie: '2026-01-01'),
       ]);
 
       final appellations = await db.bouteilleDao.getAllDistinctAppellations();
@@ -628,7 +628,7 @@ void main() {
           updatedAt: const Value('2026-01-01T00:00:00Z'),
           cru: const Value('Premier Cru'),
         ),
-        _b(id: 'gcr3'),
+        newBottle(id: 'gcr3'),
       ]);
 
       final crus = await db.bouteilleDao.getAllDistinctCrus();
@@ -667,7 +667,7 @@ void main() {
           updatedAt: const Value('2026-01-01T00:00:00Z'),
           fournisseurNom: const Value('Fournisseur B'),
         ),
-        _b(id: 'gf3'),
+        newBottle(id: 'gf3'),
       ]);
 
       final fournisseurs = await db.bouteilleDao.getDistinctFournisseurs();

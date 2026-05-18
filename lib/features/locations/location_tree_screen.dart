@@ -259,7 +259,7 @@ class _BottleListBody extends ConsumerWidget {
               }
               return ListView.separated(
                 itemCount: bottles.length,
-                separatorBuilder: (_, __) => const Divider(height: 1, indent: 16),
+                separatorBuilder: (_, _) => const Divider(height: 1, indent: 16),
                 itemBuilder: (context, i) {
                   final b = bottles[i];
                   final isSelected = selection.selectedIds.contains(b.id);

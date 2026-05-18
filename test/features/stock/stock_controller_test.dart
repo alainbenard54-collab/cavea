@@ -1,19 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cavea/core/maturity/maturity_service.dart';
 import 'package:cavea/features/stock/stock_controller.dart';
 
 void main() {
-  StockFilterController _controller() => StockFilterController();
+  StockFilterController makeController() {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    return container.read(stockFilterProvider.notifier);
+  }
 
   // ── état initial ─────────────────────────────────────────────────────────
 
   group('état initial', () {
     test('tous les filtres à leur valeur par défaut', () {
-      final ctrl = _controller();
-      final s = ctrl.state;
+      final ctrl = makeController();
+      final s = ctrl.stateOrNull!;
 
       expect(s.couleurs, isEmpty);
       expect(s.appellation, isNull);
@@ -29,25 +34,25 @@ void main() {
 
   group('hasActiveFilters', () {
     test('false si état initial', () {
-      expect(_controller().state.hasActiveFilters, isFalse);
+      expect(makeController().stateOrNull!.hasActiveFilters, isFalse);
     });
 
     test('true si texte renseigné', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setTexte('margaux');
-      expect(ctrl.state.hasActiveFilters, isTrue);
+      expect(ctrl.stateOrNull!.hasActiveFilters, isTrue);
     });
 
     test('true si couleur sélectionnée', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleCouleur('Rouge');
-      expect(ctrl.state.hasActiveFilters, isTrue);
+      expect(ctrl.stateOrNull!.hasActiveFilters, isTrue);
     });
 
     test('true si maturité sélectionnée', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleMaturite(MaturityLevel.optimal);
-      expect(ctrl.state.hasActiveFilters, isTrue);
+      expect(ctrl.stateOrNull!.hasActiveFilters, isTrue);
     });
   });
 
@@ -55,23 +60,23 @@ void main() {
 
   group('toggleCouleur', () {
     test('ajoute la couleur', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleCouleur('Rouge');
-      expect(ctrl.state.couleurs, {'Rouge'});
+      expect(ctrl.stateOrNull!.couleurs, {'Rouge'});
     });
 
     test('retire la couleur si déjà présente', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleCouleur('Rouge');
       ctrl.toggleCouleur('Rouge');
-      expect(ctrl.state.couleurs, isEmpty);
+      expect(ctrl.stateOrNull!.couleurs, isEmpty);
     });
 
     test('plusieurs couleurs simultanées', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleCouleur('Rouge');
       ctrl.toggleCouleur('Blanc');
-      expect(ctrl.state.couleurs, {'Rouge', 'Blanc'});
+      expect(ctrl.stateOrNull!.couleurs, {'Rouge', 'Blanc'});
     });
   });
 
@@ -79,28 +84,28 @@ void main() {
 
   group('toggleMaturite', () {
     test('active le filtre et bascule le tri sur gardeMin', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleMaturite(MaturityLevel.optimal);
 
-      expect(ctrl.state.maturites, {MaturityLevel.optimal});
-      expect(ctrl.state.sortColumn, 'gardeMin');
+      expect(ctrl.stateOrNull!.maturites, {MaturityLevel.optimal});
+      expect(ctrl.stateOrNull!.sortColumn, 'gardeMin');
     });
 
     test('désactive le filtre — sortColumn reste gardeMin', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleMaturite(MaturityLevel.optimal);
       ctrl.toggleMaturite(MaturityLevel.optimal);
 
-      expect(ctrl.state.maturites, isEmpty);
-      expect(ctrl.state.sortColumn, 'gardeMin');
+      expect(ctrl.stateOrNull!.maturites, isEmpty);
+      expect(ctrl.stateOrNull!.sortColumn, 'gardeMin');
     });
 
     test('plusieurs niveaux de maturité actifs simultanément', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleMaturite(MaturityLevel.optimal);
       ctrl.toggleMaturite(MaturityLevel.tropJeune);
 
-      expect(ctrl.state.maturites, {MaturityLevel.optimal, MaturityLevel.tropJeune});
+      expect(ctrl.stateOrNull!.maturites, {MaturityLevel.optimal, MaturityLevel.tropJeune});
     });
   });
 
@@ -108,24 +113,24 @@ void main() {
 
   group('setSort', () {
     test('même colonne → inverse l\'ordre', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setSort('millesime');
-      expect(ctrl.state.sortColumn, 'millesime');
-      expect(ctrl.state.sortAscending, isTrue);
+      expect(ctrl.stateOrNull!.sortColumn, 'millesime');
+      expect(ctrl.stateOrNull!.sortAscending, isTrue);
 
       ctrl.setSort('millesime');
-      expect(ctrl.state.sortAscending, isFalse);
+      expect(ctrl.stateOrNull!.sortAscending, isFalse);
     });
 
     test('nouvelle colonne → ordre remis à asc', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setSort('millesime');
       ctrl.setSort('millesime');
-      expect(ctrl.state.sortAscending, isFalse);
+      expect(ctrl.stateOrNull!.sortAscending, isFalse);
 
       ctrl.setSort('couleur');
-      expect(ctrl.state.sortColumn, 'couleur');
-      expect(ctrl.state.sortAscending, isTrue);
+      expect(ctrl.stateOrNull!.sortColumn, 'couleur');
+      expect(ctrl.stateOrNull!.sortAscending, isTrue);
     });
   });
 
@@ -133,14 +138,14 @@ void main() {
 
   group('reset', () {
     test('efface tous les filtres et remet le tri par défaut', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.toggleCouleur('Rouge');
       ctrl.toggleMaturite(MaturityLevel.aBoireUrgent);
       ctrl.setTexte('margaux');
       ctrl.setSort('millesime');
 
       ctrl.reset();
-      final s = ctrl.state;
+      final s = ctrl.stateOrNull!;
 
       expect(s.couleurs, isEmpty);
       expect(s.maturites, isEmpty);
@@ -154,24 +159,24 @@ void main() {
 
   group('autres filtres', () {
     test('setAppellation → appellation mise à jour', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setAppellation('Pomerol');
-      expect(ctrl.state.appellation, 'Pomerol');
-      expect(ctrl.state.hasActiveFilters, isTrue);
+      expect(ctrl.stateOrNull!.appellation, 'Pomerol');
+      expect(ctrl.stateOrNull!.hasActiveFilters, isTrue);
     });
 
     test('setMillesime → millesime mis à jour', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setMillesime(2015);
-      expect(ctrl.state.millesime, 2015);
-      expect(ctrl.state.hasActiveFilters, isTrue);
+      expect(ctrl.stateOrNull!.millesime, 2015);
+      expect(ctrl.stateOrNull!.hasActiveFilters, isTrue);
     });
 
     test('setAppellation(null) → filtre effacé', () {
-      final ctrl = _controller();
+      final ctrl = makeController();
       ctrl.setAppellation('Pomerol');
       ctrl.setAppellation(null);
-      expect(ctrl.state.appellation, isNull);
+      expect(ctrl.stateOrNull!.appellation, isNull);
     });
   });
 }

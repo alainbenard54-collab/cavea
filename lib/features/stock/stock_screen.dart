@@ -10,7 +10,6 @@ import '../../core/config_service.dart';
 import '../../core/maturity/maturity_service.dart';
 import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
-import '../../shared/adaptive_layout.dart' show isDesktop;
 import '../bottle_actions/bottle_actions_sheet.dart';
 import 'selection_controller.dart';
 import 'stock_controller.dart';
@@ -312,7 +311,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       child: _CascadeDropdown<String>(
                         hint: l10n.stockFilterAppellation,
                         value: filters.appellation,
-                        items: appellationsAsync.valueOrNull ?? [],
+                        items: appellationsAsync.asData?.value ?? [],
                         onChanged: ctrl.setAppellation,
                       ),
                     ),
@@ -321,7 +320,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       child: _CascadeDropdown<int>(
                         hint: l10n.stockFilterMillesime,
                         value: filters.millesime,
-                        items: millesimesAsync.valueOrNull ?? [],
+                        items: millesimesAsync.asData?.value ?? [],
                         onChanged: ctrl.setMillesime,
                       ),
                     ),

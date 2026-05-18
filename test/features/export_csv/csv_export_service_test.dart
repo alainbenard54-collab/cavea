@@ -10,7 +10,7 @@ void main() {
   const l10n = FakeAppLocalizations();
   final service = CsvExportService();
 
-  Bouteille _bouteille({
+  Bouteille bouteille({
     String id = 'b1',
     String domaine = 'Domaine Test',
     String appellation = 'Bordeaux',
@@ -89,14 +89,14 @@ void main() {
 
   group('séparateur', () {
     test('point-virgule dans les données', () {
-      final csv = service.buildCsv([_bouteille()], separator: ';', l10n: l10n);
+      final csv = service.buildCsv([bouteille()], separator: ';', l10n: l10n);
       final dataLine = csv.replaceFirst('\u{FEFF}', '').split('\n')[1];
 
       expect(dataLine.split(';').length, 20);
     });
 
     test('virgule dans les données', () {
-      final csv = service.buildCsv([_bouteille()], separator: ',', l10n: l10n);
+      final csv = service.buildCsv([bouteille()], separator: ',', l10n: l10n);
       // L'en-tête avec la virgule doit avoir 20 champs
       final headerLine = csv.replaceFirst('\u{FEFF}', '').split('\n').first;
       expect(headerLine.split(',').length, 20);
@@ -107,7 +107,7 @@ void main() {
 
   group('échappement', () {
     test('champ contenant le séparateur → entouré de guillemets', () {
-      final b = _bouteille(domaine: 'Château;Test');
+      final b = bouteille(domaine: 'Château;Test');
       final csv = service.buildCsv([b], separator: ';', l10n: l10n);
       final dataLine = csv.replaceFirst('\u{FEFF}', '').split('\n')[1];
 
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('champ avec guillemets → guillemets doublés', () {
-      final b = _bouteille(domaine: 'Dom "Grand"');
+      final b = bouteille(domaine: 'Dom "Grand"');
       final csv = service.buildCsv([b], separator: ';', l10n: l10n);
 
       expect(csv.contains('"Dom ""Grand"""'), isTrue);
@@ -126,14 +126,14 @@ void main() {
 
   group('valeurs null', () {
     test('cru=null → chaîne vide, pas "null"', () {
-      final b = _bouteille(cru: null);
+      final b = bouteille(cru: null);
       final csv = service.buildCsv([b], separator: ';', l10n: l10n);
 
       expect(csv.contains('null'), isFalse);
     });
 
     test('prix_achat=null → chaîne vide', () {
-      final b = _bouteille(prixAchat: null);
+      final b = bouteille(prixAchat: null);
       final csv = service.buildCsv([b], separator: ';', l10n: l10n);
 
       expect(csv.contains('null'), isFalse);

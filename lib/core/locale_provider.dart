@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'config_service.dart';
 
-class LocaleNotifier extends StateNotifier<Locale?> {
-  LocaleNotifier() : super(null) {
-    _load();
+class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() {
+    Future(() => _load());
+    return null;
   }
 
   Future<void> _load() async {
@@ -21,6 +23,6 @@ class LocaleNotifier extends StateNotifier<Locale?> {
   }
 }
 
-final localeProvider = StateNotifierProvider<LocaleNotifier, Locale?>(
-  (_) => LocaleNotifier(),
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+  LocaleNotifier.new,
 );

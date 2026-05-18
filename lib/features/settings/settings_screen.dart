@@ -196,7 +196,7 @@ class _DbPathSectionState extends State<_DbPathSection> {
 
   Future<void> _pickDir() async {
     final l10n = context.l10n;
-    final dir = await FilePicker.platform.getDirectoryPath(
+    final dir = await FilePicker.getDirectoryPath(
       dialogTitle: l10n.settingsDbFolder,
     );
     if (dir == null || !mounted) return;
@@ -650,7 +650,7 @@ class _CloudActivationTile extends ConsumerWidget {
       SnackBar(content: Text(l10n.driveModeActivated)),
     );
 
-    ref.read(storageModeProvider.notifier).state = 'drive';
+    ref.read(storageModeProvider.notifier).set('drive');
   }
 
   Future<void> _activateDropbox(BuildContext context, WidgetRef ref) async {
@@ -818,7 +818,7 @@ class _CloudActivationTile extends ConsumerWidget {
       SnackBar(content: Text(l10n.driveModeActivated)),
     );
 
-    ref.read(storageModeProvider.notifier).state = 'dropbox';
+    ref.read(storageModeProvider.notifier).set('dropbox');
   }
 }
 
@@ -928,7 +928,7 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
     );
     await configService.save(newConfig);
 
-    ref.read(storageModeProvider.notifier).state = 'local';
+    ref.read(storageModeProvider.notifier).set('local');
 
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -974,6 +974,6 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
     );
     await configService.save(newConfig);
 
-    ref.read(storageModeProvider.notifier).state = 'local';
+    ref.read(storageModeProvider.notifier).set('local');
   }
 }

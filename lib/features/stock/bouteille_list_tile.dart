@@ -63,7 +63,7 @@ class BouteilleListTile extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       selected: isSelected,
-      selectedTileColor: theme.colorScheme.primaryContainer.withOpacity(0.3),
+      selectedTileColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
       leading: isSelectMode
           ? Checkbox(
               value: isSelected,

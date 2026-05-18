@@ -695,7 +695,7 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
         );
       },
       displayStringForOption: (s) => s,
-      fieldViewBuilder: (_, __, ___, onFieldSubmitted) => TextFormField(
+      fieldViewBuilder: (_, _, _, onFieldSubmitted) => TextFormField(
         key: _fieldKey,
         controller: _ctrl,
         focusNode: _focusNode,

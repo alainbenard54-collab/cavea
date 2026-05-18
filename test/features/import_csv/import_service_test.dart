@@ -19,7 +19,7 @@ void main() {
     await db.close();
   });
 
-  BouteillesCompanion _companion({
+  BouteillesCompanion newCompanion({
     required String id,
     String domaine = 'Domaine Test',
     String appellation = 'Bordeaux',
@@ -44,7 +44,7 @@ void main() {
 
   group('insert', () {
     test('id absent de la base → insert, result.inserted == 1', () async {
-      final companion = _companion(id: 'new-uuid-001');
+      final companion = newCompanion(id: 'new-uuid-001');
 
       final result = await service.run([companion]);
 
@@ -58,7 +58,7 @@ void main() {
     });
 
     test('id fixe absent de la base → insert avec cet UUID exact', () async {
-      final companion = _companion(id: 'fixed-uuid-123');
+      final companion = newCompanion(id: 'fixed-uuid-123');
 
       await service.run([companion]);
 
@@ -71,10 +71,10 @@ void main() {
 
   group('overwrite', () {
     test('id existant + overwrite=true → UPDATE, result.updated == 1', () async {
-      await db.bouteilleDao.insertBouteille(_companion(id: 'exist-1', domaine: 'DomA'));
+      await db.bouteilleDao.insertBouteille(newCompanion(id: 'exist-1', domaine: 'DomA'));
 
       final result = await service.run(
-        [_companion(id: 'exist-1', domaine: 'DomB')],
+        [newCompanion(id: 'exist-1', domaine: 'DomB')],
         overwrite: true,
       );
 
@@ -86,10 +86,10 @@ void main() {
     });
 
     test('id existant + overwrite=false → SKIP, result.skipped == 1', () async {
-      await db.bouteilleDao.insertBouteille(_companion(id: 'exist-2', domaine: 'DomA'));
+      await db.bouteilleDao.insertBouteille(newCompanion(id: 'exist-2', domaine: 'DomA'));
 
       final result = await service.run(
-        [_companion(id: 'exist-2', domaine: 'DomB')],
+        [newCompanion(id: 'exist-2', domaine: 'DomB')],
         overwrite: false,
       );
 
@@ -106,7 +106,7 @@ void main() {
 
   group('updatedAt', () {
     test('valide ISO8601 → préservé tel quel', () async {
-      final companion = _companion(
+      final companion = newCompanion(
         id: 'ua-1',
         updatedAt: '2025-01-15T10:00:00Z',
       );
@@ -122,14 +122,14 @@ void main() {
 
   group('rapport compteurs', () {
     test('1 insert + 2 updates + overwrite=true → compteurs corrects', () async {
-      await db.bouteilleDao.insertBouteille(_companion(id: 'r-update'));
-      await db.bouteilleDao.insertBouteille(_companion(id: 'r-update2'));
+      await db.bouteilleDao.insertBouteille(newCompanion(id: 'r-update'));
+      await db.bouteilleDao.insertBouteille(newCompanion(id: 'r-update2'));
 
       final result = await service.run(
         [
-          _companion(id: 'r-new'),
-          _companion(id: 'r-update', domaine: 'Modifié'),
-          _companion(id: 'r-update2', domaine: 'Modifié2'),
+          newCompanion(id: 'r-new'),
+          newCompanion(id: 'r-update', domaine: 'Modifié'),
+          newCompanion(id: 'r-update2', domaine: 'Modifié2'),
         ],
         overwrite: true,
       );
@@ -141,10 +141,10 @@ void main() {
     });
 
     test('skip ne modifie pas les données existantes', () async {
-      await db.bouteilleDao.insertBouteille(_companion(id: 'r-skip2', domaine: 'OriginalDom'));
+      await db.bouteilleDao.insertBouteille(newCompanion(id: 'r-skip2', domaine: 'OriginalDom'));
 
       final result = await service.run(
-        [_companion(id: 'r-skip2', domaine: 'NewDom')],
+        [newCompanion(id: 'r-skip2', domaine: 'NewDom')],
         overwrite: false,
       );
 

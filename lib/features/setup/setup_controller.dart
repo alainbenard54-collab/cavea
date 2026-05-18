@@ -64,8 +64,9 @@ class SetupState {
   }
 }
 
-class SetupController extends StateNotifier<SetupState> {
-  SetupController() : super(const SetupState());
+class SetupController extends Notifier<SetupState> {
+  @override
+  SetupState build() => const SetupState();
 
   DriveStorageAdapter? _driveAdapter;
   DriveStorageAdapter? get driveAdapter => _driveAdapter;
@@ -279,6 +280,6 @@ class SetupController extends StateNotifier<SetupState> {
 }
 
 final setupControllerProvider =
-    StateNotifierProvider.autoDispose<SetupController, SetupState>(
-      (ref) => SetupController(),
+    NotifierProvider.autoDispose<SetupController, SetupState>(
+      SetupController.new,
     );

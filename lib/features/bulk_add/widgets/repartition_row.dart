@@ -131,7 +131,7 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
               );
             },
             displayStringForOption: (s) => s,
-            fieldViewBuilder: (_, __, ___, onFieldSubmitted) => TextField(
+            fieldViewBuilder: (_, _, _, onFieldSubmitted) => TextField(
               key: _emplacementFieldKey,
               controller: _emplacementCtrl,
               focusNode: _emplacementFocus,

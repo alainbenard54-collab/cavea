@@ -56,8 +56,9 @@ class StockFilterState {
 
 const _sentinel = Object();
 
-class StockFilterController extends StateNotifier<StockFilterState> {
-  StockFilterController() : super(const StockFilterState());
+class StockFilterController extends Notifier<StockFilterState> {
+  @override
+  StockFilterState build() => const StockFilterState();
 
   void toggleCouleur(String value) {
     final updated = Set<String>.from(state.couleurs);
@@ -105,8 +106,8 @@ class StockFilterController extends StateNotifier<StockFilterState> {
 }
 
 final stockFilterProvider =
-    StateNotifierProvider<StockFilterController, StockFilterState>(
-  (ref) => StockFilterController(),
+    NotifierProvider<StockFilterController, StockFilterState>(
+  StockFilterController.new,
 );
 
 int _maturityOrder(Bouteille b) => maturitySortOrder(

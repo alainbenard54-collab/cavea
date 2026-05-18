@@ -223,7 +223,7 @@ class StockTable extends StatelessWidget {
       onLongPress: isSelectMode ? null : () => onLongPressRow?.call(b.id),
       child: isSelected
           ? ColoredBox(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
               child: rowContent,
             )
           : rowContent,

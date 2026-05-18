@@ -6,14 +6,14 @@ import 'package:cavea/features/import_csv/csv_parser.dart';
 
 void main() {
   // Ligne CSV minimale valide avec tous les champs obligatoires
-  const _headers = 'domaine;appellation;millesime;couleur';
-  const _validRow = 'Test;Bordeaux;2018;Rouge';
+  const headers = 'domaine;appellation;millesime;couleur';
+  const validRow = 'Test;Bordeaux;2018;Rouge';
 
   // ── Séparateurs ──────────────────────────────────────────────────────────
 
   group('séparateurs', () {
     test('point-virgule (défaut)', () {
-      final result = parseCsv('$_headers\n$_validRow');
+      final result = parseCsv('$headers\n$validRow');
 
       expect(result.companions.length, 1);
       expect(result.errors, isEmpty);
@@ -41,7 +41,7 @@ void main() {
 
   group('BOM UTF-8', () {
     test('BOM retiré automatiquement — companion parsé correctement', () {
-      final csv = '\u{FEFF}$_headers\n$_validRow';
+      final csv = '\u{FEFF}$headers\n$validRow';
       final result = parseCsv(csv);
 
       expect(result.companions.length, 1);
@@ -72,7 +72,7 @@ void main() {
 
   group('conversion de types', () {
     test('millesime → int', () {
-      final result = parseCsv('$_headers\nTest;Bordeaux;2018;Rouge');
+      final result = parseCsv('$headers\nTest;Bordeaux;2018;Rouge');
 
       expect(result.companions.first.millesime.value, 2018);
     });
@@ -104,7 +104,7 @@ void main() {
 
   group('lignes invalides', () {
     test('ligne vide ignorée — 2 lignes valides conservées', () {
-      final csv = '$_headers\n$_validRow\n\n$_validRow';
+      final csv = '$headers\n$validRow\n\n$validRow';
       final result = parseCsv(csv);
 
       expect(result.companions.length, 2);
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('domaine vide → erreur, 0 companion', () {
-      final csv = '$_headers\n;Bordeaux;2018;Rouge';
+      final csv = '$headers\n;Bordeaux;2018;Rouge';
       final result = parseCsv(csv);
 
       expect(result.companions, isEmpty);
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('appellation vide → erreur', () {
-      final csv = '$_headers\nTest;;2018;Rouge';
+      final csv = '$headers\nTest;;2018;Rouge';
       final result = parseCsv(csv);
 
       expect(result.companions, isEmpty);
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('millesime invalide → erreur', () {
-      final csv = '$_headers\nTest;Bordeaux;abc;Rouge';
+      final csv = '$headers\nTest;Bordeaux;abc;Rouge';
       final result = parseCsv(csv);
 
       expect(result.companions, isEmpty);
@@ -147,7 +147,7 @@ void main() {
     });
 
     test('absent → DateTime générée non vide', () {
-      final result = parseCsv('$_headers\n$_validRow');
+      final result = parseCsv('$headers\n$validRow');
 
       final updatedAt = result.companions.first.updatedAt.value;
       expect(updatedAt, isNotEmpty);

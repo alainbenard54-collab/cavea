@@ -23,7 +23,7 @@ const _dbFileName = 'cave.db';
 const _folderName = 'Cavea';
 
 const _secureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  aOptions: AndroidOptions(),
   wOptions: WindowsOptions(),
   lOptions: LinuxOptions(),
 );
@@ -90,27 +90,37 @@ class DriveStorageAdapter implements StorageAdapter {
     _driveApi = drive.DriveApi(authClient);
   }
 
+  static bool _googleSignInInitialized = false;
+
   Future<void> _authenticateAndroid() async {
-    final googleSignIn = GoogleSignIn(scopes: [_driveScope]);
+    if (!_googleSignInInitialized) {
+      await GoogleSignIn.instance.initialize();
+      _googleSignInInitialized = true;
+    }
 
-    var account = await googleSignIn.signInSilently();
-    account ??= await googleSignIn.signIn().timeout(
-      const Duration(seconds: 60),
-      onTimeout: () => throw Exception('La connexion Google a pris trop de temps. Réessayez.'),
-    );
+    GoogleSignInAccount? account;
+    final lightweightFuture =
+        GoogleSignIn.instance.attemptLightweightAuthentication();
+    if (lightweightFuture != null) {
+      account = await lightweightFuture;
+    }
 
-    if (account == null) throw Exception('Authentification Google annulée.');
+    account ??= await GoogleSignIn.instance
+        .authenticate(scopeHint: [_driveScope])
+        .timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw Exception('La connexion Google a pris trop de temps. Réessayez.'),
+        );
 
-    final auth = await account.authentication.timeout(
-      const Duration(seconds: 30),
-      onTimeout: () => throw Exception(
-        'Impossible d\'obtenir le token Google (Google Play Services ne répond pas). Réessayez.',
-      ),
-    );
+    final authz = await account.authorizationClient
+            .authorizationForScopes([_driveScope]) ??
+        await account.authorizationClient.authorizeScopes([_driveScope]);
+
     final credentials = AccessCredentials(
       AccessToken(
         'Bearer',
-        auth.accessToken!,
+        authz.accessToken,
         DateTime.now().toUtc().add(const Duration(hours: 1)),
       ),
       null,
@@ -137,7 +147,7 @@ class DriveStorageAdapter implements StorageAdapter {
   Future<void> signOut() async {
     await _secureStorage.delete(key: _keyRefreshToken);
     if (Platform.isAndroid) {
-      await GoogleSignIn(scopes: [_driveScope]).signOut();
+      await GoogleSignIn.instance.signOut();
     }
     _authClient?.close();
     _authClient = null;

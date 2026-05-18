@@ -31,7 +31,7 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
 
   Future<void> _pickFile() async {
     final dialogTitle = context.l10n.importPickFileDialog;
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
       dialogTitle: dialogTitle,

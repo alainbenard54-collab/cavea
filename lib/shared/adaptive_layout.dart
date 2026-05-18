@@ -106,9 +106,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   void _triggerWriteOnboarding(BuildContext context) {
     pendingWriteOnboarding = false;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
+      if (!context.mounted) return;
       final seen = await configService.getAndroidWriteWarningSeen();
-      if (seen || !mounted) return;
+      if (seen || !context.mounted) return;
       showDialog<void>(context: context, builder: (_) => const _WriteOnboardingDialog());
     });
   }
@@ -823,7 +823,6 @@ class _QuitIconBtn extends StatelessWidget {
       } catch (_) {
         if (!context.mounted) {
           exit(0);
-          return;
         }
         final forceQuit = await showDialog<bool>(
           context: context,

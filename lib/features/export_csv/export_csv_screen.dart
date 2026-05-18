@@ -46,7 +46,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
     setState(() => _exporting = true);
     try {
       final csv = await _buildCsv(l10n);
-      final path = await FilePicker.platform.saveFile(
+      final path = await FilePicker.saveFile(
         dialogTitle: l10n.exportDialogTitle,
         fileName: _suggestedFileName,
         allowedExtensions: ['csv'],
@@ -76,7 +76,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
     try {
       final csv = await _buildCsv(l10n);
       final bytes = Uint8List.fromList(utf8.encode(csv));
-      final path = await FilePicker.platform.saveFile(
+      final path = await FilePicker.saveFile(
         dialogTitle: l10n.exportDialogTitle,
         fileName: _suggestedFileName,
         allowedExtensions: ['csv'],

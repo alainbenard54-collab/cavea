@@ -22,8 +22,9 @@ class SelectionState {
   int get count => selectedIds.length;
 }
 
-class SelectionController extends StateNotifier<SelectionState> {
-  SelectionController() : super(const SelectionState());
+class SelectionController extends Notifier<SelectionState> {
+  @override
+  SelectionState build() => const SelectionState();
 
   void enterSelectMode(String id) {
     state = SelectionState(
@@ -49,6 +50,6 @@ class SelectionController extends StateNotifier<SelectionState> {
 }
 
 final selectionProvider =
-    StateNotifierProvider.autoDispose<SelectionController, SelectionState>(
-  (ref) => SelectionController(),
+    NotifierProvider.autoDispose<SelectionController, SelectionState>(
+  SelectionController.new,
 );

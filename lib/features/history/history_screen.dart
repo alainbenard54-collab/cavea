@@ -50,12 +50,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     icon: const Icon(Icons.clear),
                     onPressed: () {
                       _searchController.clear();
-                      ref.read(historySearchProvider.notifier).state = '';
+                      ref.read(historySearchProvider.notifier).set('');
                     },
                   ),
               ],
               onChanged: (v) =>
-                  ref.read(historySearchProvider.notifier).state = v,
+                  ref.read(historySearchProvider.notifier).set(v),
             ),
           ),
           Expanded(
@@ -83,7 +83,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
                 return ListView.separated(
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) =>
+                  separatorBuilder: (_, _) =>
                       const Divider(height: 1, indent: 16),
                   itemBuilder: (context, i) =>
                       _HistoryTile(bouteille: filtered[i]),

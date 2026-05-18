@@ -638,7 +638,7 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
             .where((s) => s.toLowerCase().contains(q) && s != textEditingValue.text);
       },
       displayStringForOption: (s) => s,
-      fieldViewBuilder: (_, __, ___, onFieldSubmitted) => TextFormField(
+      fieldViewBuilder: (_, _, _, onFieldSubmitted) => TextFormField(
         key: _fieldKey,
         controller: widget.controller,
         focusNode: _focusNode,
@@ -649,7 +649,7 @@ class _AutocompleteFieldState extends State<_AutocompleteField> {
           suffixIcon: widget.initialValue != null
               ? ValueListenableBuilder<TextEditingValue>(
                   valueListenable: widget.controller,
-                  builder: (ctx, value, __) => value.text != widget.initialValue
+                  builder: (ctx, value, _) => value.text != widget.initialValue
                       ? IconButton(
                           icon: const Icon(Icons.restore, size: 18),
                           tooltip: ctx.l10n.editRestore,

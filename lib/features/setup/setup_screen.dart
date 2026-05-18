@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
 import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
-import '../../services/dropbox_storage_adapter.dart';
 import 'setup_controller.dart';
 
 class SetupScreen extends ConsumerWidget {
@@ -198,7 +197,7 @@ class _PathInputStep extends ConsumerWidget {
               icon: const Icon(Icons.folder_open),
               tooltip: l10n.setupParcourir,
               onPressed: () async {
-                final dir = await FilePicker.platform.getDirectoryPath(
+                final dir = await FilePicker.getDirectoryPath(
                   dialogTitle: l10n.setupPickerTitle,
                 );
                 if (dir != null) {
@@ -306,7 +305,7 @@ class _DriveAuthStep extends ConsumerWidget {
               IconButton.filled(
                 icon: const Icon(Icons.folder_open),
                 onPressed: () async {
-                  final dir = await FilePicker.platform.getDirectoryPath(
+                  final dir = await FilePicker.getDirectoryPath(
                     dialogTitle: l10n.setupDrivePickerTitle,
                   );
                   if (dir != null) {
@@ -661,7 +660,7 @@ class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
               IconButton.filled(
                 icon: const Icon(Icons.folder_open),
                 onPressed: () async {
-                  final dir = await FilePicker.platform.getDirectoryPath(
+                  final dir = await FilePicker.getDirectoryPath(
                     dialogTitle: l10n.setupDrivePickerTitle,
                   );
                   if (dir != null) {
