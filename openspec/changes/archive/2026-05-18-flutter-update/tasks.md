@@ -44,5 +44,5 @@
 
 ## 9. Finalisation
 
-- [ ] 9.1 Claude met à jour la mémoire avec la nouvelle version Flutter installée
-- [ ] 9.2 Claude prépare le commit git avec les fichiers modifiés (pubspec.yaml, pubspec.lock, fichiers .dart corrigés, fichiers générés .g.dart / .drift.dart)
+- [x] 9.1 Claude met à jour la mémoire avec la nouvelle version Flutter installée
+- [x] 9.2 Claude prépare le commit git avec les fichiers modifiés (pubspec.yaml, pubspec.lock, fichiers .dart corrigés, fichiers générés .g.dart / .drift.dart)
