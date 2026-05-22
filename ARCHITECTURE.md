@@ -187,6 +187,8 @@ lib/
 │   └── theme.dart               # Material 3 theme
 ├── core/
 │   ├── config_service.dart      # configuration persistante (SharedPreferences + .env)
+│   ├── locale_formatting.dart   # formatage dates / nombres selon la locale active
+│   ├── locale_provider.dart     # provider langue + sélection manuelle (Settings)
 │   └── maturity/
 │       └── maturity_service.dart  # calcul maturité (tropJeune/optimal/aBoireUrgent)
 ├── data/
@@ -212,6 +214,14 @@ lib/
 │   │   ├── bulk_add_controller.dart
 │   │   └── widgets/
 │   │       └── repartition_row.dart
+│   ├── export_csv/              # export CSV + onglet "Données" (import + export)
+│   │   ├── csv_export_service.dart
+│   │   ├── export_csv_screen.dart
+│   │   └── import_export_screen.dart
+│   ├── history/                 # historique des consommations (V1)
+│   │   ├── history_screen.dart
+│   │   ├── history_provider.dart
+│   │   └── history_actions_sheet.dart
 │   ├── locations/               # Navigation par emplacement — arbre hiérarchique (V1)
 │   │   ├── location_tree_screen.dart  # écran unique avec nav interne (pas de Navigator.push)
 │   │   ├── location_node.dart         # LocationNode, buildTree(), nodeStats()
@@ -337,6 +347,8 @@ Onglet "Données" (index 4, route `/data`), accessible en SyncReadOnly. Deux sec
 ### Import CSV
 
 L'utilisateur choisit son fichier via un **file picker**. Format attendu : CSV UTF-8, séparateur configurable (`;` par défaut, `,`, tabulation). Le BOM UTF-8 éventuel est retiré automatiquement.
+
+Les en-têtes du fichier sont reconnus dans la locale active de l'app (FR ou EN) et remappés automatiquement vers les noms de champs internes — un fichier exporté avec l'app en FR peut être réimporté avec l'app en EN, et vice versa.
 
 **Comportement par ligne :**
 
@@ -525,7 +537,7 @@ flutter build linux --release
 |---|---|---|
 | 1 | ~~Accès Google Drive depuis Android~~ | ✅ Résolu — Mode 2 Android opérationnel (android-lock-ux) |
 | 2 | ~~Support Dropbox~~ | ✅ Résolu — `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard + Settings (dropbox) |
-| 3 | Format d'export CSV (même format que l'import, ou autre ?) | V1 |
+| 3 | ~~Format d'export CSV (même format que l'import, ou autre ?)~~ | ✅ Résolu — Export CSV UTF-8+BOM, même structure que l'import, round-trip fidèle ; en-têtes localisés FR/EN (export-csv + fix import) |
 | 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
-| 5 | Mise à jour Flutter vers version stable courante | V1 — vérifier compatibilité dépendances avant migration |
+| 5 | ~~Mise à jour Flutter vers version stable courante~~ | ✅ Résolu — Flutter 3.41.9, Dart 3.11.5 (flutter-update 2026-05-18) |
 | 6 | ~~Support Linux~~ | ✅ Résolu — Mode 1 + Mode 2, packaging AppImage/.deb (`scripts/build_linux.sh`) |
