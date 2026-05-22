@@ -47,6 +47,29 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
 
   Future<void> _runImport() async {
     if (_filePath == null) return;
+    final l10n = context.l10n;
+    final columnMap = {
+      l10n.csvHeaderId.toLowerCase(): 'id',
+      l10n.csvHeaderDomaine.toLowerCase(): 'domaine',
+      l10n.csvHeaderAppellation.toLowerCase(): 'appellation',
+      l10n.csvHeaderMillesime.toLowerCase(): 'millesime',
+      l10n.csvHeaderCouleur.toLowerCase(): 'couleur',
+      l10n.csvHeaderCru.toLowerCase(): 'cru',
+      l10n.csvHeaderContenance.toLowerCase(): 'contenance',
+      l10n.csvHeaderEmplacement.toLowerCase(): 'emplacement',
+      l10n.csvHeaderDateEntree.toLowerCase(): 'date_entree',
+      l10n.csvHeaderDateSortie.toLowerCase(): 'date_sortie',
+      l10n.csvHeaderPrixAchat.toLowerCase(): 'prix_achat',
+      l10n.csvHeaderGardeMin.toLowerCase(): 'garde_min',
+      l10n.csvHeaderGardeMax.toLowerCase(): 'garde_max',
+      l10n.csvHeaderCommentaireEntree.toLowerCase(): 'commentaire_entree',
+      l10n.csvHeaderNoteDegus.toLowerCase(): 'note_degus',
+      l10n.csvHeaderCommentaireDegus.toLowerCase(): 'commentaire_degus',
+      l10n.csvHeaderFournisseurNom.toLowerCase(): 'fournisseur_nom',
+      l10n.csvHeaderFournisseurInfos.toLowerCase(): 'fournisseur_infos',
+      l10n.csvHeaderProducteur.toLowerCase(): 'producteur',
+      l10n.csvHeaderUpdatedAt.toLowerCase(): 'updated_at',
+    };
     setState(() {
       _importing = true;
       _result = null;
@@ -55,7 +78,7 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
 
     try {
       final content = await File(_filePath!).readAsString();
-      final parsed = parseCsv(content, separator: _separator);
+      final parsed = parseCsv(content, separator: _separator, columnMap: columnMap);
       final dao = ref.read(bouteillesDaoProvider);
       final service = ImportService(dao);
       final parseErrorDetails = parsed.errors

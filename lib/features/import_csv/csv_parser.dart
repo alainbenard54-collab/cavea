@@ -26,7 +26,11 @@ class ParseResult {
   const ParseResult({required this.companions, required this.errors});
 }
 
-ParseResult parseCsv(String content, {String separator = ';'}) {
+ParseResult parseCsv(
+  String content, {
+  String separator = ';',
+  Map<String, String>? columnMap,
+}) {
   // Normalise les fins de ligne Windows/Unix
   final lines = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
   if (lines.isEmpty) return const ParseResult(companions: [], errors: []);
@@ -38,7 +42,10 @@ ParseResult parseCsv(String content, {String separator = ';'}) {
   final headers = firstLine
       .trim()
       .split(separator)
-      .map((h) => h.trim().toLowerCase())
+      .map((h) {
+        final normalized = h.trim().toLowerCase();
+        return columnMap?[normalized] ?? normalized;
+      })
       .toList();
 
   final companions = <BouteillesCompanion>[];
