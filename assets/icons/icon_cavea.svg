@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="512" height="512" rx="90" ry="90"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fond bordeaux -->
+  <rect width="512" height="512" rx="90" fill="#4A0E1E"/>
+
+  <g clip-path="url(#rounded)" fill="#E8C5A0">
+
+    <!-- ══════════════════════════════════════════
+         ARCHE EN PIERRES
+         Centre X=256, sommet intérieur Y=95
+         Rayon intérieur arch=148, rayon extérieur=195
+         Pierres : rectangles le long du périmètre
+    ══════════════════════════════════════════ -->
+
+    <!-- Pilier gauche (bas) -->
+    <rect x="58"  y="265" width="52" height="36" rx="4"/>
+    <rect x="58"  y="305" width="52" height="36" rx="4"/>
+    <rect x="58"  y="345" width="52" height="36" rx="4"/>
+
+    <!-- Pilier droit (bas) -->
+    <rect x="402" y="265" width="52" height="36" rx="4"/>
+    <rect x="402" y="305" width="52" height="36" rx="4"/>
+    <rect x="402" y="345" width="52" height="36" rx="4"/>
+
+    <!-- Pierres de l'arche — dessinées comme des blocs rectangulaires
+         positionnés le long d'un demi-cercle.
+         Centre arc : (256, 265), rayon moyen ~172
+         On place 13 pierres + 1 clé de voûte au sommet -->
+
+    <!-- Clé de voûte (sommet, 90°) -->
+    <rect x="232" y="58" width="48" height="34" rx="4"/>
+
+    <!-- Pierres côté gauche de l'arche, de bas en haut -->
+    <!-- ~75° -->
+    <rect x="89"  y="100" width="44" height="34" rx="4"
+          transform="rotate(-15 111 117)"/>
+    <!-- ~60° -->
+    <rect x="105" y="140" width="44" height="34" rx="4"
+          transform="rotate(-30 127 157)"/>
+    <!-- ~105° -->
+    <rect x="72"  y="162" width="44" height="34" rx="4"
+          transform="rotate(-5 94 179)"/>
+    <!-- ~120° -->
+    <rect x="60"  y="198" width="48" height="34" rx="4"
+          transform="rotate(8 84 215)"/>
+    <!-- ~135° -->
+    <rect x="56"  y="233" width="48" height="32" rx="4"/>
+
+    <!-- Pierres côté droit de l'arche, de bas en haut -->
+    <!-- ~75° -->
+    <rect x="379" y="100" width="44" height="34" rx="4"
+          transform="rotate(15 401 117)"/>
+    <!-- ~60° -->
+    <rect x="363" y="140" width="44" height="34" rx="4"
+          transform="rotate(30 385 157)"/>
+    <!-- ~105° -->
+    <rect x="396" y="162" width="44" height="34" rx="4"
+          transform="rotate(5 418 179)"/>
+    <!-- ~120° -->
+    <rect x="404" y="198" width="48" height="34" rx="4"
+          transform="rotate(-8 428 215)"/>
+    <!-- ~135° -->
+    <rect x="408" y="233" width="48" height="32" rx="4"/>
+
+    <!-- Pierres supplémentaires arc gauche (entre 90° et 75°) -->
+    <rect x="130" y="72"  width="44" height="34" rx="4"
+          transform="rotate(-40 152 89)"/>
+    <rect x="172" y="60"  width="44" height="34" rx="4"
+          transform="rotate(-20 194 77)"/>
+
+    <!-- Pierres supplémentaires arc droit -->
+    <rect x="338" y="72"  width="44" height="34" rx="4"
+          transform="rotate(40 360 89)"/>
+    <rect x="296" y="60"  width="44" height="34" rx="4"
+          transform="rotate(20 318 77)"/>
+
+    <!-- ══════════════════════════════════════════
+         3 BOUTEILLES DE VIN
+         Debout dans l'arche, centrées
+         Gauche X=185, Centre X=256, Droite X=327
+    ══════════════════════════════════════════ -->
+
+    <!-- Bouteille gauche -->
+    <!-- Corps -->
+    <rect x="168" y="175" width="34" height="72" rx="6"/>
+    <!-- Épaule -->
+    <path d="M 168 175 Q 168 155 178 148 Q 188 141 202 148 Q 202 155 202 175 Z"/>
+    <!-- Col -->
+    <rect x="178" y="122" width="24" height="30" rx="4"/>
+    <!-- Tête -->
+    <rect x="181" y="108" width="18" height="16" rx="3"/>
+
+    <!-- Bouteille centrale (légèrement plus haute, accent rouge) -->
+    <!-- Corps -->
+    <rect x="239" y="170" width="34" height="77" rx="6"/>
+    <!-- Épaule -->
+    <path d="M 239 170 Q 239 148 249 141 Q 259 134 273 141 Q 273 148 273 170 Z"/>
+    <!-- Col -->
+    <rect x="249" y="115" width="24" height="30" rx="4"/>
+    <!-- Tête -->
+    <rect x="252" y="100" width="18" height="17" rx="3"/>
+    <!-- Étiquette rouge (accent couleur) -->
+    <rect x="242" y="200" width="28" height="20" rx="2" fill="#8B1A2A"/>
+
+    <!-- Bouteille droite -->
+    <!-- Corps -->
+    <rect x="310" y="175" width="34" height="72" rx="6"/>
+    <!-- Épaule -->
+    <path d="M 310 175 Q 310 155 320 148 Q 330 141 344 148 Q 344 155 344 175 Z"/>
+    <!-- Col -->
+    <rect x="320" y="122" width="24" height="30" rx="4"/>
+    <!-- Tête -->
+    <rect x="323" y="108" width="18" height="16" rx="3"/>
+
+    <!-- ══════════════════════════════════════════
+         SOL / TABLETTE SOUS LES BOUTEILLES
+    ══════════════════════════════════════════ -->
+    <rect x="108" y="247" width="296" height="10" rx="3"/>
+
+    <!-- ══════════════════════════════════════════
+         CASIER À BOUTEILLES
+         Rectangle avec croix en X + rondelles (bouts de bouteilles couchées)
+    ══════════════════════════════════════════ -->
+
+    <!-- Cadre du casier -->
+    <rect x="108" y="258" width="296" height="180" rx="8" fill="#E8C5A0"/>
+    <!-- Intérieur effacé (fond bordeaux) -->
+    <rect x="116" y="266" width="280" height="164" rx="5" fill="#4A0E1E"/>
+
+    <!-- Croix en X (diagonales) -->
+    <line x1="116" y1="266" x2="396" y2="430" stroke="#E8C5A0" stroke-width="14" stroke-linecap="round"/>
+    <line x1="396" y1="266" x2="116" y2="430" stroke="#E8C5A0" stroke-width="14" stroke-linecap="round"/>
+
+    <!-- Rondelles (bouts de bouteilles) — 2 rangées de 3 -->
+    <!-- Rangée haute -->
+    <circle cx="163" cy="300" r="22" fill="#E8C5A0"/>
+    <circle cx="163" cy="300" r="13" fill="#4A0E1E"/>
+    <circle cx="163" cy="300" r="6"  fill="#E8C5A0"/>
+
+    <circle cx="256" cy="300" r="22" fill="#E8C5A0"/>
+    <circle cx="256" cy="300" r="13" fill="#4A0E1E"/>
+    <circle cx="256" cy="300" r="6"  fill="#E8C5A0"/>
+
+    <circle cx="349" cy="300" r="22" fill="#E8C5A0"/>
+    <circle cx="349" cy="300" r="13" fill="#4A0E1E"/>
+    <circle cx="349" cy="300" r="6"  fill="#E8C5A0"/>
+
+    <!-- Rangée basse -->
+    <circle cx="163" cy="392" r="22" fill="#E8C5A0"/>
+    <circle cx="163" cy="392" r="13" fill="#4A0E1E"/>
+    <circle cx="163" cy="392" r="6"  fill="#E8C5A0"/>
+
+    <circle cx="256" cy="392" r="22" fill="#E8C5A0"/>
+    <circle cx="256" cy="392" r="13" fill="#4A0E1E"/>
+    <circle cx="256" cy="392" r="6"  fill="#E8C5A0"/>
+
+    <circle cx="349" cy="392" r="22" fill="#E8C5A0"/>
+    <circle cx="349" cy="392" r="13" fill="#4A0E1E"/>
+    <circle cx="349" cy="392" r="6"  fill="#E8C5A0"/>
+
+    <!-- Séparations verticales du casier -->
+    <rect x="204" y="266" width="8" height="164" fill="#E8C5A0"/>
+    <rect x="300" y="266" width="8" height="164" fill="#E8C5A0"/>
+
+    <!-- Séparation horizontale du casier -->
+    <rect x="116" y="344" width="280" height="8" fill="#E8C5A0"/>
+
+  </g>
+</svg>
