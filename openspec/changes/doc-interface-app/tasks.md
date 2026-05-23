@@ -8,7 +8,7 @@
 
 - [x] 2.1 Ajouter la clé `aboutDocumentation` avec valeur `"Documentation"` dans `lib/l10n/app_fr.arb` (après `aboutConfidentialite`) (PC + Android)
 - [x] 2.2 Ajouter la clé `aboutDocumentation` avec valeur `"Documentation"` dans `lib/l10n/app_en.arb` (après `aboutConfidentialite`) (PC + Android)
-- [ ] 2.3 Lancer `flutter gen-l10n` pour régénérer `lib/l10n/app_localizations*.dart` et vérifier l'absence d'erreur (PC + Android)
+- [x] 2.3 Lancer `flutter gen-l10n` pour régénérer `lib/l10n/app_localizations*.dart` et vérifier l'absence d'erreur (PC + Android)
 
 ## 3. Bouton Documentation dans le dialog À propos
 
@@ -17,8 +17,8 @@
 
 ## 4. Vérification
 
-- [ ] 4.1 Vérifier que `flutter analyze` passe sans erreur après les modifications Dart (PC) — à lancer manuellement
-- [ ] 4.2 Ouvrir l'app, naviguer vers Paramètres → À propos → vérifier la présence du bouton "Documentation" (PC) — test manuel
-- [ ] 4.3 Appuyer sur "Documentation" en langue FR → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/fr/` dans le navigateur (PC) — test manuel
-- [ ] 4.4 Appuyer sur "Documentation" en langue EN → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/en/` dans le navigateur (PC) — test manuel
-- [ ] 4.5 Vérifier que `docs/fr/README.md` et `docs/en/README.md` sont correctement servis par GitHub Pages aux URLs `/fr/` et `/en/` (PC — navigateur) — test manuel
+- [x] 4.1 Vérifier que `flutter analyze` passe sans erreur après les modifications Dart (PC) — à lancer manuellement
+- [x] 4.2 Ouvrir l'app, naviguer vers Paramètres → À propos → vérifier la présence du bouton "Documentation" (PC) — test manuel
+- [x] 4.3 Appuyer sur "Documentation" en langue FR → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/fr/` dans le navigateur (PC) — test manuel
+- [x] 4.4 Appuyer sur "Documentation" en langue EN → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/en/` dans le navigateur (PC) — test manuel
+- [x] 4.5 Vérifier que `docs/fr/README.md` et `docs/en/README.md` sont correctement servis par GitHub Pages aux URLs `/fr/` et `/en/` (PC — navigateur) — test manuel

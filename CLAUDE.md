@@ -248,6 +248,7 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 
 **5. À propos**
 - Version, licence, lien vers les licences des dépendances
+- Bouton "Documentation" → ouvre `https://alainbenard54-collab.github.io/cavea/{fr|en}/` dans le navigateur selon la langue courante de l'app (`url_launcher`, `LaunchMode.externalApplication`)
 
 ---
 

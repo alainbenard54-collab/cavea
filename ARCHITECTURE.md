@@ -231,7 +231,7 @@ lib/
 │   │   ├── import_csv_screen.dart
 │   │   ├── import_service.dart
 │   │   └── csv_parser.dart
-│   ├── settings/                # paramètres : mode sync, à propos (step 8 partiel)
+│   ├── settings/                # paramètres : mode sync, à propos + lien documentation en ligne
 │   │   └── settings_screen.dart
 │   ├── setup/                   # wizard premier lancement
 │   │   ├── setup_screen.dart
