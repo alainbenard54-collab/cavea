@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: Apache-2.0
+# Publie automatiquement l'installateur Windows sur GitHub Releases
+# Déclencheur : git tag v* poussé sur origin
+#
+# Usage :
+#   git tag v1.0.0
+#   git push origin v1.0.0
+
+name: Release Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write   # nécessaire pour créer/modifier la release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.9'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Build installer (Inno Setup)
+        run: iscc windows\packaging\cavea.iss
+
+      - name: Upload installer to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Crée la release si elle n'existe pas, sinon ajoute l'asset
+          files: windows/packaging/output/Cavea-*-windows-setup.exe
+          fail_on_unmatched_files: true
