@@ -100,6 +100,17 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () {
+                        final lang = Localizations.localeOf(dialogContext).languageCode;
+                        final section = lang == 'en' ? 'en' : 'fr';
+                        launchUrl(
+                          Uri.parse('https://alainbenard54-collab.github.io/cavea/$section/'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      child: Text(l10n.aboutDocumentation),
+                    ),
+                    TextButton(
+                      onPressed: () {
                         Navigator.of(dialogContext).pop();
                         showLicensePage(
                           context: context,

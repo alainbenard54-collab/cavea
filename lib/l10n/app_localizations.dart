@@ -884,6 +884,12 @@ abstract class AppLocalizations {
   /// **'Confidentialité'**
   String get aboutConfidentialite;
 
+  /// No description provided for @aboutDocumentation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Documentation'**
+  String get aboutDocumentation;
+
   /// No description provided for @aboutLicences.
   ///
   /// In fr, this message translates to:

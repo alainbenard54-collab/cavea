@@ -443,6 +443,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutConfidentialite => 'Privacy';
 
   @override
+  String get aboutDocumentation => 'Documentation';
+
+  @override
   String get aboutLicences => 'Licences';
 
   @override
