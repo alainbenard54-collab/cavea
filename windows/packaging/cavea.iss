@@ -74,8 +74,8 @@ var
 begin
   if CurUninstallStep = usPostUninstall then
   begin
-    { SharedPreferences Flutter Windows → %LOCALAPPDATA%\cavea }
-    ConfigPath := ExpandConstant('{localappdata}\cavea');
+    { SharedPreferences Flutter Windows → %APPDATA%\Cavea\Cavea }
+    ConfigPath := ExpandConstant('{userappdata}\Cavea\Cavea');
     if DirExists(ConfigPath) then
     begin
       Msg :=
@@ -89,7 +89,11 @@ begin
         'Note: your cave.db file will not be affected,' + #13#10 +
         'it stays in its usual location.';
       if MsgBox(Msg, mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+      begin
         DelTree(ConfigPath, True, True, True);
+        { Supprime le dossier parent %APPDATA%\Cavea s'il est vide }
+        RemoveDir(ExpandConstant('{userappdata}\Cavea'));
+      end;
     end;
   end;
 end;

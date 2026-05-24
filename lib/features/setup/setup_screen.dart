@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
+import '../../core/locale_provider.dart';
 import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
 import 'setup_controller.dart';
@@ -74,18 +75,31 @@ class SetupScreen extends ConsumerWidget {
 
 // ── Choix du mode ─────────────────────────────────────────────────────────────
 
-class _ModeChoiceStep extends StatelessWidget {
+class _ModeChoiceStep extends ConsumerWidget {
   final void Function(String) onSelect;
 
   const _ModeChoiceStep({required this.onSelect});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final lang = Localizations.localeOf(context).languageCode;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Align(
+          child: SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'fr', label: Text('Français')),
+              ButtonSegment(value: 'en', label: Text('English')),
+            ],
+            selected: {lang == 'en' ? 'en' : 'fr'},
+            onSelectionChanged: (selection) =>
+                ref.read(localeProvider.notifier).setLocale(selection.first),
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(l10n.setupWelcome, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         Text(l10n.setupChooseMode),
