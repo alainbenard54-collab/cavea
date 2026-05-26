@@ -1,12 +1,12 @@
 ## 1. Activation plateforme Linux (à faire sur machine avec Flutter installé)
 
-- [ ] 1.1 Exécuter `flutter create --platforms=linux .` à la racine du projet pour générer le répertoire `linux/` (CMakeLists.txt, runner, flutter/)
-- [ ] 1.2 Vérifier que `flutter build linux --release` compile sans erreur sur la VM Linux ou via cross-compilation
+- [x] 1.1 Exécuter `flutter create --platforms=linux .` à la racine du projet pour générer le répertoire `linux/` (CMakeLists.txt, runner, flutter/)
+- [x] 1.2 Vérifier que `flutter build linux --release` compile sans erreur sur la VM Linux ou via cross-compilation
 
 ## 2. Dépendance native libsecret (Linux uniquement)
 
-- [ ] 2.1 Dans `linux/CMakeLists.txt`, ajouter `pkg_check_modules(LIBSECRET REQUIRED libsecret-1)` et les directives `target_include_directories` / `target_link_libraries` pour `flutter_secure_storage`
-- [ ] 2.2 Vérifier que `flutter build linux --release` réussit après l'ajout (libsecret-1-dev installé sur la VM)
+- [x] 2.1 Dans `linux/CMakeLists.txt`, ajouter `pkg_check_modules(LIBSECRET REQUIRED libsecret-1)` et les directives `target_include_directories` / `target_link_libraries` pour `flutter_secure_storage` — Non nécessaire : `flutter_secure_storage_linux` gère libsecret via son propre CMakeLists.txt ; le build 1.2 a réussi sans modification manuelle
+- [x] 2.2 Vérifier que `flutter build linux --release` réussit après l'ajout (libsecret-1-dev installé sur la VM) — Validé par 1.2
 
 ## 3. Corrections gardes Platform dans le code Dart
 
