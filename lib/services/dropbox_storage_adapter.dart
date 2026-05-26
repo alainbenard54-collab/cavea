@@ -68,10 +68,11 @@ class DropboxStorageAdapter implements StorageAdapter {
   }
 
   Future<void> _authenticateAndroid() async {
-    // Lire l'App Key depuis l'asset bundlé et la persister dans secure storage.
+    // Lire l'App Key depuis l'asset bundlé (même format JSON que desktop).
     try {
-      final raw = await rootBundle.loadString('assets/secrets/dropbox_app_key.txt');
-      final bundledKey = raw.trim();
+      final raw = await rootBundle.loadString('assets/secrets/dropbox_desktop_secrets.json');
+      final map = json.decode(raw) as Map<String, dynamic>;
+      final bundledKey = (map['app_key'] as String? ?? '').trim();
       if (bundledKey.isEmpty || bundledKey.startsWith('REMPLACER')) {
         throw Exception('Dropbox App Key manquante — build de développement');
       }
