@@ -1,6 +1,6 @@
 ## 1. Settings Android — "Revenir en local" et "Changer de fournisseur"
 
-- [ ] 1.1 Dans `lib/features/settings/settings_screen.dart`, `_CloudActiveTile.build()` : remplacer `trailing: Platform.isAndroid ? null : OutlinedButton(onPressed: _deactivate, ...)` par `trailing: null` et ajouter un `ListTile` dédié (icon `Icons.logout`, title `settingsRevenirLocal`) visible sur toutes plateformes, avec `onTap: () => _deactivate(context)`
+- [ ] 1.1 Dans `lib/features/settings/settings_screen.dart`, `_CloudActiveTile.build()` : remplacer `trailing: Platform.isAndroid ? null : OutlinedButton(onPressed: _deactivate, ...)` par `trailing: null` et ajouter un `ListTile` dédié (icon `Icons.logout`, title `settingsRevenirLocal`) avec `enabled: !Platform.isAndroid` — visible sur toutes plateformes, mais grisé (`enabled: false`) sur Android pour annoncer le futur Mode 3 (Android local, V2) sans permettre l'action aujourd'hui. Sur desktop, `onTap: () => _deactivate(context)` reste fonctionnel.
 - [ ] 1.2 Supprimer le garde `if (!Platform.isAndroid)` devant le `ListTile` "Changer de fournisseur" — le rendre visible sur Android
 
 ## 2. Google Drive Android — message d'erreur explicite

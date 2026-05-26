@@ -11,6 +11,17 @@ Le wizard de premier lancement SHALL proposer une étape de sélection du fourni
 - **WHEN** l'utilisateur sélectionne "Dropbox" dans l'étape de sélection du fournisseur
 - **THEN** le wizard affiche l'étape d'authentification Dropbox (bouton "Se connecter avec Dropbox") et persiste `storageMode = 'dropbox'` à la confirmation
 
+### Requirement: Sélection Dropbox dans le wizard — Android
+Sur Android, le wizard Mode 2 SHALL déclencher le flow Dropbox PKCE sans demander d'App Key à l'utilisateur. L'App Key SHALL être lue depuis l'asset Flutter `assets/secrets/dropbox_desktop_secrets.json` bundlé dans l'APK.
+
+#### Scenario: Sélection Dropbox sur Android — App Key bundlée
+- **WHEN** l'utilisateur sélectionne "Dropbox" dans le wizard sur Android
+- **THEN** l'app lit l'App Key depuis `assets/secrets/dropbox_desktop_secrets.json` via `rootBundle`, appelle `saveAndroidAppKey()`, et déclenche le flow PKCE sans aucun champ de saisie
+
+#### Scenario: App Key absente au build Android
+- **WHEN** l'APK est buildé sans `assets/secrets/dropbox_desktop_secrets.json` et que l'utilisateur sélectionne Dropbox
+- **THEN** l'app affiche une erreur explicite ("Dropbox non disponible dans cette version") sans crash
+
 ---
 
 ### Requirement: Sélection / changement de fournisseur dans Settings
