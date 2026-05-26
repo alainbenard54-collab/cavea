@@ -122,9 +122,10 @@ build_deb() {
   cp "$BUILD_DIR/cavea" "$deb_dir/usr/local/bin/cavea"
   chmod 755 "$deb_dir/usr/local/bin/cavea"
 
-  # Bibliothèques Flutter
+  # Bibliothèques Flutter — conserver le sous-dossier lib/ pour que Flutter
+  # trouve libapp.so via résolution relative à l'exe (exe/lib/libapp.so).
   if [ -d "$BUILD_DIR/lib" ]; then
-    cp -r "$BUILD_DIR/lib/"* "$deb_dir/usr/local/lib/$pkg_name/"
+    cp -r "$BUILD_DIR/lib" "$deb_dir/usr/local/lib/$pkg_name/"
   fi
 
   # Data Flutter (assets, ICU, etc.)
@@ -153,7 +154,7 @@ EOF
   # Wrapper qui ajoute les libs au LD_LIBRARY_PATH
   cat > "$deb_dir/usr/local/bin/cavea" <<EOF
 #!/bin/sh
-export LD_LIBRARY_PATH="/usr/local/lib/$pkg_name:\${LD_LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="/usr/local/lib/$pkg_name/lib:\${LD_LIBRARY_PATH:-}"
 exec /usr/local/lib/$pkg_name/cavea "\$@"
 EOF
   chmod 755 "$deb_dir/usr/local/bin/cavea"
