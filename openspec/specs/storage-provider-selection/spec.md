@@ -40,3 +40,20 @@ L'écran Settings SHALL afficher le fournisseur cloud actif dans la section "Mod
 #### Scenario: Démarrage Mode 2 Dropbox — lock tiers
 - **WHEN** l'app démarre en Mode 2 Dropbox et qu'un lock appartenant à un autre appareil est présent
 - **THEN** l'app passe en SyncReadOnly — identique au comportement Drive
+
+---
+
+### Requirement: Chargement des secrets desktop sur Linux
+`desktopSecretsPath` dans `DriveStorageAdapter` et `DropboxStorageAdapter` SHALL retourner un chemin valide sur Linux, en plus de Windows. La recherche SHALL s'effectuer dans le même ordre : à côté de l'exécutable (`Platform.resolvedExecutable`), puis répertoire de travail courant.
+
+#### Scenario: Secret JSON trouvé à côté de l'exécutable Linux
+- **WHEN** `google_desktop_secrets.json` est placé dans le même dossier que l'exécutable Linux
+- **THEN** `DriveStorageAdapter.desktopSecretsPath` retourne ce chemin (non vide)
+
+#### Scenario: Secret JSON trouvé à côté de l'exécutable Linux — Dropbox
+- **WHEN** `dropbox_desktop_secrets.json` est placé dans le même dossier que l'exécutable Linux
+- **THEN** `DropboxStorageAdapter.desktopSecretsPath` retourne ce chemin (non vide)
+
+#### Scenario: Comportement Windows inchangé
+- **WHEN** l'app tourne sur Windows
+- **THEN** `desktopSecretsPath` se comporte exactement comme avant — aucune régression
