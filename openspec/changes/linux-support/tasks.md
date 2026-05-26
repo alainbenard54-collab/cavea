@@ -25,7 +25,7 @@
 - [x] 5.1 Placer `google_desktop_secrets.json` à côté de l'exécutable et tester l'authentification Drive (navigateur → loopback → token persisté dans libsecret) — Validé sur VM Ubuntu 26.04 (2026-05-26)
 - [x] 5.2 Placer `dropbox_desktop_secrets.json` à côté de l'exécutable et tester l'authentification Dropbox PKCE (navigateur → loopback → token persisté dans libsecret) — Validé sur Ubuntu 26.04 (.deb, /usr/local/lib/cavea/)
 - [x] 5.3 Vérifier le cycle complet Mode 2 Drive sur Linux : lock → download → sync manuelle → unlock à la fermeture — Lock OK, token persisté (2026-05-26)
-- [ ] 5.4 Vérifier le cycle complet Mode 2 Dropbox sur Linux : même séquence
+- [x] 5.4 Vérifier le cycle complet Mode 2 Dropbox sur Linux : même séquence — Validé sur Ubuntu 26.04 (.deb, 2026-05-26)
 
 ## 6. Script de packaging
 
