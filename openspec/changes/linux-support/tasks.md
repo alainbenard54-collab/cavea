@@ -31,8 +31,8 @@
 
 - [x] 6.1 Créer `scripts/build_linux.sh` avec la cible `appimage` : structure AppDir, copie des libs Flutter, icône 512×512, fichier `.desktop`, appel `appimagetool` (téléchargé si absent), sortie `build/linux/Cavea-x86_64.AppImage`
 - [x] 6.2 Ajouter la cible `deb` dans le même script : structure `DEBIAN/control` (Package, Version, Architecture, Depends, Description), installation dans `/usr/local/bin/cavea`, entrée `.desktop` dans `/usr/share/applications/`, appel `dpkg-deb --build`, sortie `build/linux/cavea_1.0.0_amd64.deb`
-- [ ] 6.3 Tester l'AppImage en VM : l'app démarre, Mode 1 fonctionnel, secret JSON trouvé à côté de l'AppImage
-- [ ] 6.4 Tester le .deb en VM : `sudo dpkg -i cavea_1.0.0_amd64.deb` → entrée menu → app démarre
+- [x] 6.3 Tester l'AppImage en VM : l'app démarre, Mode 1 fonctionnel, secret JSON trouvé à côté de l'AppImage — Validé sur Ubuntu 26.04 (2026-05-26)
+- [x] 6.4 Tester le .deb en VM : `sudo dpkg -i cavea_1.0.0_amd64.deb` → entrée menu → app démarre — Validé sur Ubuntu 26.04 (2026-05-26)
 
 ## 7. Documentation
 
