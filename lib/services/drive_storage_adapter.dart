@@ -113,6 +113,14 @@ class DriveStorageAdapter implements StorageAdapter {
               throw Exception('La connexion Google a pris trop de temps. Réessayez.'),
         );
 
+    if (account == null) {
+      throw Exception(
+        'Connexion Google annulée ou impossible. '
+        'Vérifiez que le SHA-1 de votre certificat APK est enregistré dans Google Cloud Console '
+        '(Credentials → OAuth 2.0 → Android).',
+      );
+    }
+
     final authz = await account.authorizationClient
             .authorizationForScopes([_driveScope]) ??
         await account.authorizationClient.authorizeScopes([_driveScope]);

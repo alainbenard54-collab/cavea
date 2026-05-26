@@ -531,6 +531,32 @@ flutter build linux --release
 
 ---
 
+## Prérequis Android — Mode 2 (OAuth)
+
+### Google Drive sur Android — SHA-1 obligatoire
+
+`GoogleSignIn.instance.authenticate()` retourne `null` **sans lever d'exception** quand le SHA-1 de la clé de signature APK n'est pas enregistré dans GCP Console. L'app attrape ce `null` et lève une exception explicite avec le message actionnable.
+
+**Enregistrement du SHA-1 :**
+1. Obtenir le SHA-1 du keystore de debug :
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   # Sur Windows : keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore ...
+   ```
+2. Dans [GCP Console](https://console.cloud.google.com/) → **Credentials** → OAuth 2.0 Client IDs → sélectionner le client Android → ajouter le SHA-1 sous "SHA-1 certificate fingerprint"
+3. Pour les APKs de release, répéter avec le keystore de production
+
+**Fichier `android/app/google-services.json` :** géré par Gradle automatiquement — ne pas versionner dans git.
+
+### Dropbox sur Android — App Key bundlée
+
+L'App Key Dropbox est lue depuis l'asset `assets/secrets/dropbox_desktop_secrets.json` (même format JSON que le fichier desktop). Ce fichier est **gitignored** — le copier à partir de `dropbox_desktop_secrets.json` avant chaque build :
+```bash
+cp dropbox_desktop_secrets.json assets/secrets/dropbox_desktop_secrets.json
+```
+
+---
+
 ## Points ouverts
 
 | # | Sujet | Impact |

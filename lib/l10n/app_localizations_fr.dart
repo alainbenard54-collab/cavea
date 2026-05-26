@@ -318,9 +318,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Créez dropbox_desktop_secrets.json à côté de l\'exécutable ou à la racine du projet, avec les champs app_key et app_secret.';
 
   @override
-  String get dropboxAppKeyLabel => 'App Key';
-
-  @override
   String get settingsSectionLangue => 'Langue';
 
   @override
@@ -1042,13 +1039,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get setupDropboxDescDesktop =>
       'Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.';
-
-  @override
-  String get setupDropboxDescAndroid =>
-      'Saisissez votre App Key Dropbox, puis connectez-vous.\nLe navigateur va s\'ouvrir — revenez dans Cavea après autorisation.';
-
-  @override
-  String get setupDropboxAppKey => 'App Key Dropbox';
 
   @override
   String get setupConnectDropbox => 'Connecter Dropbox';

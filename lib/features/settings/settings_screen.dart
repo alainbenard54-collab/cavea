@@ -839,20 +839,19 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
           leading: const Icon(Icons.cloud_done, color: Colors.green),
           title: Text(l10n.settingsModePartage),
           subtitle: Text(l10n.settingsModeSyncCurrent(_providerLabel)),
-          trailing: Platform.isAndroid
-              ? null
-              : OutlinedButton(
-                  onPressed: () => _deactivate(context),
-                  child: Text(l10n.settingsRevenirLocal),
-                ),
         ),
-        if (!Platform.isAndroid)
-          ListTile(
-            leading: const Icon(Icons.swap_horiz),
-            title: Text(l10n.settingsChangerFournisseur),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _changeProvider(context),
-          ),
+        ListTile(
+          enabled: !Platform.isAndroid,
+          leading: const Icon(Icons.logout),
+          title: Text(l10n.settingsRevenirLocal),
+          onTap: Platform.isAndroid ? null : () => _deactivate(context),
+        ),
+        ListTile(
+          leading: const Icon(Icons.swap_horiz),
+          title: Text(l10n.settingsChangerFournisseur),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _changeProvider(context),
+        ),
         if (Platform.isAndroid)
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined),

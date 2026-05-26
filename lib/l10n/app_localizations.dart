@@ -662,12 +662,6 @@ abstract class AppLocalizations {
   /// **'Créez dropbox_desktop_secrets.json à côté de l\'exécutable ou à la racine du projet, avec les champs app_key et app_secret.'**
   String get dropboxSetupMissingBody;
 
-  /// No description provided for @dropboxAppKeyLabel.
-  ///
-  /// In fr, this message translates to:
-  /// **'App Key'**
-  String get dropboxAppKeyLabel;
-
   /// No description provided for @settingsSectionLangue.
   ///
   /// In fr, this message translates to:
@@ -1861,18 +1855,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.'**
   String get setupDropboxDescDesktop;
-
-  /// No description provided for @setupDropboxDescAndroid.
-  ///
-  /// In fr, this message translates to:
-  /// **'Saisissez votre App Key Dropbox, puis connectez-vous.\nLe navigateur va s\'ouvrir — revenez dans Cavea après autorisation.'**
-  String get setupDropboxDescAndroid;
-
-  /// No description provided for @setupDropboxAppKey.
-  ///
-  /// In fr, this message translates to:
-  /// **'App Key Dropbox'**
-  String get setupDropboxAppKey;
 
   /// No description provided for @setupConnectDropbox.
   ///

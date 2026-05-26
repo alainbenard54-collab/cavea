@@ -4,7 +4,7 @@ Les tests APK Android (task 6.3 de bundle-oauth-credentials) ont révélé deux 
 
 ## What Changes
 
-- **"Revenir en local" sur Android** : le bouton `OutlinedButton` dans le trailing du `ListTile` actif est remplacé par un `ListTile` dédié avec icône — cohérent avec le layout Android (trailing `null` → action explicite dans la liste)
+- **"Revenir en local" sur Android** : affiché comme `ListTile` dédié mais **désactivé** (`enabled: false`, grisé) — annonce le Mode 3 Android local (futur V2) sans permettre l'action aujourd'hui
 - **"Changer de fournisseur" sur Android** : suppression du garde `!Platform.isAndroid` — l'action est désormais visible et fonctionnelle sur Android
 - **Google Drive muet sur Android** : `_authenticateAndroid()` catchait déjà les exceptions mais `GoogleSignIn.instance.authenticate()` peut retourner `null` sans exception quand le SHA-1 n'est pas enregistré — ajout d'un check explicite + message d'erreur actionnable mentionnant le SHA-1
 - **Documentation SHA-1** : ajout d'une note dans `DEPLOY_ANDROID.md` (ou `ARCHITECTURE.md`) sur le prérequis SHA-1 pour Google Drive
