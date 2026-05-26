@@ -10,9 +10,9 @@
 
 ## 3. Documentation
 
-- [ ] 3.1 Mettre à jour `ARCHITECTURE.md` : version Flutter 3.41.9 → 3.44.0, Dart 3.11.5 → 3.12.0
+- [x] 3.1 Mettre à jour `ARCHITECTURE.md` : version Flutter 3.41.9 → 3.44.0, Dart 3.11.5 → 3.12.0
 
 ## 4. Commit et vérification build
 
-- [ ] 4.1 Commiter les fichiers modifiés (`pubspec.yaml`, `pubspec.lock`, `ARCHITECTURE.md`)
-- [ ] 4.2 Demander à l'utilisateur de lancer `flutter build windows --release` et confirmer le succès
+- [x] 4.1 Commiter les fichiers modifiés (`pubspec.yaml`, `pubspec.lock`, `ARCHITECTURE.md`)
+- [x] 4.2 Demander à l'utilisateur de lancer `flutter build windows --release` et confirmer le succès

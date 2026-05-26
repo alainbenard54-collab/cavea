@@ -21,6 +21,10 @@ venv/
 
 # Fichiers temporaires Office
 ~$*
+~WRL*.tmp
+
+# Packaging Windows (binaires générés localement)
+windows/packaging/output/
 
 # OS
 .DS_Store
