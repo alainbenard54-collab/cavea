@@ -16,9 +16,9 @@
 
 ## 4. Vérification tests Mode 1 sur Linux
 
-- [ ] 4.1 Lancer l'app en VM Ubuntu 24.04 en Mode 1 : vérifier wizard → sélection dossier (file picker) → cave.db créé → vue stock chargée
-- [ ] 4.2 Vérifier que `_DesktopRail` (NavigationRail) s'affiche bien sur Linux (pas `_MobileBar`)
-- [ ] 4.3 Vérifier que la fermeture de la fenêtre Linux déclenche `didRequestAppExit` (comportement identique à Windows en Mode 1)
+- [x] 4.1 Lancer l'app en VM Ubuntu 26.04 en Mode 1 : vérifier wizard → sélection dossier (file picker) → cave.db créé → vue stock chargée
+- [x] 4.2 Vérifier que `_DesktopRail` (NavigationRail) s'affiche bien sur Linux (pas `_MobileBar`)
+- [x] 4.3 Vérifier que la fermeture de la fenêtre Linux déclenche `didRequestAppExit` (comportement identique à Windows en Mode 1)
 
 ## 5. Vérification tests Mode 2 sur Linux
 
