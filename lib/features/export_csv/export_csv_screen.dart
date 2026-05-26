@@ -41,19 +41,25 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
     return CsvExportService().buildCsv(bouteilles, separator: _separator, l10n: l10n);
   }
 
-  Future<void> _exportWindows() async {
+  Future<void> _exportDesktop() async {
     final l10n = context.l10n;
     setState(() => _exporting = true);
     try {
       final csv = await _buildCsv(l10n);
+      final csvBytes = Uint8List.fromList(utf8.encode(csv));
       final path = await FilePicker.saveFile(
         dialogTitle: l10n.exportDialogTitle,
         fileName: _suggestedFileName,
         allowedExtensions: ['csv'],
         type: FileType.custom,
+        bytes: csvBytes,
       );
       if (path == null || !mounted) return;
-      await File(path).writeAsBytes(utf8.encode(csv));
+      // On Windows, file_picker returns a path without writing the file.
+      // On Linux, the portal writes the file directly via bytes.
+      if (Platform.isWindows) {
+        await File(path).writeAsBytes(csvBytes);
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.exportSaved(path.split(Platform.pathSeparator).last))),
@@ -167,7 +173,7 @@ class _ExportCsvScreenState extends ConsumerState<ExportCsvScreen> {
                   )
                 : const Icon(Icons.download),
             label: Text(_exporting ? l10n.exportEnCours : l10n.exportButton),
-            onPressed: _exporting ? null : _exportWindows,
+            onPressed: _exporting ? null : _exportDesktop,
           )
         else
           Row(
