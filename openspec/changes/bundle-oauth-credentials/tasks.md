@@ -31,4 +31,4 @@
 - [x] 6.2 `flutter test` — 0 régression (122/122 passés)
 - [ ] 6.3 Test Android : builder l'APK avec `assets/secrets/dropbox_app_key.txt` présent, vérifier que le wizard Dropbox ne demande plus l'App Key et que l'auth PKCE fonctionne
 - [ ] 6.4 Test Linux : relancer `build_linux.sh deb` avec les JSON à la racine, installer le .deb, vérifier que les JSON sont dans `/usr/local/lib/cavea/` et que le Mode 2 fonctionne directement
-- [ ] 6.5 Test Windows : recompiler l'installateur avec les JSON à la racine du projet, installer, vérifier que les JSON sont dans `{app}\` et que le Mode 2 fonctionne directement
+- [x] 6.5 Test Windows : recompiler l'installateur avec les JSON à la racine du projet, installer, vérifier que les JSON sont dans `{app}\` et que le Mode 2 fonctionne directement — Validé 2026-05-26
