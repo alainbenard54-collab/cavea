@@ -37,13 +37,18 @@ build_appimage() {
 
   local appdir="$OUT_DIR/${APP_NAME}.AppDir"
   rm -rf "$appdir"
-  mkdir -p "$appdir/usr/bin" "$appdir/usr/lib" "$appdir/usr/share/applications" "$appdir/usr/share/icons/hicolor/512x512/apps"
+  # L'exécutable est placé directement dans usr/ (pas usr/bin/) pour que Flutter
+  # trouve lib/ et data/ dans le même répertoire que lui — résolution AOT relative.
+  mkdir -p "$appdir/usr" "$appdir/usr/share/applications" "$appdir/usr/share/icons/hicolor/512x512/apps"
 
-  # Exécutable + bibliothèques + data Flutter
-  cp "$BUILD_DIR/cavea" "$appdir/usr/bin/$APP_NAME"
-  cp -r "$BUILD_DIR/lib/"* "$appdir/usr/lib/" 2>/dev/null || true
+  # Exécutable + bibliothèques + data Flutter — structure miroir du bundle release
+  cp "$BUILD_DIR/cavea" "$appdir/usr/$APP_NAME"
+  chmod 755 "$appdir/usr/$APP_NAME"
+  if [ -d "$BUILD_DIR/lib" ]; then
+    cp -r "$BUILD_DIR/lib" "$appdir/usr/"          # → usr/lib/libapp.so etc.
+  fi
   if [ -d "$BUILD_DIR/data" ]; then
-    cp -r "$BUILD_DIR/data" "$appdir/usr/"
+    cp -r "$BUILD_DIR/data" "$appdir/usr/"         # → usr/data/flutter_assets etc.
   fi
 
   # Icône (utilise ic_launcher xxxhdpi comme source 192px ; idéal = 512px)
@@ -79,7 +84,7 @@ EOF
 SELF=$(readlink -f "$0")
 HERE=$(dirname "$SELF")
 export LD_LIBRARY_PATH="$HERE/usr/lib:${LD_LIBRARY_PATH:-}"
-exec "$HERE/usr/bin/Cavea" "$@"
+exec "$HERE/usr/Cavea" "$@"
 EOF
   chmod +x "$appdir/AppRun"
 

@@ -22,9 +22,9 @@
 
 ## 5. Vérification tests Mode 2 sur Linux
 
-- [ ] 5.1 Placer `google_desktop_secrets.json` à côté de l'exécutable et tester l'authentification Drive (navigateur → loopback → token persisté dans libsecret)
+- [x] 5.1 Placer `google_desktop_secrets.json` à côté de l'exécutable et tester l'authentification Drive (navigateur → loopback → token persisté dans libsecret) — Validé sur VM Ubuntu 26.04 (2026-05-26)
 - [ ] 5.2 Placer `dropbox_desktop_secrets.json` à côté de l'exécutable et tester l'authentification Dropbox PKCE (navigateur → loopback → token persisté dans libsecret)
-- [ ] 5.3 Vérifier le cycle complet Mode 2 Drive sur Linux : lock → download → sync manuelle → unlock à la fermeture
+- [x] 5.3 Vérifier le cycle complet Mode 2 Drive sur Linux : lock → download → sync manuelle → unlock à la fermeture — Lock OK, token persisté (2026-05-26)
 - [ ] 5.4 Vérifier le cycle complet Mode 2 Dropbox sur Linux : même séquence
 
 ## 6. Script de packaging
