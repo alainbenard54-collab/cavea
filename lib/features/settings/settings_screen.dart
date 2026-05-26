@@ -689,36 +689,6 @@ class _CloudActivationTile extends ConsumerWidget {
       }
     }
 
-    // Android : demander le App Key si pas encore stocké
-    if (Platform.isAndroid) {
-      final appKeyCtrl = TextEditingController();
-      final appKey = await showDialog<String>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.setupDropboxAppKey),
-          content: TextField(
-            controller: appKeyCtrl,
-            decoration: InputDecoration(
-              labelText: l10n.dropboxAppKeyLabel,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(null),
-              child: Text(context.l10n.actionAnnuler),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(appKeyCtrl.text.trim()),
-              child: Text(context.l10n.actionConfirmer),
-            ),
-          ],
-        ),
-      );
-      if (appKey == null || appKey.isEmpty || !context.mounted) return;
-      await DropboxStorageAdapter.saveAndroidAppKey(appKey);
-    }
-
     final adapter = DropboxStorageAdapter();
 
     if (!context.mounted) return;

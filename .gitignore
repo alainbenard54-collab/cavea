@@ -41,6 +41,7 @@ clean_stock_archive.py
 google_desktop_secrets.json
 dropbox_desktop_secrets.json
 android/app/google-services.json
+assets/secrets/
 
 # Keystore Android et config de signature (ne jamais committer)
 *.jks

@@ -51,6 +51,16 @@ build_appimage() {
     cp -r "$BUILD_DIR/data" "$appdir/usr/"         # → usr/data/flutter_assets etc.
   fi
 
+  # Credentials OAuth — copiés à la racine de l'AppDir (à côté de AppRun / de l'exe)
+  for secret in google_desktop_secrets.json dropbox_desktop_secrets.json; do
+    if [ -f "$secret" ]; then
+      cp "$secret" "$appdir/usr/$secret"
+      echo "   ✓ $secret inclus dans l'AppImage"
+    else
+      echo "⚠   [WARN] $secret absent — Mode 2 non disponible dans cette AppImage"
+    fi
+  done
+
   # Icône (utilise ic_launcher xxxhdpi comme source 192px ; idéal = 512px)
   local icon_src="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
   if [ -f "$icon_src" ]; then
@@ -132,6 +142,16 @@ build_deb() {
   if [ -d "$BUILD_DIR/data" ]; then
     cp -r "$BUILD_DIR/data" "$deb_dir/usr/local/lib/$pkg_name/"
   fi
+
+  # Credentials OAuth — copiés dans /usr/local/lib/cavea/ (à côté de l'exe réel)
+  for secret in google_desktop_secrets.json dropbox_desktop_secrets.json; do
+    if [ -f "$secret" ]; then
+      cp "$secret" "$deb_dir/usr/local/lib/$pkg_name/$secret"
+      echo "   ✓ $secret inclus dans le .deb"
+    else
+      echo "⚠   [WARN] $secret absent — Mode 2 non disponible dans ce paquet"
+    fi
+  done
 
   # Icône
   local icon_src="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"

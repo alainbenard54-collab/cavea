@@ -103,8 +103,6 @@
 
   "dropboxSetupMissingTitle": "Missing Dropbox configuration file",
   "dropboxSetupMissingBody": "Create dropbox_desktop_secrets.json next to the executable or at the project root, with fields app_key and app_secret.",
-  "dropboxAppKeyLabel": "App Key",
-
   "settingsSectionLangue": "Language",
   "settingsLangAuto": "Automatic",
 
@@ -331,8 +329,6 @@
   "setupProviderDropboxDesc": "Requires a Dropbox account. Create an app at developer.dropbox.com.",
   "setupDropboxTitle": "Dropbox connection",
   "setupDropboxDescDesktop": "First choose the local folder for cave.db (working cache), then connect your Dropbox account.",
-  "setupDropboxDescAndroid": "Enter your Dropbox App Key, then connect.\nThe browser will open — return to Cavea after authorization.",
-  "setupDropboxAppKey": "Dropbox App Key",
   "setupConnectDropbox": "Connect Dropbox",
   "setupDropboxConnectedTitle": "Dropbox connected",
   "setupDropboxNoCave": "No cellar detected on Dropbox.",

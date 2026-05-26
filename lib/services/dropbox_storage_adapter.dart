@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
@@ -67,11 +68,20 @@ class DropboxStorageAdapter implements StorageAdapter {
   }
 
   Future<void> _authenticateAndroid() async {
+    // Lire l'App Key depuis l'asset bundlé et la persister dans secure storage.
+    try {
+      final raw = await rootBundle.loadString('assets/secrets/dropbox_app_key.txt');
+      final bundledKey = raw.trim();
+      if (bundledKey.isEmpty || bundledKey.startsWith('REMPLACER')) {
+        throw Exception('Dropbox App Key manquante — build de développement');
+      }
+      await saveAndroidAppKey(bundledKey);
+    } on FlutterError {
+      throw Exception('Dropbox App Key manquante — build de développement');
+    }
     final appKey = await _secureStorage.read(key: _keyAppKey);
     if (appKey == null) {
-      throw Exception(
-        'Dropbox App Key non configuré. Reconfigurez le Mode 2 dans les paramètres.',
-      );
+      throw Exception('Dropbox App Key manquante — build de développement');
     }
     final saved = await _secureStorage.read(key: _keyRefreshToken);
     if (saved != null) {

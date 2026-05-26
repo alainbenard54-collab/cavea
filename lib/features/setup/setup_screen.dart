@@ -617,7 +617,6 @@ class _DropboxAuthStep extends ConsumerStatefulWidget {
 
 class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
   final _folderController = TextEditingController();
-  final _appKeyController = TextEditingController();
 
   @override
   void initState() {
@@ -628,7 +627,6 @@ class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
   @override
   void dispose() {
     _folderController.dispose();
-    _appKeyController.dispose();
     super.dispose();
   }
 
@@ -643,20 +641,9 @@ class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
       children: [
         Text(l10n.setupDropboxTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        if (Platform.isAndroid) ...[
-          Text(l10n.setupDropboxDescAndroid),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _appKeyController,
-            decoration: InputDecoration(
-              labelText: l10n.setupDropboxAppKey,
-              errorText: state.errorMessage,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-        ] else ...[
-          Text(l10n.setupDropboxDescDesktop),
-          const SizedBox(height: 16),
+        Text(l10n.setupDropboxDescDesktop),
+        const SizedBox(height: 16),
+        if (!Platform.isAndroid) ...[
           Row(
             children: [
               Expanded(
@@ -685,8 +672,8 @@ class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
               ),
             ],
           ),
+          const SizedBox(height: 24),
         ],
-        const SizedBox(height: 24),
         if (state.isLoading)
           const Center(child: CircularProgressIndicator())
         else
@@ -703,7 +690,6 @@ class _DropboxAuthStepState extends ConsumerState<_DropboxAuthStep> {
               }
               await widget.controller.authenticateDropbox(
                 folderPath: Platform.isAndroid ? widget.state.folderPath : state.folderPath,
-                androidAppKey: Platform.isAndroid ? _appKeyController.text.trim() : null,
               );
             },
           ),

@@ -51,6 +51,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; Contenu complet du build Flutter Release (inclut flutter_assets/, data/, dlls...)
 Source: "..\..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Credentials OAuth (absents en CI de PR — skipifsourcedoesntexist pour ne pas bloquer)
+Source: "..\..\google_desktop_secrets.json";  DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\..\dropbox_desktop_secrets.json"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
 Name: "{group}\{#MyAppName}";                         Filename: "{app}\{#MyAppExeName}"

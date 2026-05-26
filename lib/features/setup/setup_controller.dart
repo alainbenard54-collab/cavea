@@ -215,14 +215,10 @@ class SetupController extends Notifier<SetupState> {
 
   Future<void> authenticateDropbox({
     required String folderPath,
-    String? androidAppKey,
   }) async {
     state = state.copyWith(folderPath: folderPath, isLoading: true, errorMessage: null);
     try {
       _dropboxAdapter = DropboxStorageAdapter();
-      if (Platform.isAndroid && androidAppKey != null && androidAppKey.isNotEmpty) {
-        await DropboxStorageAdapter.saveAndroidAppKey(androidAppKey);
-      }
       await _dropboxAdapter!.authenticate();
 
       final hasCave = await _dropboxAdapter!.remoteDbExists();
