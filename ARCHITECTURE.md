@@ -478,13 +478,16 @@ Fichiers : `lib/features/locations/` (4 fichiers). DAO : `watchLocationStats()`,
 Sur Android en Mode 2, le verrou n'est **jamais libéré automatiquement** sur les événements de cycle de vie (`paused`, `resumed`). Deux raisons : l'OS tue le process avant la fin des requêtes HTTP, et des sous-activités (FilePicker, share sheet) déclenchent aussi `paused`/`resumed` — libérer le lock dans ces cas causait des faux positifs "Cave utilisée par un autre appareil". Voir section dédiée dans CLAUDE.md.
 
 **Feature V1** : quand `_MobileBar` affiche le bouton "Sauvegarder et libérer" (`!isReadOnly && isAndroid && syncService.isActive`), afficher également un bouton **Quitter** (icône `exit_to_app`) qui :
-1. Déclenche `syncService.releaseManual()` (upload + suppression lock)
-2. Attend la fin de l'opération (état `SyncIdle` ou `SyncReadOnly`)
-3. Appelle `exit(0)` pour fermer le process proprement
+1. Dialogue de confirmation
+2. Déclenche `syncService.tryRelease()` (upload + suppression lock — peut lever une exception)
+3. En cas d'échec : dialogue "Forcer quitter ?" avec option d'abandon
+4. En cas de succès ou abandon : appelle `_closeApp()` → `finishAndRemoveTask()` via MethodChannel `com.cavea.cavea/app_control` (dans `MainActivity.kt`)
+
+`finishAndRemoveTask()` est la seule API Android qui ferme l'Activity **et** retire la task de la liste des apps récentes. `exit(0)` reste en filet de sécurité si le MethodChannel échoue.
 
 Ce bouton remplace le pattern "ferme l'app → session interrompue → récupération au prochain démarrage" par une sortie propre explicite. Il ne s'affiche qu'en mode écriture actif (pas en lecture seule, pas en Mode 1).
 
-Emplacement dans `_MobileBar` : dans la zone sync (gauche), aux côtés de `_AbandonWriteIconBtn` et `_SaveReleaseIconBtn`.
+Emplacement dans `_MobileBar` : dans la zone sync (gauche), icône `_QuitIconBtn`.
 
 ---
 
@@ -533,20 +536,47 @@ flutter build linux --release
 
 ## Prérequis Android — Mode 2 (OAuth)
 
-### Google Drive sur Android — SHA-1 obligatoire
+### Google Drive sur Android — google_sign_in v7 + client Web application
 
-`GoogleSignIn.instance.authenticate()` retourne `null` **sans lever d'exception** quand le SHA-1 de la clé de signature APK n'est pas enregistré dans GCP Console. L'app attrape ce `null` et lève une exception explicite avec le message actionnable.
+L'app utilise `google_sign_in_android` v7 (Google Identity Services SDK / Credential Manager). Cette version impose une architecture OAuth différente de v6 :
 
-**Enregistrement du SHA-1 :**
-1. Obtenir le SHA-1 du keystore de debug :
+**Clients OAuth2 GCP requis :**
+
+| Client GCP | Type | Usage |
+|---|---|---|
+| "Ordinateur de bureau" | Desktop app | Windows + Linux (`google_desktop_secrets.json` + `clientViaUserConsent`) |
+| "Cavea Android dev" | Android | Reconnaît le SHA-1 debug → Credential Manager autorisé |
+| "Cavea Android apk et store" | Android | Reconnaît le SHA-1 release/Play Store |
+| Client Web application | **Web application** | `serverClientId` requis par GIS v7 — **type obligatoire, pas Desktop** |
+
+Le `serverClientId` (client Web application) est injecté à la compilation via `--dart-define-from-file=dart-defines.json` :
+
+```json
+{
+  "GOOGLE_ANDROID_SERVER_CLIENT_ID": "<client_id_web_application>.apps.googleusercontent.com"
+}
+```
+
+`dart-defines.json` est gitignored. Le template `dart-defines.json.template` est versionné. Le script `scripts/check_android_config.sh` vérifie la configuration avant build.
+
+**Build Android :**
+```bash
+flutter run -d <device> --dart-define-from-file=dart-defines.json
+flutter build apk --release --split-per-abi --dart-define-from-file=dart-defines.json
+flutter build appbundle --release --dart-define-from-file=dart-defines.json
+```
+
+**SHA-1 obligatoire :**
+1. Debug keystore :
    ```bash
    keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-   # Sur Windows : keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore ...
    ```
-2. Dans [GCP Console](https://console.cloud.google.com/) → **Credentials** → OAuth 2.0 Client IDs → sélectionner le client Android → ajouter le SHA-1 sous "SHA-1 certificate fingerprint"
-3. Pour les APKs de release, répéter avec le keystore de production
+2. GCP Console → Credentials → client Android → ajouter SHA-1
+3. Pour release : répéter avec le keystore de production
 
-**Fichier `android/app/google-services.json` :** géré par Gradle automatiquement — ne pas versionner dans git.
+**Cache account** : `DriveStorageAdapter._cachedAccount` (static) évite de rappeler `authenticate()` à chaque recréation du `SyncService` (rebuild ProviderScope après download). Vidé au `signOut()`.
+
+**Persistance de configuration** : `main.dart` ne vérifie plus `hasStoredTokens()` pour Drive sur Android — GIS v7 gère sa propre session via le compte Google système (persiste même après réinstallation). Seul Dropbox déclenche cette vérification (ses tokens sont dans le KeyStore de l'app).
 
 ### Dropbox sur Android — App Key bundlée
 

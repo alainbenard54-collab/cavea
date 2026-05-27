@@ -216,7 +216,7 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 
 **Comportement retenu :**
 - Le lock reste dans le partage après toute fermeture Android (bouton Home, task switcher, kill OS).
-- **Bouton "Quitter"** dans `_MobileBar` (mode écriture) = seul chemin de sortie propre sur Android : upload + unlock + `exit(0)`.
+- **Bouton "Quitter"** dans `_MobileBar` (mode écriture) = seul chemin de sortie propre sur Android : upload + unlock + `finishAndRemoveTask()` via MethodChannel (`com.cavea.cavea/app_control` dans `MainActivity.kt`). Cette API est la seule qui ferme l'Activity **et** retire l'app de la liste des apps récentes. `exit(0)` reste en filet de sécurité si le channel échoue.
 - Au prochain démarrage, si le lock appartient à notre appareil, résolution silencieuse (upload local → lock conservé) sans dialog "Session interrompue". Le dialog crash recovery reste affiché uniquement sur PC (Windows), où `didRequestAppExit()` intercepte la fermeture et les requêtes ont le temps de terminer.
 
 ---
@@ -257,7 +257,7 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - ✅ **Édition complète d'une bouteille** : formulaire avec tous les champs non protégés modifiables. Accessible depuis le BottomSheet "Modifier la fiche" via `/bottle-edit/:id`. DropdownMenu filtrable pour couleur/cru/contenance, DatePicker pour date_entree, autocomplétion RawAutocomplete, bouton restore ↩.
 - ✅ **Fiche lecture seule** d'une bouteille : `BottleDetailScreen` via route `/bottle/:id`, même présentation que `BottleEditScreen` (OutlineInputBorder, IgnorePointer), badge maturité coloré, section Consommation masquée si bouteille en stock. Accessible depuis le BottomSheet ("Consulter la fiche") en mode normal ET SyncReadOnly. Fix associé : `garde_min=0` désormais valeur légitime (buvable dès le millésime).
 - ✅ **Multi-sélection de bouteilles** : appui long → mode sélection → barre d'actions contextuelle → **Déplacer** (même emplacement pour toutes) ou **Consommer** (même date/note/commentaire pour toutes). Désactivé en SyncReadOnly (appui long ignoré). Voir section ci-dessous et ARCHITECTURE.md "Multi-sélection".
-- ✅ **Bouton quitter Android (Mode 2, mode écriture)** : quand `_MobileBar` est en mode écriture, bouton "Quitter" qui déclenche `releaseManual()` puis `exit(0)`. Dialogue de confirmation avec option "Sauvegarder et quitter" / "Annuler". Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
+- ✅ **Bouton quitter Android (Mode 2, mode écriture)** : quand `_MobileBar` est en mode écriture, bouton "Quitter" qui déclenche `tryRelease()` (upload + unlock, peut lever une exception) puis `_closeApp()` → `finishAndRemoveTask()` via MethodChannel (retire l'app des apps récentes). Dialogue de confirmation + dialogue d'erreur si upload échoue. Voir ARCHITECTURE.md section "Quitter Android en mode écriture".
 - ✅ **Navigation par emplacement** : onglet "Emplacements" (`Icons.shelves`, index 2) dans `_DesktopRail` et `_MobileBar`. Voir ARCHITECTURE.md section "Navigation par emplacement".
 - ✅ **Internationalisation (i18n)** : `flutter_localizations` + fichiers ARB (`lib/l10n/app_fr.arb`, `lib/l10n/app_en.arb`). Détection automatique langue système + sélection manuelle dans paramètres. Voir ARCHITECTURE.md section "Internationalisation".
 - ✅ **Historique des consommations** : liste bouteilles consommées, tri par date, recherche texte, BottomSheet détail + Réhabiliter, badge maturité masqué sur bouteilles consommées
