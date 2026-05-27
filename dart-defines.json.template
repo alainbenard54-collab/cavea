@@ -1,0 +1,9 @@
+{
+  "_comment": "Copier ce fichier en dart-defines.json et renseigner les valeurs. dart-defines.json est gitignored.",
+  "_comment2": "Usage : flutter run --dart-define-from-file=dart-defines.json",
+  "_comment3": "         flutter build apk --dart-define-from-file=dart-defines.json",
+
+  "_section_android_drive": "--- Google Drive Android ---",
+  "_android_drive_hint": "Client OAuth Web (type 3) dans android/app/google-services.json > oauth_client[client_type=3] > client_id",
+  "GOOGLE_ANDROID_SERVER_CLIENT_ID": "REMPLACER_PAR_LE_CLIENT_ID_WEB_DE_google-services.json"
+}

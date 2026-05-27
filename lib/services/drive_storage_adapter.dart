@@ -22,6 +22,9 @@ const _lockFileName = 'cave.db.lock';
 const _dbFileName = 'cave.db';
 const _folderName = 'Cavea';
 
+// Injecté via --dart-define-from-file=dart-defines.json (voir dart-defines.json.template).
+const _kAndroidServerClientId = String.fromEnvironment('GOOGLE_ANDROID_SERVER_CLIENT_ID');
+
 const _secureStorage = FlutterSecureStorage(
   aOptions: AndroidOptions(),
   wOptions: WindowsOptions(),
@@ -91,34 +94,54 @@ class DriveStorageAdapter implements StorageAdapter {
   }
 
   static bool _googleSignInInitialized = false;
+  // Survit aux recréations de DriveStorageAdapter (ProviderScope rebuild après sync).
+  // Évite de rappeler authenticate() — qui affiche brièvement l'UI Credential Manager.
+  static GoogleSignInAccount? _cachedAccount;
 
   Future<void> _authenticateAndroid() async {
     if (!_googleSignInInitialized) {
-      await GoogleSignIn.instance.initialize();
+      if (_kAndroidServerClientId.isEmpty) {
+        throw Exception(
+          'GOOGLE_ANDROID_SERVER_CLIENT_ID non défini.\n'
+          'Copiez dart-defines.json.template → dart-defines.json, '
+          'renseignez le client_id web (type 3) de google-services.json, '
+          'puis relancez avec --dart-define-from-file=dart-defines.json.',
+        );
+      }
+      await GoogleSignIn.instance.initialize(
+        serverClientId: _kAndroidServerClientId,
+      );
       _googleSignInInitialized = true;
     }
 
-    GoogleSignInAccount? account;
-    final lightweightFuture =
-        GoogleSignIn.instance.attemptLightweightAuthentication();
-    if (lightweightFuture != null) {
-      account = await lightweightFuture;
-    }
-
-    account ??= await GoogleSignIn.instance
-        .authenticate(scopeHint: [_driveScope])
-        .timeout(
-          const Duration(seconds: 60),
-          onTimeout: () =>
-              throw Exception('La connexion Google a pris trop de temps. Réessayez.'),
-        );
+    GoogleSignInAccount? account = _cachedAccount;
 
     if (account == null) {
-      throw Exception(
-        'Connexion Google annulée ou impossible. '
-        'Vérifiez que le SHA-1 de votre certificat APK est enregistré dans Google Cloud Console '
-        '(Credentials → OAuth 2.0 → Android).',
-      );
+      final lightweightFuture =
+          GoogleSignIn.instance.attemptLightweightAuthentication();
+      if (lightweightFuture != null) {
+        account = await lightweightFuture;
+      }
+
+      if (account == null) {
+        try {
+          account = await GoogleSignIn.instance
+              .authenticate(scopeHint: [_driveScope])
+              .timeout(
+                const Duration(seconds: 60),
+                onTimeout: () => throw Exception(
+                    'La connexion Google a pris trop de temps. Réessayez.'),
+              );
+        } on Exception catch (e) {
+          if (e.toString().contains('trop de temps')) rethrow;
+          throw Exception(
+            'Connexion Google annulée ou impossible. '
+            'Vérifiez que le SHA-1 de votre certificat APK est enregistré dans Google Cloud Console '
+            '(Credentials → OAuth 2.0 → Android).',
+          );
+        }
+      }
+      _cachedAccount = account;
     }
 
     final authz = await account.authorizationClient
@@ -152,9 +175,15 @@ class DriveStorageAdapter implements StorageAdapter {
     await _authenticateAndroid();
   }
 
+  static Future<bool> hasStoredTokens() async {
+    final token = await _secureStorage.read(key: _keyRefreshToken);
+    return token != null && token.isNotEmpty;
+  }
+
   Future<void> signOut() async {
     await _secureStorage.delete(key: _keyRefreshToken);
     if (Platform.isAndroid) {
+      _cachedAccount = null;
       await GoogleSignIn.instance.signOut();
     }
     _authClient?.close();

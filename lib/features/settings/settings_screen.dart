@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config_service.dart';
@@ -948,12 +949,9 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
       await DropboxStorageAdapter.clearTokens();
     }
 
-    final newConfig = AppConfig(
-      storageMode: 'local',
-      dbPath: configService.config!.dbPath,
-    );
-    await configService.save(newConfig);
+    await configService.reset();
 
-    ref.read(storageModeProvider.notifier).set('local');
+    if (!context.mounted) return;
+    context.go('/setup');
   }
 }

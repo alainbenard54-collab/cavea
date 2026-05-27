@@ -6,7 +6,6 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // google-services plugin retiré : pas de Firebase dans ce projet
 }
 
 // Chargement de android/key.properties (gitignored — ne jamais committer)

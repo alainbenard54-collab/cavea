@@ -7,10 +7,11 @@
 /build/
 android/.kotlin/
 
-# Environnement
+# Environnement et configuration locale
 .env
 .env.*
 *.env
+dart-defines.json
 
 # Python
 __pycache__/

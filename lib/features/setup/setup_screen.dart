@@ -299,6 +299,13 @@ class _DriveAuthStep extends ConsumerWidget {
         const SizedBox(height: 8),
         if (Platform.isAndroid) ...[
           Text(l10n.setupDriveDescAndroid),
+          if (state.errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              state.errorMessage!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13),
+            ),
+          ],
         ] else ...[
           Text(l10n.setupDriveDescDesktop),
           const SizedBox(height: 16),

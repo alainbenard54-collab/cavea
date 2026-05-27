@@ -1027,11 +1027,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get setupProviderDriveDesc =>
-      'Compte Google requis. Nécessite la configuration d\'un projet GCP.';
+      'Synchronisation via votre compte Google.';
 
   @override
   String get setupProviderDropboxDesc =>
-      'Compte Dropbox requis. Créez une app sur developer.dropbox.com.';
+      'Synchronisation via votre compte Dropbox.';
 
   @override
   String get setupDropboxTitle => 'Connexion Dropbox';

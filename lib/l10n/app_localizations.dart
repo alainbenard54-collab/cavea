@@ -1835,13 +1835,13 @@ abstract class AppLocalizations {
   /// No description provided for @setupProviderDriveDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Compte Google requis. Nécessite la configuration d\'un projet GCP.'**
+  /// **'Synchronisation via votre compte Google.'**
   String get setupProviderDriveDesc;
 
   /// No description provided for @setupProviderDropboxDesc.
   ///
   /// In fr, this message translates to:
-  /// **'Compte Dropbox requis. Créez une app sur developer.dropbox.com.'**
+  /// **'Synchronisation via votre compte Dropbox.'**
   String get setupProviderDropboxDesc;
 
   /// No description provided for @setupDropboxTitle.

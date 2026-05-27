@@ -366,6 +366,11 @@ class DropboxStorageAdapter implements StorageAdapter {
   }
 
   /// Stocke le App Key Dropbox dans secure storage (Android uniquement).
+  static Future<bool> hasStoredTokens() async {
+    final token = await _secureStorage.read(key: _keyRefreshToken);
+    return token != null && token.isNotEmpty;
+  }
+
   static Future<void> saveAndroidAppKey(String appKey) async {
     await _secureStorage.write(key: _keyAppKey, value: appKey);
   }

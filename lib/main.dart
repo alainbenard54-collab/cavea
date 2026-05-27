@@ -4,6 +4,9 @@
 import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
+import 'services/drive_storage_adapter.dart';
+import 'services/dropbox_storage_adapter.dart';
+
 import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter/material.dart';
@@ -24,6 +27,17 @@ final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configService.load();
+  // Android Auto Backup peut restaurer storageMode='dropbox' après réinstallation
+  // sans restaurer les tokens OAuth (stockés dans KeyStore, non backupés).
+  // Drive sur Android n'est pas concerné : GIS v7 utilise le compte Google système,
+  // qui persiste sur le device indépendamment de l'app.
+  if (Platform.isAndroid) {
+    final mode = configService.config?.storageMode;
+    if (mode == 'dropbox') {
+      final hasTokens = await DropboxStorageAdapter.hasStoredTokens();
+      if (!hasTokens) await configService.reset();
+    }
+  }
   runApp(const AppWrapper());
 }
 

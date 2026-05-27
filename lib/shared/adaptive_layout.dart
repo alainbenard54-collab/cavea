@@ -4,6 +4,7 @@
 import 'dart:io' show Platform, exit;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -169,15 +170,17 @@ class _AppShellState extends ConsumerState<AppShell> {
               SnackBar(content: Text(l10n.syncSavedAndUnlocked)),
             );
           }
-        case SyncError(:final message):
-          final wasAcquiringLock = previous is SyncStarting;
+        case SyncError(:final message, :final isStartup):
+          // isStartup=true : erreur pendant syncOnStartup, pas de lock réel.
+          // isStartup=false + previous=SyncStarting : echec acquireLock explicite.
+          final wasAcquiringLock = !isStartup && previous is SyncStarting;
           if (wasAcquiringLock) syncService.resetToReadOnly();
           showDialog<void>(
             context: context,
             builder: (_) => _SyncErrorDialog(
               title: wasAcquiringLock ? l10n.syncAcquireLockFailedTitle : null,
               message: wasAcquiringLock ? l10n.syncAcquireLockFailedBody : message,
-              onRetry: wasAcquiringLock ? syncService.acquireLock : syncService.sync,
+              onRetry: (wasAcquiringLock || isStartup) ? syncService.acquireLock : syncService.sync,
               onClose: null,
               closeLabel: wasAcquiringLock ? l10n.syncStayReadOnly : null,
             ),
@@ -779,6 +782,18 @@ class _SaveIconBtn extends StatelessWidget {
   }
 }
 
+// Sur Android, finishAndRemoveTask() est la seule API qui ferme l'Activity ET
+// retire l'app de la liste des apps récentes. exit(0) en filet de sécurité.
+Future<void> _closeApp() async {
+  if (Platform.isAndroid) {
+    try {
+      const _channel = MethodChannel('com.cavea.cavea/app_control');
+      await _channel.invokeMethod<void>('finishAndRemoveTask');
+    } catch (_) {}
+  }
+  exit(0);
+}
+
 class _QuitIconBtn extends StatelessWidget {
   final SyncService syncService;
   const _QuitIconBtn({required this.syncService});
@@ -819,10 +834,11 @@ class _QuitIconBtn extends StatelessWidget {
       if (confirmed != true) return;
       try {
         await syncService.tryRelease();
-        exit(0);
+        await _closeApp();
       } catch (_) {
         if (!context.mounted) {
-          exit(0);
+          await _closeApp();
+          return;
         }
         final forceQuit = await showDialog<bool>(
           context: context,
@@ -843,7 +859,7 @@ class _QuitIconBtn extends StatelessWidget {
             ],
           ),
         );
-        if (forceQuit == true) exit(0);
+        if (forceQuit == true) await _closeApp();
       }
     });
   }

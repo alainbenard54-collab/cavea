@@ -1024,12 +1024,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupChooseProvider => 'Choose your cloud provider';
 
   @override
-  String get setupProviderDriveDesc =>
-      'Requires a Google account and a GCP project.';
+  String get setupProviderDriveDesc => 'Sync via your Google account.';
 
   @override
-  String get setupProviderDropboxDesc =>
-      'Requires a Dropbox account. Create an app at developer.dropbox.com.';
+  String get setupProviderDropboxDesc => 'Sync via your Dropbox account.';
 
   @override
   String get setupDropboxTitle => 'Dropbox connection';

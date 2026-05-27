@@ -56,7 +56,10 @@ class SyncExiting extends SyncState {
 
 class SyncError extends SyncState {
   final String message;
-  const SyncError(this.message);
+  /// true si l'erreur s'est produite pendant syncOnStartup (pas pendant acquireLock).
+  /// Dans ce cas il n'y a pas de lock réel : ne pas afficher "verrouillé par autre appareil".
+  final bool isStartup;
+  const SyncError(this.message, {this.isStartup = false});
 }
 
 // ── Callbacks close/reopen drift ─────────────────────────────────────────────
@@ -194,7 +197,7 @@ class SyncService extends Notifier<SyncState> {
         _lockHeldByUs = false;
       }
       if (_isDisposed) return;
-      state = SyncError(e.toString());
+      state = SyncError(e.toString(), isStartup: true);
     }
   }
 
