@@ -527,7 +527,7 @@ flutter create --platforms=linux .
 ```bash
 flutter build linux --release
 ./scripts/build_linux.sh appimage   # → build/linux/Cavea-x86_64.AppImage
-./scripts/build_linux.sh deb        # → build/linux/cavea_0.1.0_amd64.deb
+./scripts/build_linux.sh deb        # → build/linux/cavea_<version>_amd64.deb
 ```
 
 **Guide de déploiement utilisateur :** `DEPLOY_LINUX.md` — installation .deb / AppImage, configuration Mode 1 et Mode 2, secrets OAuth, dépannage Wayland / trousseau.

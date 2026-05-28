@@ -3,7 +3,7 @@
 #
 # Usage :
 #   ./scripts/build_linux.sh appimage   → Cavea-x86_64.AppImage
-#   ./scripts/build_linux.sh deb        → cavea_0.1.0_amd64.deb
+#   ./scripts/build_linux.sh deb        → cavea_<version>_amd64.deb
 #   ./scripts/build_linux.sh all        → les deux
 #
 # Pré-requis : flutter (dans PATH), appimagetool (téléchargé si absent), dpkg-deb
