@@ -44,13 +44,15 @@ Uninstall Cavea. On Windows and Linux, the uninstaller offers to delete your con
 
 Then reinstall the app normally.
 
-### Data-only reset — Windows and Linux
+### Data-only reset — Local mode, Windows and Linux
 
-If you want to keep your settings (mode, cellar path) but start with an empty cellar:
+If you are using **Local mode** and want to keep your settings (cellar path) but start with an empty cellar:
 
 1. Close Cavea
 2. Delete the `cave.db` file from the folder configured in **⚙️ Settings > Cellar location**
 3. Relaunch Cavea — the app automatically creates a new empty cellar at the same location
+
+> **Shared mode**: deleting the local `cave.db` does not have the intended effect. On the next launch, Cavea automatically re-downloads the copy from the cloud — the shared cellar is not lost, but you do not start with an empty cellar either. To reset in Shared mode, first switch to Local mode via **⚙️ Settings > Change provider**, then delete `cave.db`.
 
 > On Android, `cave.db` is in protected app storage — uninstalling is the only accessible option.
 
