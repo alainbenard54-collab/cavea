@@ -86,7 +86,7 @@ Les credentials sont stockés localement dans le trousseau système (Windows Cre
 
 ## Documentation utilisateur
 
-Voir [docs/README.md](docs/README.md) pour le guide utilisateur complet — 13 scénarios disponibles en français et en anglais.
+Voir [docs/README.md](docs/README.md) pour le guide utilisateur complet — 14 scénarios disponibles en français et en anglais, dont un guide [découverte avec les données d'exemple](docs/fr/00-decouverte.md).
 
 ## Licence
 

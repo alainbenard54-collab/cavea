@@ -2,6 +2,7 @@
 
 | # | Scenario |
 |---|---|
+| 00 | [Getting started with sample data](00-discovery.md) |
 | 01 | [First start](01-first-start.md) |
 | 02 | [Add bottles](02-add-bottles.md) |
 | 03 | [Browse stock](03-stock.md) |

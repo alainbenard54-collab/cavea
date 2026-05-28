@@ -86,7 +86,7 @@ Credentials are stored locally in the system keychain (Windows Credential Manage
 
 ## User documentation
 
-See [docs/README.md](docs/README.md) for the complete user guide — 13 scenarios available in French and English.
+See [docs/README.md](docs/README.md) for the complete user guide — 14 scenarios available in French and English, including a [getting started with sample data](docs/en/00-discovery.md) guide.
 
 ## License
 

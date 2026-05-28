@@ -41,6 +41,10 @@ Pour mettre à jour : téléchargez et exécutez le nouvel installateur — il r
 **Prérequis / Requirements**
 - Ubuntu 22.04+ ou Debian 11+ — 64 bits / Ubuntu 22.04+ or Debian 11+ — 64-bit
 
+**Étapes / Steps**
+1. Télécharger `cavea_1.1.0_amd64.deb` ci-dessous / Download `cavea_1.1.0_amd64.deb` below
+2. Installer / Install:
+
 ```bash
 sudo dpkg -i cavea_1.1.0_amd64.deb
 sudo apt-get install -f
@@ -62,6 +66,24 @@ Download `app-arm64-v8a-release.apk` (recent 64-bit phones) or `app-armeabi-v7a-
 > ℹ️ Installation hors Play Store : activer "Sources inconnues" dans Paramètres Android → Sécurité. / Side-loading: enable "Unknown sources" in Android Settings → Security.
 
 **Play Store** — bientôt disponible / coming soon
+
+---
+
+---
+
+## 🧪 Test et découverte / Test and discovery
+
+Deux fichiers CSV d'exemple sont joints à cette release : `cavea_sample_fr.csv` et `cavea_sample_en.csv`.
+Ils contiennent 50 bouteilles en stock et 20 consommées, couvrant toutes les couleurs et tous les stades de maturité.
+
+Two sample CSV files are attached to this release: `cavea_sample_fr.csv` and `cavea_sample_en.csv`.
+They contain 50 bottles in stock and 20 consumed, covering all colours and maturity stages.
+
+**Import / Import** : ↔️ Données → Importer → sélectionner le fichier, séparateur `;` / ↔️ Data → Import → select file, separator `;`
+
+Pour la réinitialisation et les détails d'utilisation / For reset instructions and full usage details:
+🇫🇷 [Découverte avec les données d'exemple](https://alainbenard54-collab.github.io/cavea/fr/00-decouverte.html)
+🇬🇧 [Getting started with sample data](https://alainbenard54-collab.github.io/cavea/en/00-discovery.html)
 
 ---
 

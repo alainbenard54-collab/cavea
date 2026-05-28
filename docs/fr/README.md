@@ -2,6 +2,7 @@
 
 | # | Scénario |
 |---|---|
+| 00 | [Découverte avec les données d'exemple](00-decouverte.md) |
 | 01 | [Premier démarrage](01-premier-demarrage.md) |
 | 02 | [Ajouter des bouteilles](02-ajout-bouteilles.md) |
 | 03 | [Consulter le stock](03-stock.md) |
