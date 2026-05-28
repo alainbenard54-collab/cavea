@@ -227,7 +227,13 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
     } else {
       shellContent = Scaffold(
-        body: widget.child,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          left: true,
+          right: true,
+          child: widget.child,
+        ),
         bottomNavigationBar: _MobileBar(
           selectedIndex: widget.selectedIndex,
           syncService: syncService,
@@ -495,10 +501,14 @@ class _MobileBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
-    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final sysPad = MediaQuery.of(context).padding;
     return Container(
       color: cs.surfaceContainer,
-      padding: EdgeInsets.only(bottom: bottomPad),
+      padding: EdgeInsets.only(
+        bottom: sysPad.bottom,
+        left: sysPad.left,
+        right: sysPad.right,
+      ),
       child: SizedBox(
         height: 56,
         child: Row(
