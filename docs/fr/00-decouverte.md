@@ -52,7 +52,7 @@ Si vous utilisez le **Mode Local** et souhaitez conserver vos paramètres (chemi
 2. Supprimez le fichier `cave.db` depuis le dossier configuré dans **⚙️ Paramètres > Emplacement de la cave**
 3. Relancez Cavea — l'application crée automatiquement une nouvelle cave vide au même emplacement
 
-> **Mode Partagé** : supprimer le `cave.db` local n'a pas l'effet attendu. Au prochain démarrage, Cavea retélécharge automatiquement la copie depuis le cloud — la cave partagée n'est pas perdue, mais vous ne repartez pas non plus d'une cave vide. Pour réinitialiser en Mode Partagé, basculez d'abord vers le Mode Local via **⚙️ Paramètres > Changer de fournisseur**, puis supprimez `cave.db`.
+> **Mode Partagé** : supprimer le `cave.db` local n'a pas l'effet attendu. Au prochain démarrage, Cavea retélécharge automatiquement la copie depuis le cloud — la cave partagée n'est pas perdue, mais vous ne repartez pas non plus d'une cave vide. Pour réinitialiser en Mode Partagé, basculez d'abord vers le Mode Local via **⚙️ Paramètres > Revenir en local**, puis supprimez `cave.db`.
 
 > Sur Android, `cave.db` est dans le stockage protégé de l'application — la désinstallation est la seule option accessible.
 

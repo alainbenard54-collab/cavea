@@ -52,7 +52,7 @@ If you are using **Local mode** and want to keep your settings (cellar path) but
 2. Delete the `cave.db` file from the folder configured in **⚙️ Settings > Cellar location**
 3. Relaunch Cavea — the app automatically creates a new empty cellar at the same location
 
-> **Shared mode**: deleting the local `cave.db` does not have the intended effect. On the next launch, Cavea automatically re-downloads the copy from the cloud — the shared cellar is not lost, but you do not start with an empty cellar either. To reset in Shared mode, first switch to Local mode via **⚙️ Settings > Change provider**, then delete `cave.db`.
+> **Shared mode**: deleting the local `cave.db` does not have the intended effect. On the next launch, Cavea automatically re-downloads the copy from the cloud — the shared cellar is not lost, but you do not start with an empty cellar either. To reset in Shared mode, first switch to Local mode via **⚙️ Settings > Switch to local**, then delete `cave.db`.
 
 > On Android, `cave.db` is in protected app storage — uninstalling is the only accessible option.
 
