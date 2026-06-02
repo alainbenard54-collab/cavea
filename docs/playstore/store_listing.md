@@ -119,13 +119,13 @@ Also available on Windows and Linux: github.com/alainbenard54-collab/cavea/relea
 - Format : JPG ou PNG 24 bits (pas d'alpha)
 - Résolution native Android recommandée (ex. 1080×2400)
 - Minimum 2, maximum 8
-- Ordre recommandé :
-  1. Vue stock — filtres ouverts + badges maturité colorés
-  2. BottomSheet actions bouteille (Consommer / Déplacer / Fiche)
-  3. Navigation Emplacements (arborescence)
-  4. Formulaire Ajout en lot avec Répartition
-  5. Historique des consommations
-  6. *(optionnel)* Fiche bouteille complète
+- Fichiers dans `assets/screenshots/` :
+  1. `phone_01_stock.jpg` — Vue stock avec badges maturité colorés
+  2. `phone_02_actions.jpg` — BottomSheet actions bouteille (Consommer / Déplacer / Fiche)
+  3. `phone_03_emplacements.jpg` — Navigation Emplacements (arborescence)
+  4. `phone_04_bulk_add_top.jpg` — Formulaire Ajout en lot — champs communs
+  5. `phone_05_bulk_add_bottom.jpg` — Formulaire Ajout en lot — répartition
+  6. `phone_06_historique.jpg` — Historique des consommations
 
 ---
 
