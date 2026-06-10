@@ -30,6 +30,7 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
         path: '/setup',
         builder: (context, state) => SetupScreen(
           onComplete: (_) => onSetupComplete(),
+          startAtProviderChoice: state.extra == 'providerChoice',
         ),
       ),
       GoRoute(

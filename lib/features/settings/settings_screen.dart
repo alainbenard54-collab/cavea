@@ -842,10 +842,9 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
           subtitle: Text(l10n.settingsModeSyncCurrent(_providerLabel)),
         ),
         ListTile(
-          enabled: !Platform.isAndroid,
           leading: const Icon(Icons.logout),
           title: Text(l10n.settingsRevenirLocal),
-          onTap: Platform.isAndroid ? null : () => _deactivate(context),
+          onTap: () => _deactivate(context),
         ),
         ListTile(
           leading: const Icon(Icons.swap_horiz),
@@ -952,6 +951,6 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
     await configService.reset();
 
     if (!context.mounted) return;
-    context.go('/setup');
+    context.go('/setup', extra: 'providerChoice');
   }
 }

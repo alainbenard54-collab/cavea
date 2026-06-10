@@ -438,6 +438,7 @@
   "setupChooseProvider": "Choisissez votre fournisseur cloud",
   "setupProviderDriveDesc": "Synchronisation via votre compte Google.",
   "setupProviderDropboxDesc": "Synchronisation via votre compte Dropbox.",
+  "setupProviderActuel": "Fournisseur actuellement actif.",
   "setupDropboxTitle": "Connexion Dropbox",
   "setupDropboxDescDesktop": "Choisissez le dossier local pour cave.db (cache de travail), puis connectez votre compte Dropbox.",
   "setupConnectDropbox": "Connecter Dropbox",

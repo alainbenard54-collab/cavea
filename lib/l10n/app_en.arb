@@ -357,6 +357,7 @@
   "setupChooseProvider": "Choose your cloud provider",
   "setupProviderDriveDesc": "Sync via your Google account.",
   "setupProviderDropboxDesc": "Sync via your Dropbox account.",
+  "setupProviderActuel": "Currently active provider.",
   "setupDropboxTitle": "Dropbox connection",
   "setupDropboxDescDesktop": "First choose the local folder for cave.db (working cache), then connect your Dropbox account.",
   "setupConnectDropbox": "Connect Dropbox",

@@ -12,14 +12,35 @@ import '../../l10n/l10n.dart';
 import '../../services/drive_storage_adapter.dart';
 import 'setup_controller.dart';
 
-class SetupScreen extends ConsumerWidget {
+class SetupScreen extends ConsumerStatefulWidget {
   final void Function(AppConfig config) onComplete;
+  final bool startAtProviderChoice;
 
-  const SetupScreen({super.key, required this.onComplete});
+  const SetupScreen({
+    super.key,
+    required this.onComplete,
+    this.startAtProviderChoice = false,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SetupScreen> createState() => _SetupScreenState();
+}
+
+class _SetupScreenState extends ConsumerState<SetupScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.startAtProviderChoice) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(setupControllerProvider.notifier).selectMode('shared');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(setupControllerProvider);
+    final currentProvider = configService.config?.storageMode;
 
     final l10n = context.l10n;
     return Scaffold(
@@ -36,16 +57,17 @@ class SetupScreen extends ConsumerWidget {
               SetupStep.pathInput => _PathInputStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
-                onComplete: onComplete,
+                onComplete: widget.onComplete,
               ),
               SetupStep.confirmation => _ConfirmationStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
-                onComplete: onComplete,
+                onComplete: widget.onComplete,
               ),
               SetupStep.providerChoice => _ProviderChoiceStep(
                 onSelectProvider: ref.read(setupControllerProvider.notifier).selectProvider,
                 onBack: ref.read(setupControllerProvider.notifier).backToModeChoice,
+                currentProvider: currentProvider,
               ),
               SetupStep.driveAuth => _DriveAuthStep(
                 state: state,
@@ -54,7 +76,7 @@ class SetupScreen extends ConsumerWidget {
               SetupStep.driveChoice => _DriveChoiceStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
-                onComplete: onComplete,
+                onComplete: widget.onComplete,
               ),
               SetupStep.dropboxAuth => _DropboxAuthStep(
                 state: state,
@@ -63,7 +85,7 @@ class SetupScreen extends ConsumerWidget {
               SetupStep.dropboxChoice => _DropboxChoiceStep(
                 state: state,
                 controller: ref.read(setupControllerProvider.notifier),
-                onComplete: onComplete,
+                onComplete: widget.onComplete,
               ),
             },
           ),
@@ -582,12 +604,19 @@ class _DetectionCard extends StatelessWidget {
 class _ProviderChoiceStep extends StatelessWidget {
   final void Function(String) onSelectProvider;
   final VoidCallback onBack;
+  final String? currentProvider;
 
-  const _ProviderChoiceStep({required this.onSelectProvider, required this.onBack});
+  const _ProviderChoiceStep({
+    required this.onSelectProvider,
+    required this.onBack,
+    this.currentProvider,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDrive = currentProvider == 'drive';
+    final isDropbox = currentProvider == 'dropbox';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -596,16 +625,22 @@ class _ProviderChoiceStep extends StatelessWidget {
         const SizedBox(height: 24),
         _ModeCard(
           title: 'Google Drive',
-          description: l10n.setupProviderDriveDesc,
+          description: isDrive
+              ? l10n.setupProviderActuel
+              : l10n.setupProviderDriveDesc,
           icon: Icons.cloud,
-          onTap: () => onSelectProvider('drive'),
+          enabled: !isDrive,
+          onTap: isDrive ? null : () => onSelectProvider('drive'),
         ),
         const SizedBox(height: 12),
         _ModeCard(
           title: 'Dropbox',
-          description: l10n.setupProviderDropboxDesc,
+          description: isDropbox
+              ? l10n.setupProviderActuel
+              : l10n.setupProviderDropboxDesc,
           icon: Icons.cloud_queue,
-          onTap: () => onSelectProvider('dropbox'),
+          enabled: !isDropbox,
+          onTap: isDropbox ? null : () => onSelectProvider('dropbox'),
         ),
         const SizedBox(height: 24),
         OutlinedButton(
