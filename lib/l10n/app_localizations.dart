@@ -290,6 +290,18 @@ abstract class AppLocalizations {
   /// **'Mode local — PC seul'**
   String get tooltipModeLocal;
 
+  /// No description provided for @tooltipModeLocalAndroid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode local — Android'**
+  String get tooltipModeLocalAndroid;
+
+  /// No description provided for @setupRetourChoixMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour au choix du mode'**
+  String get setupRetourChoixMode;
+
   /// No description provided for @tooltipCaveEcriture.
   ///
   /// In fr, this message translates to:
@@ -979,6 +991,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Importer un CSV'**
   String get stockImportCsv;
+
+  /// No description provided for @stockImportSampleData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer les données exemple'**
+  String get stockImportSampleData;
+
+  /// No description provided for @stockImportMyData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer mes données'**
+  String get stockImportMyData;
+
+  /// No description provided for @stockImportMyDataHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import CSV disponible dans le menu « … »'**
+  String get stockImportMyDataHint;
+
+  /// No description provided for @sampleDataImporting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement des données exemple…'**
+  String get sampleDataImporting;
+
+  /// No description provided for @sampleDataImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} bouteilles exemple importées'**
+  String sampleDataImported(int count);
+
+  /// No description provided for @sampleDataError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les données exemple : {error}'**
+  String sampleDataError(String error);
+
+  /// No description provided for @sampleDataUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service de données exemple non configuré'**
+  String get sampleDataUnavailable;
+
+  /// No description provided for @resetDbTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser la base'**
+  String get resetDbTitle;
+
+  /// No description provided for @resetDbDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer toutes les bouteilles (stock et historique). Action irréversible.'**
+  String get resetDbDesc;
+
+  /// No description provided for @resetDbButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser…'**
+  String get resetDbButton;
+
+  /// No description provided for @resetDbDialogTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer la réinitialisation'**
+  String get resetDbDialogTitle;
+
+  /// No description provided for @resetDbDialogContent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les bouteilles seront supprimées (stock et historique).\n\nCette action est irréversible. Exportez vos données avant de continuer.'**
+  String get resetDbDialogContent;
+
+  /// No description provided for @resetDbConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser'**
+  String get resetDbConfirm;
+
+  /// No description provided for @resetDbSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Base réinitialisée'**
+  String get resetDbSuccess;
+
+  /// No description provided for @dangerZoneTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone de danger'**
+  String get dangerZoneTitle;
 
   /// No description provided for @stockCountFiltered.
   ///
@@ -1814,6 +1916,24 @@ abstract class AppLocalizations {
   /// **'La base de données est stockée localement sur ce PC.'**
   String get setupModeLocalDesc;
 
+  /// No description provided for @setupModeLocalAndroid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode local (Android)'**
+  String get setupModeLocalAndroid;
+
+  /// No description provided for @setupModeLocalAndroidDesc.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données stockées sur cet appareil · aucun compte cloud requis.'**
+  String get setupModeLocalAndroidDesc;
+
+  /// No description provided for @setupConfirmModeAndroid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode local (Android)'**
+  String get setupConfirmModeAndroid;
+
   /// No description provided for @setupModeDrive.
   ///
   /// In fr, this message translates to:
@@ -1843,6 +1963,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Synchronisation via votre compte Dropbox.'**
   String get setupProviderDropboxDesc;
+
+  /// No description provided for @setupProviderActuel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fournisseur actuellement actif.'**
+  String get setupProviderActuel;
 
   /// No description provided for @setupDropboxTitle.
   ///

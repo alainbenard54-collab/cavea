@@ -109,6 +109,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tooltipModeLocal => 'Local mode — PC only';
 
   @override
+  String get tooltipModeLocalAndroid => 'Local mode — Android';
+
+  @override
+  String get setupRetourChoixMode => 'Back to mode selection';
+
+  @override
   String get tooltipCaveEcriture => 'Your cellar is open for writing';
 
   @override
@@ -489,6 +495,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockImportCsv => 'Import a CSV';
+
+  @override
+  String get stockImportSampleData => 'Import sample data';
+
+  @override
+  String get stockImportMyData => 'Import my data';
+
+  @override
+  String get stockImportMyDataHint => 'CSV import available in the « … » menu';
+
+  @override
+  String get sampleDataImporting => 'Loading sample data…';
+
+  @override
+  String sampleDataImported(int count) {
+    return '$count sample bottles imported';
+  }
+
+  @override
+  String sampleDataError(String error) {
+    return 'Could not load sample data: $error';
+  }
+
+  @override
+  String get sampleDataUnavailable => 'Sample data service not configured';
+
+  @override
+  String get resetDbTitle => 'Reset database';
+
+  @override
+  String get resetDbDesc =>
+      'Delete all bottles (stock and history). This action is irreversible.';
+
+  @override
+  String get resetDbButton => 'Reset…';
+
+  @override
+  String get resetDbDialogTitle => 'Confirm reset';
+
+  @override
+  String get resetDbDialogContent =>
+      'All bottles will be deleted (stock and history).\n\nThis action is irreversible. Export your data before continuing.';
+
+  @override
+  String get resetDbConfirm => 'Reset';
+
+  @override
+  String get resetDbSuccess => 'Database reset';
+
+  @override
+  String get dangerZoneTitle => 'Danger zone';
 
   @override
   String stockCountFiltered(int shown, int total) {
@@ -1014,6 +1071,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupModeLocalDesc => 'The database is stored locally on this PC.';
 
   @override
+  String get setupModeLocalAndroid => 'Local mode (Android)';
+
+  @override
+  String get setupModeLocalAndroidDesc =>
+      'Data stored on this device · no cloud account required.';
+
+  @override
+  String get setupConfirmModeAndroid => 'Local mode (Android)';
+
+  @override
   String get setupModeDrive => 'Shared mode';
 
   @override
@@ -1028,6 +1095,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupProviderDropboxDesc => 'Sync via your Dropbox account.';
+
+  @override
+  String get setupProviderActuel => 'Currently active provider.';
 
   @override
   String get setupDropboxTitle => 'Dropbox connection';

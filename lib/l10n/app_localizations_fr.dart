@@ -108,6 +108,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tooltipModeLocal => 'Mode local — PC seul';
 
   @override
+  String get tooltipModeLocalAndroid => 'Mode local — Android';
+
+  @override
+  String get setupRetourChoixMode => 'Retour au choix du mode';
+
+  @override
   String get tooltipCaveEcriture => 'Votre cave est ouverte en écriture';
 
   @override
@@ -489,6 +495,59 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get stockImportCsv => 'Importer un CSV';
+
+  @override
+  String get stockImportSampleData => 'Importer les données exemple';
+
+  @override
+  String get stockImportMyData => 'Importer mes données';
+
+  @override
+  String get stockImportMyDataHint =>
+      'Import CSV disponible dans le menu « … »';
+
+  @override
+  String get sampleDataImporting => 'Chargement des données exemple…';
+
+  @override
+  String sampleDataImported(int count) {
+    return '$count bouteilles exemple importées';
+  }
+
+  @override
+  String sampleDataError(String error) {
+    return 'Impossible de charger les données exemple : $error';
+  }
+
+  @override
+  String get sampleDataUnavailable =>
+      'Service de données exemple non configuré';
+
+  @override
+  String get resetDbTitle => 'Réinitialiser la base';
+
+  @override
+  String get resetDbDesc =>
+      'Supprimer toutes les bouteilles (stock et historique). Action irréversible.';
+
+  @override
+  String get resetDbButton => 'Réinitialiser…';
+
+  @override
+  String get resetDbDialogTitle => 'Confirmer la réinitialisation';
+
+  @override
+  String get resetDbDialogContent =>
+      'Toutes les bouteilles seront supprimées (stock et historique).\n\nCette action est irréversible. Exportez vos données avant de continuer.';
+
+  @override
+  String get resetDbConfirm => 'Réinitialiser';
+
+  @override
+  String get resetDbSuccess => 'Base réinitialisée';
+
+  @override
+  String get dangerZoneTitle => 'Zone de danger';
 
   @override
   String stockCountFiltered(int shown, int total) {
@@ -1016,6 +1075,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'La base de données est stockée localement sur ce PC.';
 
   @override
+  String get setupModeLocalAndroid => 'Mode local (Android)';
+
+  @override
+  String get setupModeLocalAndroidDesc =>
+      'Données stockées sur cet appareil · aucun compte cloud requis.';
+
+  @override
+  String get setupConfirmModeAndroid => 'Mode local (Android)';
+
+  @override
   String get setupModeDrive => 'Mode partagé';
 
   @override
@@ -1032,6 +1101,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get setupProviderDropboxDesc =>
       'Synchronisation via votre compte Dropbox.';
+
+  @override
+  String get setupProviderActuel => 'Fournisseur actuellement actif.';
 
   @override
   String get setupDropboxTitle => 'Connexion Dropbox';

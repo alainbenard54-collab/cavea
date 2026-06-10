@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 import '../../core/config_service.dart';
 import '../../core/locale_provider.dart';
 import '../../l10n/l10n.dart';
@@ -15,11 +16,15 @@ import 'setup_controller.dart';
 class SetupScreen extends ConsumerStatefulWidget {
   final void Function(AppConfig config) onComplete;
   final bool startAtProviderChoice;
+  final String? currentProvider;
+  final String? existingDbPath;
 
   const SetupScreen({
     super.key,
     required this.onComplete,
     this.startAtProviderChoice = false,
+    this.currentProvider,
+    this.existingDbPath,
   });
 
   @override
@@ -32,7 +37,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     super.initState();
     if (widget.startAtProviderChoice) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(setupControllerProvider.notifier).selectMode('shared');
+        final notifier = ref.read(setupControllerProvider.notifier);
+        if (widget.existingDbPath != null) {
+          notifier.setFolderPath(p.dirname(widget.existingDbPath!));
+        }
+        notifier.selectMode('shared');
       });
     }
   }
@@ -40,7 +49,6 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(setupControllerProvider);
-    final currentProvider = configService.config?.storageMode;
 
     final l10n = context.l10n;
     return Scaffold(
@@ -66,8 +74,10 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               ),
               SetupStep.providerChoice => _ProviderChoiceStep(
                 onSelectProvider: ref.read(setupControllerProvider.notifier).selectProvider,
-                onBack: ref.read(setupControllerProvider.notifier).backToModeChoice,
-                currentProvider: currentProvider,
+                onBack: widget.startAtProviderChoice
+                    ? null
+                    : ref.read(setupControllerProvider.notifier).backToModeChoice,
+                currentProvider: widget.currentProvider,
               ),
               SetupStep.driveAuth => _DriveAuthStep(
                 state: state,
@@ -603,12 +613,12 @@ class _DetectionCard extends StatelessWidget {
 
 class _ProviderChoiceStep extends StatelessWidget {
   final void Function(String) onSelectProvider;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final String? currentProvider;
 
   const _ProviderChoiceStep({
     required this.onSelectProvider,
-    required this.onBack,
+    this.onBack,
     this.currentProvider,
   });
 
@@ -642,11 +652,13 @@ class _ProviderChoiceStep extends StatelessWidget {
           enabled: !isDropbox,
           onTap: isDropbox ? null : () => onSelectProvider('dropbox'),
         ),
-        const SizedBox(height: 24),
-        OutlinedButton(
-          onPressed: onBack,
-          child: Text(l10n.actionRetour),
-        ),
+        if (onBack != null) ...[
+          const SizedBox(height: 24),
+          OutlinedButton(
+            onPressed: onBack,
+            child: Text(l10n.actionRetour),
+          ),
+        ],
       ],
     );
   }

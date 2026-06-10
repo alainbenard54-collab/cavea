@@ -948,9 +948,16 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
       await DropboxStorageAdapter.clearTokens();
     }
 
+    final savedProvider = configService.config?.storageMode;
+    final savedDbPath = configService.config?.dbPath;
+
     await configService.reset();
 
     if (!context.mounted) return;
-    context.go('/setup', extra: 'providerChoice');
+    context.go('/setup', extra: {
+      'step': 'providerChoice',
+      'currentProvider': savedProvider,
+      'existingDbPath': savedDbPath,
+    });
   }
 }

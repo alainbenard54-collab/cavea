@@ -28,10 +28,15 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
     routes: [
       GoRoute(
         path: '/setup',
-        builder: (context, state) => SetupScreen(
-          onComplete: (_) => onSetupComplete(),
-          startAtProviderChoice: state.extra == 'providerChoice',
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return SetupScreen(
+            onComplete: (_) => onSetupComplete(),
+            startAtProviderChoice: extra?['step'] == 'providerChoice',
+            currentProvider: extra?['currentProvider'] as String?,
+            existingDbPath: extra?['existingDbPath'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: '/bottle/:id',
