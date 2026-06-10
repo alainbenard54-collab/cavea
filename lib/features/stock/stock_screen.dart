@@ -8,9 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/config_service.dart';
 import '../../core/maturity/maturity_service.dart';
+import '../../data/providers.dart';
 import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import '../bottle_actions/bottle_actions_sheet.dart';
+import '../import_csv/import_service.dart';
+import '../import_csv/sample_data_service.dart';
 import 'selection_controller.dart';
 import 'stock_controller.dart';
 import 'bouteille_list_tile.dart';
@@ -503,16 +506,48 @@ class _CascadeDropdown<T> extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
+class _EmptyState extends ConsumerStatefulWidget {
   final bool hasFilters;
   final bool isReadOnly;
 
   const _EmptyState({required this.hasFilters, this.isReadOnly = false});
 
   @override
+  ConsumerState<_EmptyState> createState() => _EmptyStateState();
+}
+
+class _EmptyStateState extends ConsumerState<_EmptyState> {
+  bool _importing = false;
+
+  Future<void> _importSampleData() async {
+    final l10n = context.l10n;
+    final lang = Localizations.localeOf(context).languageCode;
+    final dao = ref.read(bouteillesDaoProvider);
+    final service = SampleDataService(ImportService(dao));
+
+    setState(() => _importing = true);
+    try {
+      final result = await service.importSampleData(lang);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.sampleDataImported(result.inserted))),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.sampleDataError(e.toString()))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (hasFilters) {
+    if (widget.hasFilters) {
       return Center(child: Text(l10n.stockEmptyFiltered));
     }
     return Center(
@@ -522,13 +557,35 @@ class _EmptyState extends StatelessWidget {
           const Icon(Icons.wine_bar_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(l10n.stockEmptyTitle, style: const TextStyle(fontSize: 18)),
-          if (!isReadOnly) ...[
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              icon: const Icon(Icons.upload_file),
-              label: Text(l10n.stockImportCsv),
-              onPressed: () => context.go('/data'),
-            ),
+          if (!widget.isReadOnly) ...[
+            const SizedBox(height: 20),
+            if (_importing)
+              const CircularProgressIndicator()
+            else if (SampleDataService.isConfigured) ...[
+              FilledButton.icon(
+                icon: const Icon(Icons.wine_bar),
+                label: Text(l10n.stockImportSampleData),
+                onPressed: _importSampleData,
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.upload_file),
+                label: Text(l10n.stockImportMyData),
+                onPressed: () => context.go('/data'),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.stockImportMyDataHint,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+              ),
+            ] else
+              FilledButton.icon(
+                icon: const Icon(Icons.upload_file),
+                label: Text(l10n.stockImportCsv),
+                onPressed: () => context.go('/data'),
+              ),
           ],
         ],
       ),

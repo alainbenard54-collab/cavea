@@ -39,11 +39,12 @@ Do not introduce alternative state management (Provider, BLoC, GetX) or navigati
 - Requires OAuth credentials setup on every participating device (GCP project + per-platform credentials)
 - The defining characteristic is **sharing across devices**, not the specific device types
 
-### Mode 3 — Android only (full local, future)
-- `dart:io` / SQLite direct access to `cave.db` stored in the app's local storage on Android
-- No StorageAdapter, no sync, no lock — mirrors Mode 1 but on Android
-- No cloud dependency, no credentials required
-- Out of MVP scope
+### Mode 3 — Android local (same as Mode 1 but on Android) — ✅ implémenté v1.2
+- `path_provider` (`getApplicationDocumentsDirectory()`) pour localiser `cave.db` — chemin géré en interne, invisible pour l'utilisateur
+- Pas de StorageAdapter, pas de sync, pas de verrou — miroir exact du Mode 1 sur Android
+- Aucun compte cloud requis
+- Wizard : carte "Mode local (Android)" affichée en premier sur Android, passe directement à la confirmation sans saisie de chemin
+- Boutons disquette (sauvegarde) et quitter (flèche rouge) absents : ils sont conditionnés à `syncService.isActive == true`, qui est `false` en mode local
 
 ---
 
@@ -86,6 +87,22 @@ These fields must **never** be exposed in a generic edit form. They are only wri
 All other fields are editable in the full bottle edit form (V1 feature, not MVP).
 
 ---
+
+## Données exemple (cave vide)
+
+Quand la cave est vide (sans filtre actif), l'état vide affiche deux boutons :
+1. **"Importer les données exemple"** (FilledButton, principal) — télécharge et importe un CSV exemple depuis une URL publique (GitHub Pages). URL configurée via `dart-defines.json` : `SAMPLE_DATA_URL_FR` et `SAMPLE_DATA_URL_EN`. Si l'URL n'est pas configurée (`String.fromEnvironment` vide), seul le bouton CSV personnel est affiché.
+2. **"Importer mes données"** (OutlinedButton) — navigue vers l'onglet `…` (Import/Export)
+
+Fichier sample : `docs/sample/cavea_sample_fr.csv` et `docs/sample/cavea_sample_en.csv` — publiés sur `https://alainbenard54-collab.github.io/cavea/sample/`. La langue de l'URL est choisie d'après `Localizations.localeOf(context).languageCode`.
+
+Service : `lib/features/import_csv/sample_data_service.dart` — `SampleDataService.isConfigured` (bool statique) pilote l'affichage du bouton.
+
+## Réinitialisation de la base
+
+Accessible depuis le menu `…` → Import/Export, section **"Zone de danger"** en bas de l'écran (invisible en mode lecture seule). Dialogue de confirmation avant suppression. Appelle `BouteilleDao.deleteAll()`.
+
+Choix de placement : l'onglet `…` (Données) gère les *opérations sur les données* (import, export, reset) ; les Paramètres gèrent la *configuration* (chemin, mode, langue). La réinitialisation est sémantiquement une opération sur les données, pas un paramètre.
 
 ## MVP development order
 

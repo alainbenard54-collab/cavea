@@ -5,5 +5,10 @@
 
   "_section_android_drive": "--- Google Drive Android ---",
   "_android_drive_hint": "Client OAuth Web (type 3) dans android/app/google-services.json > oauth_client[client_type=3] > client_id",
-  "GOOGLE_ANDROID_SERVER_CLIENT_ID": "REMPLACER_PAR_LE_CLIENT_ID_WEB_DE_google-services.json"
+  "GOOGLE_ANDROID_SERVER_CLIENT_ID": "REMPLACER_PAR_LE_CLIENT_ID_WEB_DE_google-services.json",
+
+  "_section_sample_data": "--- Données exemple (tous modes) ---",
+  "_sample_data_hint": "URL publique des CSV exemple. Laissez vide pour désactiver le bouton 'Données exemple' sur cave vide.",
+  "SAMPLE_DATA_URL_FR": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_fr.csv",
+  "SAMPLE_DATA_URL_EN": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_en.csv"
 }

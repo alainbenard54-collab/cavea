@@ -104,7 +104,15 @@ class _ModeChoiceStep extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(l10n.setupChooseMode),
         const SizedBox(height: 24),
-        if (!Platform.isAndroid) ...[
+        if (Platform.isAndroid) ...[
+          _ModeCard(
+            title: l10n.setupModeLocalAndroid,
+            description: l10n.setupModeLocalAndroidDesc,
+            icon: Icons.phone_android,
+            onTap: () => onSelect('local'),
+          ),
+          const SizedBox(height: 12),
+        ] else ...[
           _ModeCard(
             title: l10n.setupModeLocal,
             description: l10n.setupModeLocalDesc,
@@ -119,16 +127,6 @@ class _ModeChoiceStep extends ConsumerWidget {
           icon: Icons.sync,
           onTap: () => onSelect('shared'),
         ),
-        if (!Platform.isAndroid) ...[
-          const SizedBox(height: 12),
-          _ModeCard(
-            title: l10n.setupModeMobile,
-            description: l10n.setupModeMobileDesc,
-            icon: Icons.phone_android,
-            enabled: false,
-            onTap: null,
-          ),
-        ],
       ],
     );
   }
@@ -254,12 +252,17 @@ class _ConfirmationStep extends StatelessWidget {
       children: [
         Text(l10n.setupConfirmTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 24),
-        _ConfigRow(label: l10n.setupConfirmMode, value: l10n.setupModeLocal),
-        const SizedBox(height: 8),
         _ConfigRow(
-          label: l10n.setupConfirmDb,
-          value: '${state.folderPath}/cave.db',
+          label: l10n.setupConfirmMode,
+          value: Platform.isAndroid ? l10n.setupConfirmModeAndroid : l10n.setupModeLocal,
         ),
+        if (!Platform.isAndroid) ...[
+          const SizedBox(height: 8),
+          _ConfigRow(
+            label: l10n.setupConfirmDb,
+            value: '${state.folderPath}/cave.db',
+          ),
+        ],
         const SizedBox(height: 32),
         FilledButton(
           onPressed: () async {
@@ -268,11 +271,13 @@ class _ConfirmationStep extends StatelessWidget {
           },
           child: Text(l10n.setupDemarrer),
         ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: controller.backToPathInput,
-          child: Text(l10n.setupModifierChemin),
-        ),
+        if (!Platform.isAndroid) ...[
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: controller.backToPathInput,
+            child: Text(l10n.setupModifierChemin),
+          ),
+        ],
       ],
     );
   }

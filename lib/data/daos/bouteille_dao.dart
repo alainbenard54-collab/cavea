@@ -356,4 +356,6 @@ class BouteilleDao {
       ),
     );
   }
+
+  Future<void> deleteAll() => _db.delete(_db.bouteilles).go();
 }

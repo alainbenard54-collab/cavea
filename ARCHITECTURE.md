@@ -90,9 +90,19 @@ La synchronisation est manuelle et symétrique (voir section Synchronisation).
 
 ---
 
-### Mode 3 — Mobile seul (évolution future, hors MVP)
+### Mode 3 — Android local (même logique que Mode 1, sur Android) — ✅ v1.2
 
-Fonctionnalités PC à porter sur mobile. Le codebase Flutter le supporte déjà structurellement — c'est une question d'activer les vues et formulaires manquants, pas de changer l'architecture. La question du stockage sur mobile devient alors critique (voir point ouvert ci-dessous).
+```
+App Flutter Android
+        ↓
+   cave.db (stockage interne : getApplicationDocumentsDirectory())
+```
+
+Même mécanique que Mode 1 : `dart:io` direct, pas de StorageAdapter, pas de verrou. Le chemin est résolu par `path_provider` au premier lancement et stocké en SharedPreferences (`db_path`). L'utilisateur ne voit pas le chemin physique.
+
+**Wizard** : sur Android, la carte "Mode local (Android)" est affichée en premier (avant "Mode partagé"). La sélection déclenche `_selectLocalAndroid()` qui configure le chemin automatiquement et saute l'étape de saisie. L'étape confirmation n'affiche pas le chemin (non significatif pour l'utilisateur).
+
+**Boutons sync** (`_MobileBar`) : absents — conditionnés à `syncService.isActive`, qui est `false` en mode local (pas d'adapter injecté).
 
 ---
 
@@ -308,12 +318,17 @@ Si aucune configuration valide n'est trouvée → **wizard de premier lancement*
 
 ```
 Étape 1 : choix du mode
-  Mode 1 — PC seul (local)     → disponible
-  Mode 2 — Partagé (cloud)     → disponible (Google Drive ou Dropbox)
-  Mode 3 — Mobile seul         → "Non disponible dans cette version"
+  Sur Android :
+    Mode local (Android)       → disponible — configure path_provider, passe à confirmation
+    Mode partagé               → disponible (Google Drive ou Dropbox)
+  Sur PC (Windows / Linux) :
+    PC seul (local)            → disponible
+    Mode partagé               → disponible (Google Drive ou Dropbox)
 
-Étape 2a (Mode 1) : chemin vers le répertoire contenant cave.db
+Étape 2a (Mode 1 PC) : chemin vers le répertoire contenant cave.db
   → champ texte + bouton "Parcourir" (file picker dossier)
+
+Étape 2a (Mode 3 Android) : aucune — path_provider automatique, va directement à confirmation
 
 Étape 2b (Mode 2) : choix du fournisseur cloud
   → "Google Drive" ou "Dropbox"
@@ -339,6 +354,31 @@ Android ne lit pas `.env`. Le wizard est le seul chemin de configuration sur mob
 Voir `.env.example` à la racine du projet. Variables utilisées en Mode 1 : `STORAGE_MODE=local`, `LOCAL_DB_PATH`.
 
 ---
+
+## Données exemple
+
+URL des CSV exemple configurées via `dart-defines.json` (constantes compile-time) :
+
+```json
+{
+  "SAMPLE_DATA_URL_FR": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_fr.csv",
+  "SAMPLE_DATA_URL_EN": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_en.csv"
+}
+```
+
+Fichiers sources dans le repo : `docs/sample/cavea_sample_fr.csv` et `docs/sample/cavea_sample_en.csv` — publiés automatiquement via GitHub Pages.
+
+**Logique d'affichage** : `SampleDataService.isConfigured` (bool statique) est `true` si au moins une URL est non-vide. Si `false`, le bouton "Données exemple" est absent (remplacé par le seul bouton "Importer mes données").
+
+**Import** : `SampleDataService.importSampleData(languageCode)` — HTTP GET → `parseCsv()` (sans `columnMap`, les en-têtes sont les noms internes) → `ImportService.run()` sans overwrite.
+
+**Fichier** : `lib/features/import_csv/sample_data_service.dart`.
+
+## Réinitialisation de la base
+
+Accessible depuis l'onglet `…` (Import/Export), section "Zone de danger" en bas. Masquée en mode lecture seule. Dialogue de confirmation avant exécution.
+
+**Implémentation** : `BouteilleDao.deleteAll()` → `_db.delete(_db.bouteilles).go()`. Après suppression, les streams drift (stock, historique, emplacements) se mettent à jour automatiquement → `_EmptyState` réapparaît sans navigation supplémentaire.
 
 ## Import / Export CSV
 

@@ -165,6 +165,31 @@
   "stockEmptyFiltered": "No bottles match the filters.",
   "stockEmptyTitle": "No bottles in stock",
   "stockImportCsv": "Import a CSV",
+  "stockImportSampleData": "Import sample data",
+  "stockImportMyData": "Import my data",
+  "stockImportMyDataHint": "CSV import available in the « … » menu",
+  "sampleDataImporting": "Loading sample data…",
+  "sampleDataImported": "{count} sample bottles imported",
+  "@sampleDataImported": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sampleDataError": "Could not load sample data: {error}",
+  "@sampleDataError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "sampleDataUnavailable": "Sample data service not configured",
+  "resetDbTitle": "Reset database",
+  "resetDbDesc": "Delete all bottles (stock and history). This action is irreversible.",
+  "resetDbButton": "Reset…",
+  "resetDbDialogTitle": "Confirm reset",
+  "resetDbDialogContent": "All bottles will be deleted (stock and history).\n\nThis action is irreversible. Export your data before continuing.",
+  "resetDbConfirm": "Reset",
+  "resetDbSuccess": "Database reset",
+  "dangerZoneTitle": "Danger zone",
   "stockCountFiltered": "{shown} / {total} bottles",
   "stockCountTotal": "{count, plural, =1{1 bottle in stock} other{{count} bottles in stock}}",
 
@@ -322,6 +347,9 @@
   "setupChooseMode": "Choose your operating mode:",
   "setupModeLocal": "PC only (local)",
   "setupModeLocalDesc": "The database is stored locally on this PC.",
+  "setupModeLocalAndroid": "Local mode (Android)",
+  "setupModeLocalAndroidDesc": "Data stored on this device · no cloud account required.",
+  "setupConfirmModeAndroid": "Local mode (Android)",
   "setupModeDrive": "Shared mode",
   "setupModeDriveDesc": "Share your cellar across multiple devices via Google Drive or Dropbox.",
   "setupChooseProvider": "Choose your cloud provider",

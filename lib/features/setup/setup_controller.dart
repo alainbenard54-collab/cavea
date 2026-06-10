@@ -74,7 +74,11 @@ class SetupController extends Notifier<SetupState> {
 
   void selectMode(String mode) {
     if (mode == 'local') {
-      state = state.copyWith(selectedMode: mode, step: SetupStep.pathInput);
+      if (Platform.isAndroid) {
+        _selectLocalAndroid();
+      } else {
+        state = state.copyWith(selectedMode: mode, step: SetupStep.pathInput);
+      }
     } else if (mode == 'shared') {
       if (Platform.isAndroid) {
         _selectSharedAndroid();
@@ -82,7 +86,17 @@ class SetupController extends Notifier<SetupState> {
         state = state.copyWith(step: SetupStep.providerChoice);
       }
     }
-    // Mobile seul : non disponible
+  }
+
+  Future<void> _selectLocalAndroid() async {
+    state = state.copyWith(isLoading: true);
+    final dir = await getApplicationDocumentsDirectory();
+    state = state.copyWith(
+      selectedMode: 'local',
+      folderPath: dir.path,
+      step: SetupStep.confirmation,
+      isLoading: false,
+    );
   }
 
   Future<void> _selectSharedAndroid() async {

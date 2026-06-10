@@ -180,6 +180,31 @@
   "stockEmptyFiltered": "Aucune bouteille ne correspond aux filtres.",
   "stockEmptyTitle": "Aucune bouteille en stock",
   "stockImportCsv": "Importer un CSV",
+  "stockImportSampleData": "Importer les données exemple",
+  "stockImportMyData": "Importer mes données",
+  "stockImportMyDataHint": "Import CSV disponible dans le menu « … »",
+  "sampleDataImporting": "Chargement des données exemple…",
+  "sampleDataImported": "{count} bouteilles exemple importées",
+  "@sampleDataImported": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sampleDataError": "Impossible de charger les données exemple : {error}",
+  "@sampleDataError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "sampleDataUnavailable": "Service de données exemple non configuré",
+  "resetDbTitle": "Réinitialiser la base",
+  "resetDbDesc": "Supprimer toutes les bouteilles (stock et historique). Action irréversible.",
+  "resetDbButton": "Réinitialiser…",
+  "resetDbDialogTitle": "Confirmer la réinitialisation",
+  "resetDbDialogContent": "Toutes les bouteilles seront supprimées (stock et historique).\n\nCette action est irréversible. Exportez vos données avant de continuer.",
+  "resetDbConfirm": "Réinitialiser",
+  "resetDbSuccess": "Base réinitialisée",
+  "dangerZoneTitle": "Zone de danger",
   "stockCountFiltered": "{shown} / {total} bouteilles",
   "@stockCountFiltered": {
     "placeholders": {
@@ -403,6 +428,9 @@
   "setupChooseMode": "Choisissez votre mode de fonctionnement :",
   "setupModeLocal": "PC seul (local)",
   "setupModeLocalDesc": "La base de données est stockée localement sur ce PC.",
+  "setupModeLocalAndroid": "Mode local (Android)",
+  "setupModeLocalAndroidDesc": "Données stockées sur cet appareil · aucun compte cloud requis.",
+  "setupConfirmModeAndroid": "Mode local (Android)",
   "setupModeDrive": "Mode partagé",
   "setupModeDriveDesc": "Partagez votre cave entre plusieurs appareils via Google Drive ou Dropbox.",
   "setupChooseProvider": "Choisissez votre fournisseur cloud",
