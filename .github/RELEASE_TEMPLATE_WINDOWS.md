@@ -44,8 +44,8 @@
 
 ### 📖 Documentation
 
-🇫🇷 [Guide utilisateur (français)](https://alainbenard54-collab.github.io/cavea/fr/)
-🇬🇧 [User guide (English)](https://alainbenard54-collab.github.io/cavea/en/)
+🇫🇷 [Guide utilisateur (français)](https://cavea.abapps.fr/fr/)
+🇬🇧 [User guide (English)](https://cavea.abapps.fr/en/)
 
 ---
 

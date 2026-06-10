@@ -82,8 +82,8 @@ They contain 50 bottles in stock and 20 consumed, covering all colours and matur
 **Import / Import** : ↔️ Données → Importer → sélectionner le fichier, séparateur `;` / ↔️ Data → Import → select file, separator `;`
 
 Pour la réinitialisation et les détails d'utilisation / For reset instructions and full usage details:
-🇫🇷 [Découverte avec les données d'exemple](https://alainbenard54-collab.github.io/cavea/fr/00-decouverte.html)
-🇬🇧 [Getting started with sample data](https://alainbenard54-collab.github.io/cavea/en/00-discovery.html)
+🇫🇷 [Découverte avec les données d'exemple](https://cavea.abapps.fr/fr/00-decouverte.html)
+🇬🇧 [Getting started with sample data](https://cavea.abapps.fr/en/00-discovery.html)
 
 ---
 
@@ -96,5 +96,5 @@ Pour la réinitialisation et les détails d'utilisation / For reset instructions
 ---
 
 ## 📖 Documentation
-🇫🇷 [Guide utilisateur (français)](https://alainbenard54-collab.github.io/cavea/fr/)
-🇬🇧 [User guide (English)](https://alainbenard54-collab.github.io/cavea/en/)
+🇫🇷 [Guide utilisateur (français)](https://cavea.abapps.fr/fr/)
+🇬🇧 [User guide (English)](https://cavea.abapps.fr/en/)

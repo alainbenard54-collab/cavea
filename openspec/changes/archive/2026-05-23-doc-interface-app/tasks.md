@@ -19,6 +19,6 @@
 
 - [x] 4.1 Vérifier que `flutter analyze` passe sans erreur après les modifications Dart (PC) — à lancer manuellement
 - [x] 4.2 Ouvrir l'app, naviguer vers Paramètres → À propos → vérifier la présence du bouton "Documentation" (PC) — test manuel
-- [x] 4.3 Appuyer sur "Documentation" en langue FR → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/fr/` dans le navigateur (PC) — test manuel
-- [x] 4.4 Appuyer sur "Documentation" en langue EN → vérifier l'ouverture de `https://alainbenard54-collab.github.io/cavea/en/` dans le navigateur (PC) — test manuel
+- [x] 4.3 Appuyer sur "Documentation" en langue FR → vérifier l'ouverture de `https://cavea.abapps.fr/fr/` dans le navigateur (PC) — test manuel
+- [x] 4.4 Appuyer sur "Documentation" en langue EN → vérifier l'ouverture de `https://cavea.abapps.fr/en/` dans le navigateur (PC) — test manuel
 - [x] 4.5 Vérifier que `docs/fr/README.md` et `docs/en/README.md` sont correctement servis par GitHub Pages aux URLs `/fr/` et `/en/` (PC — navigateur) — test manuel

@@ -2,7 +2,7 @@
 
 L'app possède un dialog "À propos" dans `settings_screen.dart` avec deux actions : "Confidentialité" (ouvre la privacy page via `url_launcher`) et "Licences" (`showLicensePage`). `url_launcher ^6.3.1` est déjà une dépendance du projet.
 
-La documentation utilisateur (13 scénarios) est dans `docs/fr/` et `docs/en/`, publiée via GitHub Pages sur `https://alainbenard54-collab.github.io/cavea/`. L'index `docs/README.md` contient un tableau bilingue mélangeant les deux langues. Il n'existe pas de fichier `docs/fr/README.md` ni `docs/en/README.md`.
+La documentation utilisateur (13 scénarios) est dans `docs/fr/` et `docs/en/`, publiée via GitHub Pages sur `https://cavea.abapps.fr/`. L'index `docs/README.md` contient un tableau bilingue mélangeant les deux langues. Il n'existe pas de fichier `docs/fr/README.md` ni `docs/en/README.md`.
 
 GitHub Pages avec Jekyll sert automatiquement `README.md` comme index d'un répertoire : `docs/fr/README.md` est accessible à l'URL `/fr/`.
 

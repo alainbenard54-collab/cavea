@@ -93,7 +93,7 @@ class SettingsScreen extends ConsumerWidget {
                         final lang = Localizations.localeOf(dialogContext).languageCode;
                         final page = lang == 'en' ? 'en' : 'fr';
                         launchUrl(
-                          Uri.parse('https://alainbenard54-collab.github.io/cavea/privacy/$page.html'),
+                          Uri.parse('https://cavea.abapps.fr/privacy/$page.html'),
                           mode: LaunchMode.externalApplication,
                         );
                       },
@@ -104,7 +104,7 @@ class SettingsScreen extends ConsumerWidget {
                         final lang = Localizations.localeOf(dialogContext).languageCode;
                         final section = lang == 'en' ? 'en' : 'fr';
                         launchUrl(
-                          Uri.parse('https://alainbenard54-collab.github.io/cavea/$section/'),
+                          Uri.parse('https://cavea.abapps.fr/$section/'),
                           mode: LaunchMode.externalApplication,
                         );
                       },
@@ -490,7 +490,7 @@ class _CloudActivationTile extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => launchUrl(
-                Uri.parse('https://alainbenard54-collab.github.io/cavea/setup-drive.html'),
+                Uri.parse('https://cavea.abapps.fr/setup-drive.html'),
                 mode: LaunchMode.externalApplication,
               ),
               child: Text(l10n.driveGuideEnLigne),

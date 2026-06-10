@@ -12,10 +12,10 @@ Langue principale : **Français**. Traduction disponible : **Anglais**.
 | Package name | `com.cavea.cavea` |
 | Catégorie | Lifestyle |
 | Tags | cave à vin, vin, stock, gestion, cellar |
-| Privacy policy (FR) | `https://alainbenard54-collab.github.io/cavea/privacy/fr.html` |
-| Privacy policy (EN) | `https://alainbenard54-collab.github.io/cavea/privacy/en.html` |
+| Privacy policy (FR) | `https://cavea.abapps.fr/privacy/fr.html` |
+| Privacy policy (EN) | `https://cavea.abapps.fr/privacy/en.html` |
 | Email contact | alain.benard54@gmail.com |
-| Site web | `https://alainbenard54-collab.github.io/cavea/fr/` |
+| Site web | `https://cavea.abapps.fr/fr/` |
 
 ---
 

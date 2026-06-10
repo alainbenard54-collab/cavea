@@ -8,7 +8,7 @@ La documentation utilisateur (13 scénarios, bilingue fr/en) existe dans `docs/`
   - `docs/README.md` → page d'entrée minimaliste avec deux liens langue
   - `docs/fr/README.md` → index complet en français uniquement
   - `docs/en/README.md` → full index in English only
-- **Bouton "Documentation" dans le dialog "À propos"** : nouveau `TextButton` entre "Confidentialité" et "Licences" qui ouvre `https://alainbenard54-collab.github.io/cavea/fr/` ou `.../en/` selon la langue courante de l'app. `url_launcher` est déjà une dépendance.
+- **Bouton "Documentation" dans le dialog "À propos"** : nouveau `TextButton` entre "Confidentialité" et "Licences" qui ouvre `https://cavea.abapps.fr/fr/` ou `.../en/` selon la langue courante de l'app. `url_launcher` est déjà une dépendance.
 - **Clé l10n** : ajout de `aboutDocumentation` dans `app_fr.arb` et `app_en.arb`.
 
 ## Capabilities
