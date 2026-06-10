@@ -271,13 +271,15 @@ class _ConfirmationStep extends StatelessWidget {
           },
           child: Text(l10n.setupDemarrer),
         ),
-        if (!Platform.isAndroid) ...[
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: controller.backToPathInput,
-            child: Text(l10n.setupModifierChemin),
-          ),
-        ],
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: Platform.isAndroid
+              ? controller.backToModeChoice
+              : controller.backToPathInput,
+          child: Text(Platform.isAndroid
+              ? l10n.setupRetourChoixMode
+              : l10n.setupModifierChemin),
+        ),
       ],
     );
   }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,10 +46,15 @@ class _SyncStatusIndicatorState extends ConsumerState<SyncStatusIndicator>
     final l10n = context.l10n;
 
     // Icône de mode — toujours affichée
+    final isAndroid = Platform.isAndroid;
     final modeIcon = Tooltip(
-      message: isMode2 ? l10n.tooltipModePartage : l10n.tooltipModeLocal,
+      message: isMode2
+          ? l10n.tooltipModePartage
+          : (isAndroid ? l10n.tooltipModeLocalAndroid : l10n.tooltipModeLocal),
       child: Icon(
-        isMode2 ? Icons.cloud : Icons.computer,
+        isMode2
+            ? Icons.cloud
+            : (isAndroid ? Icons.phone_android : Icons.computer),
         color: isMode2 ? Colors.blue : Colors.grey,
         size: 20,
       ),

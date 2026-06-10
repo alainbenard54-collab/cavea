@@ -39,6 +39,8 @@
 
   "tooltipModePartage": "Mode partagé",
   "tooltipModeLocal": "Mode local — PC seul",
+  "tooltipModeLocalAndroid": "Mode local — Android",
+  "setupRetourChoixMode": "Retour au choix du mode",
   "tooltipCaveEcriture": "Votre cave est ouverte en écriture",
   "tooltipLectureSeule": "Mode lecture seule",
   "tooltipSynchronisation": "Synchronisation en cours…",

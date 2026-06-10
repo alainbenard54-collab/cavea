@@ -513,13 +513,13 @@ class _MobileBar extends StatelessWidget {
         height: 56,
         child: Row(
           children: [
-            if (syncService.isActive) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SyncStatusIndicator(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SyncStatusIndicator(),
+                  if (syncService.isActive) ...[
                     if (isReadOnly && isAndroid)
                       _AcquireLockIconBtn(syncService: syncService),
                     if (!isReadOnly && isAndroid) ...[
@@ -529,14 +529,14 @@ class _MobileBar extends StatelessWidget {
                     if (!isAndroid && showSyncButton)
                       _SyncIconBtn(syncService: syncService),
                   ],
-                ),
+                ],
               ),
-              VerticalDivider(
-                indent: 10,
-                endIndent: 10,
-                color: cs.outlineVariant,
-              ),
-            ],
+            ),
+            VerticalDivider(
+              indent: 10,
+              endIndent: 10,
+              color: cs.outlineVariant,
+            ),
             _NavBtn(
               tooltip: l10n.navStock,
               icon: Icons.wine_bar_outlined,

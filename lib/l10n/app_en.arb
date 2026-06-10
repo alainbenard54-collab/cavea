@@ -36,6 +36,8 @@
 
   "tooltipModePartage": "Shared mode",
   "tooltipModeLocal": "Local mode — PC only",
+  "tooltipModeLocalAndroid": "Local mode — Android",
+  "setupRetourChoixMode": "Back to mode selection",
   "tooltipCaveEcriture": "Your cellar is open for writing",
   "tooltipLectureSeule": "Read-only mode",
   "tooltipSynchronisation": "Syncing…",
