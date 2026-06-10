@@ -94,7 +94,7 @@ Quand la cave est vide (sans filtre actif), l'état vide affiche deux boutons :
 1. **"Importer les données exemple"** (FilledButton, principal) — télécharge et importe un CSV exemple depuis une URL publique (GitHub Pages). URL configurée via `dart-defines.json` : `SAMPLE_DATA_URL_FR` et `SAMPLE_DATA_URL_EN`. Si l'URL n'est pas configurée (`String.fromEnvironment` vide), seul le bouton CSV personnel est affiché.
 2. **"Importer mes données"** (OutlinedButton) — navigue vers l'onglet `…` (Import/Export)
 
-Fichier sample : `docs/sample/cavea_sample_fr.csv` et `docs/sample/cavea_sample_en.csv` — publiés sur `https://alainbenard54-collab.github.io/cavea/sample/`. La langue de l'URL est choisie d'après `Localizations.localeOf(context).languageCode`.
+Fichier sample : `docs/sample/cavea_sample_fr.csv` et `docs/sample/cavea_sample_en.csv` — publiés sur `https://cavea.abapps.fr/sample/`. La langue de l'URL est choisie d'après `Localizations.localeOf(context).languageCode`.
 
 Service : `lib/features/import_csv/sample_data_service.dart` — `SampleDataService.isConfigured` (bool statique) pilote l'affichage du bouton.
 

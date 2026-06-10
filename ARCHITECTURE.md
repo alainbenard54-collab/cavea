@@ -361,8 +361,8 @@ URL des CSV exemple configurées via `dart-defines.json` (constantes compile-tim
 
 ```json
 {
-  "SAMPLE_DATA_URL_FR": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_fr.csv",
-  "SAMPLE_DATA_URL_EN": "https://alainbenard54-collab.github.io/cavea/sample/cavea_sample_en.csv"
+  "SAMPLE_DATA_URL_FR": "https://cavea.abapps.fr/sample/cavea_sample_fr.csv",
+  "SAMPLE_DATA_URL_EN": "https://cavea.abapps.fr/sample/cavea_sample_en.csv"
 }
 ```
 
