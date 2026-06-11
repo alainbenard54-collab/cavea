@@ -287,6 +287,21 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 
 ---
 
+## Bump de version — règle obligatoire
+
+À chaque changement de version, **4 fichiers doivent être mis à jour simultanément** :
+
+| Fichier | Champ |
+|---|---|
+| `pubspec.yaml` | `version: X.Y.Z+N` |
+| `windows/packaging/cavea.iss` | `#define MyAppVersion "X.Y.Z"` |
+| `installer/cavea.iss` | `#define MyAppVersion "X.Y.Z"` |
+| `scripts/build_linux.sh` | `VERSION="X.Y.Z"` |
+
+Le `versionCode` (`+N`) est incrémenté à chaque build uploadé sur le Play Store. Les 3 autres fichiers n'utilisent que `X.Y.Z`.
+
+---
+
 ## Out of scope (do not implement)
 
 - Multi-user or concurrent access management
