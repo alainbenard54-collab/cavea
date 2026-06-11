@@ -437,7 +437,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutButton => 'About';
 
   @override
-  String get aboutVersion => 'Version 1.0.0';
+  String get aboutVersion => 'Version 1.2.0';
 
   @override
   String get aboutCopyright => '© 2026 Alain Benard\nApache 2.0 Licence';
@@ -559,6 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count bottles in stock',
       one: '1 bottle in stock',
+      zero: 'No bottles in stock',
     );
     return '$_temp0';
   }

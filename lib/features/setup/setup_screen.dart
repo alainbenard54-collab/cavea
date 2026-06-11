@@ -18,6 +18,7 @@ class SetupScreen extends ConsumerStatefulWidget {
   final bool startAtProviderChoice;
   final String? currentProvider;
   final String? existingDbPath;
+  final VoidCallback? onCancel;
 
   const SetupScreen({
     super.key,
@@ -25,6 +26,7 @@ class SetupScreen extends ConsumerStatefulWidget {
     this.startAtProviderChoice = false,
     this.currentProvider,
     this.existingDbPath,
+    this.onCancel,
   });
 
   @override
@@ -77,6 +79,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 onBack: widget.startAtProviderChoice
                     ? null
                     : ref.read(setupControllerProvider.notifier).backToModeChoice,
+                onCancel: widget.startAtProviderChoice ? widget.onCancel : null,
                 currentProvider: widget.currentProvider,
               ),
               SetupStep.driveAuth => _DriveAuthStep(
@@ -614,11 +617,13 @@ class _DetectionCard extends StatelessWidget {
 class _ProviderChoiceStep extends StatelessWidget {
   final void Function(String) onSelectProvider;
   final VoidCallback? onBack;
+  final VoidCallback? onCancel;
   final String? currentProvider;
 
   const _ProviderChoiceStep({
     required this.onSelectProvider,
     this.onBack,
+    this.onCancel,
     this.currentProvider,
   });
 
@@ -627,6 +632,7 @@ class _ProviderChoiceStep extends StatelessWidget {
     final l10n = context.l10n;
     final isDrive = currentProvider == 'drive';
     final isDropbox = currentProvider == 'dropbox';
+    final backAction = onCancel ?? onBack;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -652,11 +658,11 @@ class _ProviderChoiceStep extends StatelessWidget {
           enabled: !isDropbox,
           onTap: isDropbox ? null : () => onSelectProvider('dropbox'),
         ),
-        if (onBack != null) ...[
+        if (backAction != null) ...[
           const SizedBox(height: 24),
           OutlinedButton(
-            onPressed: onBack,
-            child: Text(l10n.actionRetour),
+            onPressed: backAction,
+            child: Text(onCancel != null ? l10n.actionAnnuler : l10n.actionRetour),
           ),
         ],
       ],

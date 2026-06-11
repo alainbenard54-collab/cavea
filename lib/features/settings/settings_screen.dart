@@ -116,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
                         showLicensePage(
                           context: context,
                           applicationName: 'Cavea',
-                          applicationVersion: '1.1.0',
+                          applicationVersion: '1.2.0',
                           applicationLegalese: '© 2026 Alain Benard',
                         );
                       },
@@ -942,16 +942,10 @@ class _CloudActiveTileState extends ConsumerState<_CloudActiveTile> {
       await activeSyncService?.releaseIfNeeded();
     } catch (_) {}
 
-    if (widget.storageMode == 'drive') {
-      await DriveStorageAdapter().signOut();
-    } else {
-      await DropboxStorageAdapter.clearTokens();
-    }
-
     final savedProvider = configService.config?.storageMode;
     final savedDbPath = configService.config?.dbPath;
 
-    await configService.reset();
+    configService.isChangingProvider = true;
 
     if (!context.mounted) return;
     context.go('/setup', extra: {

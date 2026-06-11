@@ -22,7 +22,7 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
       final configured = configService.isConfigured;
       final onSetup = state.matchedLocation == '/setup';
       if (!configured && !onSetup) return '/setup';
-      if (configured && onSetup) return '/';
+      if (configured && onSetup && !configService.isChangingProvider) return '/';
       return null;
     },
     routes: [
@@ -30,11 +30,21 @@ GoRouter buildRouter(VoidCallback onSetupComplete) {
         path: '/setup',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
+          final isProviderChange = extra?['step'] == 'providerChoice';
           return SetupScreen(
-            onComplete: (_) => onSetupComplete(),
-            startAtProviderChoice: extra?['step'] == 'providerChoice',
+            onComplete: (_) {
+              configService.isChangingProvider = false;
+              onSetupComplete();
+            },
+            startAtProviderChoice: isProviderChange,
             currentProvider: extra?['currentProvider'] as String?,
             existingDbPath: extra?['existingDbPath'] as String?,
+            onCancel: isProviderChange
+                ? () {
+                    configService.isChangingProvider = false;
+                    if (context.mounted) context.go('/settings');
+                  }
+                : null,
           );
         },
       ),

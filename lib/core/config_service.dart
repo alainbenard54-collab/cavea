@@ -67,6 +67,9 @@ class ConfigService {
   List<String>? _refContenances;
   List<String>? _refCrus;
 
+  // Vrai uniquement pendant un changement de fournisseur en cours (in-memory, reset à chaque démarrage)
+  bool isChangingProvider = false;
+
   AppConfig? get config => _config;
   bool get isConfigured => _config != null;
   String get couleurDefaut => _couleurDefaut ?? 'Rouge';

@@ -797,8 +797,8 @@ class _SaveIconBtn extends StatelessWidget {
 Future<void> _closeApp() async {
   if (Platform.isAndroid) {
     try {
-      const _channel = MethodChannel('com.cavea.cavea/app_control');
-      await _channel.invokeMethod<void>('finishAndRemoveTask');
+      const channel = MethodChannel('com.cavea.cavea/app_control');
+      await channel.invokeMethod<void>('finishAndRemoveTask');
     } catch (_) {}
   }
   exit(0);

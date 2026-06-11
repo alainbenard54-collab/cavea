@@ -183,6 +183,7 @@ class SetupController extends Notifier<SetupState> {
 
   /// Confirme "Nouvelle cave" en Mode 2 (aucun téléchargement).
   Future<AppConfig> confirmDriveNew() async {
+    await DropboxStorageAdapter.clearTokens();
     final dbPath = p.join(state.folderPath, 'cave.db');
     final config = AppConfig(storageMode: 'drive', dbPath: dbPath);
     await configService.save(config);
@@ -195,6 +196,7 @@ class SetupController extends Notifier<SetupState> {
     final dbPath = p.join(state.folderPath, 'cave.db');
     try {
       await _driveAdapter!.downloadDb(dbPath);
+      await DropboxStorageAdapter.clearTokens();
       final config = AppConfig(storageMode: 'drive', dbPath: dbPath);
       await configService.save(config);
       state = state.copyWith(isLoading: false);
@@ -211,6 +213,7 @@ class SetupController extends Notifier<SetupState> {
     final dbPath = p.join(state.folderPath, 'cave.db');
     try {
       await _driveAdapter!.deleteDb();
+      await DropboxStorageAdapter.clearTokens();
       final config = AppConfig(storageMode: 'drive', dbPath: dbPath);
       await configService.save(config);
       state = state.copyWith(isLoading: false);
@@ -252,6 +255,7 @@ class SetupController extends Notifier<SetupState> {
   }
 
   Future<AppConfig> confirmDropboxNew() async {
+    await DriveStorageAdapter().signOut();
     final dbPath = p.join(state.folderPath, 'cave.db');
     final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
     await configService.save(config);
@@ -263,6 +267,7 @@ class SetupController extends Notifier<SetupState> {
     final dbPath = p.join(state.folderPath, 'cave.db');
     try {
       await _dropboxAdapter!.downloadDb(dbPath);
+      await DriveStorageAdapter().signOut();
       final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
       await configService.save(config);
       state = state.copyWith(isLoading: false);
@@ -278,6 +283,7 @@ class SetupController extends Notifier<SetupState> {
     final dbPath = p.join(state.folderPath, 'cave.db');
     try {
       await _dropboxAdapter!.deleteDb();
+      await DriveStorageAdapter().signOut();
       final config = AppConfig(storageMode: 'dropbox', dbPath: dbPath);
       await configService.save(config);
       state = state.copyWith(isLoading: false);

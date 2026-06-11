@@ -875,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutVersion.
   ///
   /// In fr, this message translates to:
-  /// **'Version 1.0.0'**
+  /// **'Version 1.2.0'**
   String get aboutVersion;
 
   /// No description provided for @aboutCopyright.
@@ -1091,7 +1091,7 @@ abstract class AppLocalizations {
   /// No description provided for @stockCountTotal.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 bouteille en stock} other{{count} bouteilles en stock}}'**
+  /// **'{count, plural, =0{Aucune bouteille en stock} =1{1 bouteille en stock} other{{count} bouteilles en stock}}'**
   String stockCountTotal(int count);
 
   /// No description provided for @tableHeaderDomaine.

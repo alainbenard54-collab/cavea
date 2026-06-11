@@ -161,7 +161,7 @@
   "aboutTitle": "Cavea",
   "aboutSubtitle": "Gestionnaire de cave à vin personnel",
   "aboutButton": "À propos",
-  "aboutVersion": "Version 1.0.0",
+  "aboutVersion": "Version 1.2.0",
   "aboutCopyright": "© 2026 Alain Benard\nLicence Apache 2.0",
   "aboutConfidentialite": "Confidentialité",
   "aboutDocumentation": "Documentation",
@@ -214,7 +214,7 @@
       "total": { "type": "int" }
     }
   },
-  "stockCountTotal": "{count, plural, =1{1 bouteille en stock} other{{count} bouteilles en stock}}",
+  "stockCountTotal": "{count, plural, =0{Aucune bouteille en stock} =1{1 bouteille en stock} other{{count} bouteilles en stock}}",
   "@stockCountTotal": {
     "placeholders": { "count": { "type": "int" } }
   },

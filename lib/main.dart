@@ -4,7 +4,6 @@
 import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
-import 'services/drive_storage_adapter.dart';
 import 'services/dropbox_storage_adapter.dart';
 
 import 'dart:ui' show AppExitResponse;

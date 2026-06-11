@@ -146,7 +146,7 @@
   "aboutTitle": "Cavea",
   "aboutSubtitle": "Personal wine cellar manager",
   "aboutButton": "About",
-  "aboutVersion": "Version 1.0.0",
+  "aboutVersion": "Version 1.2.0",
   "aboutCopyright": "© 2026 Alain Benard\nApache 2.0 Licence",
   "aboutConfidentialite": "Privacy",
   "aboutDocumentation": "Documentation",
@@ -193,7 +193,7 @@
   "resetDbSuccess": "Database reset",
   "dangerZoneTitle": "Danger zone",
   "stockCountFiltered": "{shown} / {total} bottles",
-  "stockCountTotal": "{count, plural, =1{1 bottle in stock} other{{count} bottles in stock}}",
+  "stockCountTotal": "{count, plural, =0{No bottles in stock} =1{1 bottle in stock} other{{count} bottles in stock}}",
 
   "tableHeaderDomaine": "DOMAIN",
   "tableHeaderAppellation": "APPELLATION",

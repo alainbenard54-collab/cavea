@@ -14,7 +14,7 @@ set -euo pipefail
 
 APP_NAME="Cavea"
 APP_ID="io.github.alainbenard.cavea"
-VERSION="0.1.0"
+VERSION="1.2.0"
 ARCH="x86_64"
 BUILD_DIR="build/linux/x64/release/bundle"
 OUT_DIR="build/linux"
