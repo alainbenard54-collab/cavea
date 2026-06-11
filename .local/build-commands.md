@@ -72,9 +72,13 @@ Output : `build\app\outputs\bundle\release\app-release.aab`
 
 ## Linux (depuis la VM Ubuntu)
 
+### Prérequis
+- `dart-defines.json` présent à la racine (copier depuis `.template`, gitignored)
+- Sans `dart-defines.json`, le bouton "Importer les données exemple" sera absent du build
+
 ### 1. Build Flutter
 ```bash
-flutter build linux --release
+flutter build linux --release --dart-define-from-file=dart-defines.json
 ```
 
 ### 2. Paquet .deb
@@ -84,7 +88,7 @@ flutter build linux --release
 Output : `build/linux/cavea_{version}_amd64.deb`
 
 > La version dans build_linux.sh doit correspondre à pubspec.yaml.
-> Mettre à jour la ligne `VERSION=` dans `scripts/build_linux.sh` à chaque release.
+> Mettre à jour la ligne `VERSION=` dans `scripts/build_linux.sh` à chaque release (Claude le fait).
 
 ---
 

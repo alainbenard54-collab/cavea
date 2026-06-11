@@ -8,7 +8,10 @@
 #
 # Pré-requis : flutter (dans PATH), appimagetool (téléchargé si absent), dpkg-deb
 # Le build Flutter Release doit avoir été exécuté au préalable :
-#   flutter build linux --release
+#   flutter build linux --release --dart-define-from-file=dart-defines.json
+#
+# dart-defines.json doit être présent à la racine du projet (gitignored).
+# Sans lui, SAMPLE_DATA_URL_FR/EN sont vides → bouton "Données exemple" absent.
 
 set -euo pipefail
 
