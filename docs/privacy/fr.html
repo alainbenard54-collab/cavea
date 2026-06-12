@@ -15,6 +15,7 @@
     }
     h1 { font-size: 1.8rem; margin-bottom: 4px; }
     h2 { font-size: 1.1rem; margin-top: 2rem; color: #5c2d0a; }
+    h3 { font-size: 1rem; margin-top: 1.4rem; color: #6f3d12; }
     .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
     .highlight {
       background: #f5f0eb;
@@ -23,9 +24,23 @@
       border-radius: 0 6px 6px 0;
       margin: 1.5rem 0;
     }
+    .limited-use {
+      background: #eef4ee;
+      border-left: 4px solid #2e7d32;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
     .lang { text-align: right; font-size: 0.85rem; margin-bottom: 1rem; }
     a { color: #8b4513; }
-    footer { margin-top: 3rem; font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 1rem; }
+    footer {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -33,98 +48,296 @@
 <p class="lang"><a href="en.html">English</a></p>
 
 <h1>🍷 Politique de confidentialité</h1>
-<p class="meta">Application Cavea · Dernière mise à jour : avril 2026</p>
+<p class="meta">Application Cavea · Dernière mise à jour : juin 2026</p>
 
 <div class="highlight">
-  <strong>En résumé :</strong> Cavea ne collecte aucune donnée personnelle.
-  Vos données restent sur votre appareil ou dans votre propre espace Google Drive.
-  Nous n'avons accès à rien.
+  <strong>En résumé :</strong>
+  Cavea ne collecte, ne vend et ne partage aucune donnée personnelle.
+  Les données de votre cave restent stockées sur votre appareil ou dans votre
+  propre espace Google Drive ou Dropbox lorsque vous activez la synchronisation.
+  Le développeur n'a pas accès à ces données.
 </div>
 
 <h2>1. Qui sommes-nous ?</h2>
+
 <p>
   Cavea est une application personnelle de gestion de cave à vin développée par
-  <strong>Alain Benard</strong>. L'application est disponible sur Windows et Android.
+  <strong>Alain Benard</strong>.
+</p>
+
+<p>
+  L'application est disponible sur Android, Windows et Linux.
+</p>
+
+<p>
   Code source disponible sur
   <a href="https://github.com/alainbenard54-collab/cavea">GitHub</a>.
 </p>
 
-<h2>2. Données collectées</h2>
+<h2>2. Données traitées par l'application</h2>
+
 <p>
-  <strong>Cavea ne collecte aucune donnée personnelle.</strong>
-  Il n'y a pas de compte utilisateur, pas de serveur distant, pas d'analytique,
-  pas de publicité, pas de cookies.
+  Cavea ne dispose d'aucun serveur centralisé et ne collecte pas les données de ses utilisateurs.
+  L'application ne contient aucun système publicitaire, aucun outil d'analyse comportementale
+  et aucun mécanisme de suivi marketing.
 </p>
-<p>Les seules données traitées par l'application sont :</p>
+
+<p>
+  Les données traitées par l'application sont exclusivement celles nécessaires à la gestion
+  de votre cave à vin :
+</p>
+
 <ul>
-  <li>
-    <strong>Votre cave à vin</strong> (bouteilles, millésimes, emplacements…) —
-    stockée dans un fichier SQLite local (<code>cave.db</code>) sur votre appareil.
-  </li>
-  <li>
-    <strong>Vos préférences d'application</strong> (chemin du fichier, valeurs par défaut) —
-    stockées localement dans les préférences système de votre appareil (SharedPreferences).
-  </li>
+  <li>Bouteilles et références.</li>
+  <li>Appellations.</li>
+  <li>Millésimes.</li>
+  <li>Emplacements de stockage.</li>
+  <li>Dates d'achat.</li>
+  <li>Informations de dégustation et notes éventuelles.</li>
 </ul>
 
-<h2>3. Synchronisation Google Drive (optionnelle)</h2>
 <p>
-  Si vous activez la synchronisation Google Drive, l'application accède
-  à <strong>votre propre espace de stockage Google Drive</strong> via l'API officielle Google,
-  dans un dossier dédié (<code>Cavea/</code>). Elle y dépose et récupère uniquement
-  votre fichier <code>cave.db</code>.
+  Ces informations sont stockées dans une base de données SQLite nommée
+  <code>cave.db</code>.
 </p>
-<p>Ce que cela implique :</p>
+
+<p>
+  Les préférences de l'application (chemins d'accès, paramètres de synchronisation,
+  options utilisateur) sont stockées localement sur l'appareil.
+</p>
+
+<h2>3. Fonctionnement en mode local</h2>
+
+<p>
+  Cavea peut fonctionner intégralement en mode local.
+</p>
+
+<p>
+  Dans ce mode, toutes les données restent stockées uniquement sur l'appareil
+  de l'utilisateur et ne quittent jamais celui-ci.
+</p>
+
+<p>
+  Aucune connexion à Google Drive, Dropbox ou à un quelconque serveur distant
+  n'est nécessaire.
+</p>
+
+<h2>4. Utilisation de Google Drive (optionnelle)</h2>
+
+<p>
+  Si l'utilisateur active le mode de stockage partagé, Cavea peut accéder à
+  son compte Google Drive via les API officielles de Google afin de stocker
+  et synchroniser les données de la cave entre plusieurs appareils appartenant
+  au même utilisateur.
+</p>
+
+<h3>4.1 Données Google accessibles</h3>
+
+<p>
+  Dans le cadre de cette fonctionnalité, Cavea accède uniquement aux
+  données suivantes :
+</p>
+
 <ul>
-  <li>Votre token d'authentification Google est stocké localement sur votre appareil
-      dans un espace sécurisé (Keychain sur Android, Credential Store sur Windows).
-      Il n'est jamais transmis à un tiers autre que Google.</li>
-  <li>L'application utilise le scope <code>drive.file</code> : elle ne peut accéder
-      qu'aux fichiers qu'elle a elle-même créés dans votre Drive (le dossier
-      <code>Cavea/</code>, visible dans votre interface Google Drive).
-      Elle ne peut ni lire ni modifier le reste de votre Drive.</li>
-  <li>Aucun fichier de votre Drive n'est lu ou modifié par le développeur.</li>
+  <li>Le compte Google sélectionné par l'utilisateur lors de l'autorisation (adresse e-mail, utilisée uniquement pour identifier la session d'authentification).</li>
+  <li>Le dossier <code>Cavea</code> créé ou utilisé par l'application dans Google Drive.</li>
+  <li>Les fichiers créés et gérés par l'application dans ce dossier (<code>cave.db</code> et fichiers de verrouillage techniques).</li>
 </ul>
+
 <p>
-  La synchronisation est entièrement sous votre contrôle : vous pouvez la désactiver
-  à tout moment depuis les Paramètres de l'application.
+  Cavea n'accède pas aux autres fichiers ou dossiers présents dans Google Drive de l'utilisateur.
 </p>
 
-<h2>4. Partage de données</h2>
+<h3>4.2 Utilisation des données Google</h3>
+
 <p>
-  Aucune donnée n'est partagée avec des tiers. Il n'y a pas de serveur backend,
-  pas de base de données distante, pas de service d'analyse. Le développeur
-  n'a techniquement aucun accès à vos données.
+  Les données accessibles via Google Drive sont utilisées exclusivement pour :
 </p>
 
-<h2>5. Sécurité</h2>
+<ul>
+  <li>Stocker la base SQLite contenant les données de la cave.</li>
+  <li>Synchroniser les données entre plusieurs appareils appartenant au même utilisateur.</li>
+  <li>Créer et gérer les fichiers techniques de verrouillage nécessaires à la cohérence des accès simultanés.</li>
+  <li>Garantir l'intégrité des données lors des opérations de synchronisation.</li>
+</ul>
+
 <p>
-  Le fichier <code>cave.db</code> est stocké en clair (non chiffré) sur votre appareil.
-  C'est un choix délibéré pour une application d'usage personnel. Si votre appareil
-  est protégé par un code PIN ou un mot de passe, vos données sont protégées au même
-  niveau que tous les autres fichiers de l'appareil.
+  Ces données ne sont jamais utilisées à d'autres fins.
 </p>
 
-<h2>6. Droits et contact</h2>
+<h3>4.3 Stockage et partage</h3>
+
 <p>
-  Comme Cavea ne stocke aucune donnée côté serveur, il n'y a pas de données
-  à consulter, corriger ou supprimer auprès du développeur. Toutes vos données
-  sont sous votre contrôle direct sur votre appareil.
-</p>
-<p>
-  Pour toute question :
-  <a href="https://github.com/alainbenard54-collab/cavea/issues">GitHub Issues</a>.
+  Les données restent stockées exclusivement dans l'espace Google Drive
+  appartenant à l'utilisateur.
 </p>
 
-<h2>7. Modifications</h2>
+<p>
+  Aucune donnée n'est transmise, vendue, louée, analysée ou partagée avec le développeur
+  ou avec des tiers.
+</p>
+
+<p>
+  Le développeur ne dispose d'aucun accès technique aux fichiers stockés dans le dossier
+  <code>Cavea</code> du compte Google Drive de l'utilisateur.
+</p>
+
+<h3>4.4 Autorisations Google</h3>
+
+<p>
+  Cavea utilise le scope Google Drive <code>drive.file</code>.
+  Cette autorisation limite l'accès aux fichiers créés ou gérés par l'application
+  et ne permet pas l'accès à l'ensemble du contenu Google Drive de l'utilisateur.
+</p>
+
+<p>
+  L'utilisateur peut révoquer cette autorisation à tout moment depuis les paramètres
+  de sécurité de son compte Google
+  (<a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>).
+</p>
+
+<h2>5. Utilisation de Dropbox (optionnelle)</h2>
+
+<p>
+  Cavea peut également utiliser Dropbox comme espace de stockage partagé,
+  en remplacement de Google Drive.
+</p>
+
+<h3>5.1 Données Dropbox accessibles</h3>
+
+<p>
+  Lorsque la synchronisation Dropbox est activée, Cavea accède uniquement :
+</p>
+
+<ul>
+  <li>Au dossier <code>Cavea</code> créé dans l'espace Dropbox de l'utilisateur.</li>
+  <li>Aux fichiers créés et gérés par l'application dans ce dossier (<code>cave.db</code> et fichiers de verrouillage techniques).</li>
+</ul>
+
+<p>
+  Cavea n'accède pas aux autres fichiers ou dossiers présents dans le compte Dropbox de l'utilisateur.
+</p>
+
+<h3>5.2 Utilisation des données Dropbox</h3>
+
+<p>
+  Les données sont utilisées exclusivement pour :
+</p>
+
+<ul>
+  <li>La sauvegarde de la base SQLite contenant les données de la cave.</li>
+  <li>La synchronisation entre plusieurs appareils appartenant au même utilisateur.</li>
+  <li>La gestion des fichiers de verrouillage.</li>
+</ul>
+
+<p>
+  Ces données ne sont jamais transmises, vendues, analysées ou partagées avec le développeur
+  ou avec des tiers.
+</p>
+
+<h2>6. Partage de données</h2>
+
+<p>
+  Cavea ne vend, ne loue, ne partage et ne transmet aucune donnée utilisateur
+  à des tiers.
+</p>
+
+<p>
+  Aucune donnée n'est exploitée à des fins publicitaires, marketing,
+  statistiques ou de profilage.
+</p>
+
+<p>
+  Le développeur n'a techniquement aucun accès aux données de la cave
+  stockées localement ou dans les espaces cloud de l'utilisateur.
+</p>
+
+<h2>7. Sécurité</h2>
+
+<p>
+  Les données sont stockées dans un fichier SQLite standard.
+</p>
+
+<p>
+  La protection des données dépend principalement des mécanismes de sécurité
+  mis en œuvre sur l'appareil ou sur le compte cloud utilisé par l'utilisateur
+  (mot de passe, chiffrement du système, authentification Google ou Dropbox, etc.).
+</p>
+
+<p>
+  Les jetons d'authentification nécessaires à l'accès aux services cloud
+  sont conservés localement dans les mécanismes sécurisés fournis par le système
+  d'exploitation (Keychain sur Android, Credential Store sur Windows, libsecret sur Linux).
+</p>
+
+<h2>8. Conformité aux politiques Google</h2>
+
+<div class="limited-use">
+  L'utilisation par Cavea des données obtenues via les API Google est strictement limitée
+  à la fourniture des fonctionnalités décrites dans cette politique de confidentialité,
+  conformément à la
+  <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+  y compris les exigences relatives à l'utilisation limitée
+  (<em>Limited Use Requirements</em>).
+</div>
+
+<p>
+  En particulier, les données obtenues via les API Google ne sont jamais utilisées pour :
+</p>
+
+<ul>
+  <li>La publicité ou le marketing.</li>
+  <li>Le profilage des utilisateurs.</li>
+  <li>L'entraînement de modèles d'intelligence artificielle ou de machine learning.</li>
+  <li>La vente ou le transfert à des tiers.</li>
+  <li>Tout usage sans rapport avec la synchronisation des données de cave à vin.</li>
+</ul>
+
+<h2>9. Vos droits</h2>
+
+<p>
+  Toutes les données demeurent sous le contrôle exclusif de l'utilisateur.
+</p>
+
+<p>
+  Vous pouvez à tout moment :
+</p>
+
+<ul>
+  <li>Supprimer les données stockées localement.</li>
+  <li>Désactiver la synchronisation cloud depuis les Paramètres de l'application.</li>
+  <li>Révoquer l'accès Google Drive depuis <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  <li>Révoquer l'accès Dropbox depuis les paramètres de sécurité de votre compte Dropbox.</li>
+  <li>Supprimer les fichiers stockés dans vos espaces cloud.</li>
+</ul>
+
+<h2>10. Contact</h2>
+
+<p>
+  Pour toute question relative à cette politique de confidentialité :
+</p>
+
+<p>
+  <a href="https://github.com/alainbenard54-collab/cavea/issues">
+    GitHub Issues
+  </a>
+</p>
+
+<h2>11. Modifications</h2>
+
 <p>
   Cette politique peut être mise à jour lors de nouvelles versions de l'application.
-  La date en haut de page indique la version en vigueur.
+</p>
+
+<p>
+  La date figurant en haut de cette page indique la version actuellement en vigueur.
 </p>
 
 <footer>
   Cavea · Application open source · Licence Apache 2.0 ·
-  <a href="https://github.com/alainbenard54-collab/cavea">github.com/alainbenard54-collab/cavea</a>
+  <a href="https://github.com/alainbenard54-collab/cavea">
+    github.com/alainbenard54-collab/cavea
+  </a>
 </footer>
 
 </body>

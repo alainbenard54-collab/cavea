@@ -15,6 +15,7 @@
     }
     h1 { font-size: 1.8rem; margin-bottom: 4px; }
     h2 { font-size: 1.1rem; margin-top: 2rem; color: #5c2d0a; }
+    h3 { font-size: 1rem; margin-top: 1.4rem; color: #6f3d12; }
     .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
     .highlight {
       background: #f5f0eb;
@@ -23,9 +24,23 @@
       border-radius: 0 6px 6px 0;
       margin: 1.5rem 0;
     }
+    .limited-use {
+      background: #eef4ee;
+      border-left: 4px solid #2e7d32;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
     .lang { text-align: right; font-size: 0.85rem; margin-bottom: 1rem; }
     a { color: #8b4513; }
-    footer { margin-top: 3rem; font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 1rem; }
+    footer {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: #888;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -33,96 +48,283 @@
 <p class="lang"><a href="fr.html">Français</a></p>
 
 <h1>🍷 Privacy Policy</h1>
-<p class="meta">Cavea app · Last updated: April 2026</p>
+<p class="meta">Cavea app · Last updated: June 2026</p>
 
 <div class="highlight">
-  <strong>In short:</strong> Cavea does not collect any personal data.
-  Your data stays on your device or in your own Google Drive storage.
-  We have no access to anything.
+  <strong>In short:</strong>
+  Cavea does not collect, sell, or share any personal data.
+  Your wine cellar data is stored on your device or in your own Google Drive or Dropbox
+  space when you enable synchronisation.
+  The developer has no access to this data.
 </div>
 
 <h2>1. Who are we?</h2>
+
 <p>
   Cavea is a personal wine cellar management app developed by
-  <strong>Alain Benard</strong>. The app is available on Windows and Android.
+  <strong>Alain Benard</strong>.
+</p>
+
+<p>
+  The app is available on Android, Windows, and Linux.
+</p>
+
+<p>
   Source code available on
   <a href="https://github.com/alainbenard54-collab/cavea">GitHub</a>.
 </p>
 
-<h2>2. Data collected</h2>
+<h2>2. Data processed by the app</h2>
+
 <p>
-  <strong>Cavea does not collect any personal data.</strong>
-  There is no user account, no remote server, no analytics, no advertising, no cookies.
+  Cavea has no centralised server and does not collect user data.
+  The app contains no advertising system, no behavioural analytics tool,
+  and no marketing tracking mechanism.
 </p>
-<p>The only data processed by the app is:</p>
+
+<p>
+  The data processed by the app is exclusively what is required for managing
+  your wine cellar:
+</p>
+
 <ul>
-  <li>
-    <strong>Your wine cellar</strong> (bottles, vintages, locations…) —
-    stored in a local SQLite file (<code>cave.db</code>) on your device.
-  </li>
-  <li>
-    <strong>Your app preferences</strong> (file path, default values) —
-    stored locally in your device's system preferences (SharedPreferences).
-  </li>
+  <li>Bottles and references.</li>
+  <li>Appellations.</li>
+  <li>Vintages.</li>
+  <li>Storage locations.</li>
+  <li>Purchase dates.</li>
+  <li>Tasting notes and ratings.</li>
 </ul>
 
-<h2>3. Google Drive synchronisation (optional)</h2>
 <p>
-  If you enable Google Drive synchronisation, the app accesses
-  <strong>your own Google Drive storage</strong> via the official Google API,
-  in a dedicated folder (<code>Cavea/</code>). It only uploads and downloads
-  your <code>cave.db</code> file there.
+  This information is stored in a SQLite database named <code>cave.db</code>.
 </p>
-<p>What this means:</p>
+
+<p>
+  App preferences (file paths, sync settings, user options) are stored
+  locally on the device.
+</p>
+
+<h2>3. Local mode</h2>
+
+<p>
+  Cavea can operate entirely in local mode.
+</p>
+
+<p>
+  In this mode, all data remains stored solely on the user's device
+  and never leaves it.
+</p>
+
+<p>
+  No connection to Google Drive, Dropbox, or any remote server is required.
+</p>
+
+<h2>4. Google Drive (optional)</h2>
+
+<p>
+  If the user enables shared storage mode, Cavea can access their Google Drive account
+  via the official Google API to store and synchronise wine cellar data across multiple
+  devices belonging to the same user.
+</p>
+
+<h3>4.1 Google data accessed</h3>
+
+<p>
+  As part of this feature, Cavea accesses only the following data:
+</p>
+
 <ul>
-  <li>Your Google authentication token is stored locally on your device
-      in a secure area (Keychain on Android, Credential Store on Windows).
-      It is never transmitted to any third party other than Google.</li>
-  <li>The app uses the <code>drive.file</code> scope: it can only access
-      files it has itself created in your Drive (the <code>Cavea/</code> folder,
-      visible in your Google Drive interface).
-      It cannot read or modify anything else in your Drive.</li>
-  <li>No file in your Drive is read or modified by the developer.</li>
+  <li>The Google account selected by the user during authorisation (email address, used solely to identify the authentication session).</li>
+  <li>The <code>Cavea</code> folder created or used by the app in Google Drive.</li>
+  <li>Files created and managed by the app in that folder (<code>cave.db</code> and technical lock files).</li>
 </ul>
+
 <p>
-  Synchronisation is entirely under your control: you can disable it
-  at any time from the app's Settings.
+  Cavea does not access any other files or folders in the user's Google Drive.
 </p>
 
-<h2>4. Data sharing</h2>
+<h3>4.2 How Google data is used</h3>
+
 <p>
-  No data is shared with third parties. There is no backend server,
-  no remote database, no analytics service. The developer has
-  technically no access to your data.
+  Data accessed via Google Drive is used exclusively to:
 </p>
 
-<h2>5. Security</h2>
+<ul>
+  <li>Store the SQLite database containing wine cellar data.</li>
+  <li>Synchronise data across multiple devices belonging to the same user.</li>
+  <li>Create and manage technical lock files required for concurrent access consistency.</li>
+  <li>Ensure data integrity during synchronisation operations.</li>
+</ul>
+
 <p>
-  The <code>cave.db</code> file is stored in plain text (unencrypted) on your device.
-  This is a deliberate choice for a personal-use application. If your device
-  is protected by a PIN or password, your data is protected at the same level
-  as all other files on the device.
+  This data is never used for any other purpose.
 </p>
 
-<h2>6. Rights and contact</h2>
+<h3>4.3 Storage and sharing</h3>
+
 <p>
-  Since Cavea stores no data server-side, there is no data to view, correct,
-  or delete with the developer. All your data is under your direct control on your device.
-</p>
-<p>
-  For any questions:
-  <a href="https://github.com/alainbenard54-collab/cavea/issues">GitHub Issues</a>.
+  Data remains stored exclusively in the user's own Google Drive space.
 </p>
 
-<h2>7. Changes</h2>
+<p>
+  No data is transmitted, sold, rented, analysed, or shared with the developer
+  or with any third party.
+</p>
+
+<p>
+  The developer has no technical access to files stored in the <code>Cavea</code> folder
+  of the user's Google Drive account.
+</p>
+
+<h3>4.4 Google permissions</h3>
+
+<p>
+  Cavea uses the Google Drive <code>drive.file</code> scope.
+  This permission limits access to files created or managed by the app
+  and does not grant access to the rest of the user's Google Drive content.
+</p>
+
+<p>
+  The user can revoke this permission at any time from their Google account security settings
+  (<a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>).
+</p>
+
+<h2>5. Dropbox (optional)</h2>
+
+<p>
+  Cavea can also use Dropbox as a shared storage space, as an alternative to Google Drive.
+</p>
+
+<h3>5.1 Dropbox data accessed</h3>
+
+<p>
+  When Dropbox synchronisation is enabled, Cavea accesses only:
+</p>
+
+<ul>
+  <li>The <code>Cavea</code> folder created in the user's Dropbox space.</li>
+  <li>Files created and managed by the app in that folder (<code>cave.db</code> and technical lock files).</li>
+</ul>
+
+<p>
+  Cavea does not access any other files or folders in the user's Dropbox account.
+</p>
+
+<h3>5.2 How Dropbox data is used</h3>
+
+<p>
+  Data is used exclusively for:
+</p>
+
+<ul>
+  <li>Storing the SQLite database containing wine cellar data.</li>
+  <li>Synchronising data across multiple devices belonging to the same user.</li>
+  <li>Managing lock files.</li>
+</ul>
+
+<p>
+  This data is never transmitted, sold, analysed, or shared with the developer or with any third party.
+</p>
+
+<h2>6. Data sharing</h2>
+
+<p>
+  Cavea does not sell, rent, share, or transmit any user data to third parties.
+</p>
+
+<p>
+  No data is used for advertising, marketing, analytics, or profiling purposes.
+</p>
+
+<p>
+  The developer has technically no access to wine cellar data stored locally
+  or in the user's cloud spaces.
+</p>
+
+<h2>7. Security</h2>
+
+<p>
+  Data is stored in a standard SQLite file.
+</p>
+
+<p>
+  Data protection depends primarily on the security mechanisms implemented on the device
+  or cloud account used by the user (PIN, system encryption, Google or Dropbox authentication, etc.).
+</p>
+
+<p>
+  Authentication tokens required to access cloud services are stored locally using
+  the secure mechanisms provided by the operating system
+  (Keychain on Android, Credential Store on Windows, libsecret on Linux).
+</p>
+
+<h2>8. Google API compliance</h2>
+
+<div class="limited-use">
+  Cavea's use of data obtained from Google APIs is strictly limited to providing
+  the features described in this privacy policy, in compliance with the
+  <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+  including the <em>Limited Use Requirements</em>.
+</div>
+
+<p>
+  In particular, data obtained via Google APIs is never used for:
+</p>
+
+<ul>
+  <li>Advertising or marketing.</li>
+  <li>User profiling.</li>
+  <li>Training artificial intelligence or machine learning models.</li>
+  <li>Sale or transfer to third parties.</li>
+  <li>Any purpose unrelated to wine cellar data synchronisation.</li>
+</ul>
+
+<h2>9. Your rights</h2>
+
+<p>
+  All data remains under the exclusive control of the user.
+</p>
+
+<p>
+  You can at any time:
+</p>
+
+<ul>
+  <li>Delete locally stored data.</li>
+  <li>Disable cloud synchronisation from the app's Settings.</li>
+  <li>Revoke Google Drive access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  <li>Revoke Dropbox access from your Dropbox account security settings.</li>
+  <li>Delete files stored in your cloud spaces.</li>
+</ul>
+
+<h2>10. Contact</h2>
+
+<p>
+  For any questions regarding this privacy policy:
+</p>
+
+<p>
+  <a href="https://github.com/alainbenard54-collab/cavea/issues">
+    GitHub Issues
+  </a>
+</p>
+
+<h2>11. Changes</h2>
+
 <p>
   This policy may be updated with new versions of the app.
-  The date at the top of the page indicates the current version.
+</p>
+
+<p>
+  The date at the top of this page indicates the version currently in effect.
 </p>
 
 <footer>
   Cavea · Open source application · Apache 2.0 License ·
-  <a href="https://github.com/alainbenard54-collab/cavea">github.com/alainbenard54-collab/cavea</a>
+  <a href="https://github.com/alainbenard54-collab/cavea">
+    github.com/alainbenard54-collab/cavea
+  </a>
 </footer>
 
 </body>
