@@ -31,9 +31,10 @@ windows/packaging/output/
 .DS_Store
 Thumbs.db
 
+.local/
+
 # Fichiers exemple et préparation des données exportées et scripts python de préparation
 cave_clean.csv
-cave.xlsx
 stock.csv
 historique.csv
 clean_stock_archive.py
@@ -48,7 +49,3 @@ assets/secrets/
 *.jks
 *.keystore
 android/key.properties
-
-# Apprentissage / preparation du projet
-discussion_prealable.docx
-avancement.docx
