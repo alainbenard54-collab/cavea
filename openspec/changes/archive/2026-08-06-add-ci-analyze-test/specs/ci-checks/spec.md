@@ -9,7 +9,7 @@ Le projet SHALL contenir `.github/workflows/ci.yml` s'exécutant sur `ubuntu-lat
 
 Le workflow SHALL :
 - Checkout le code source
-- Installer Flutter `3.41.9` (stable) via `subosito/flutter-action@v2` avec `cache: true`
+- Installer Flutter `3.44.0` (stable) via `subosito/flutter-action@v2` avec `cache: true`
 - Exécuter `flutter pub get`
 - Exécuter `flutter analyze`
 - Exécuter `flutter test`
