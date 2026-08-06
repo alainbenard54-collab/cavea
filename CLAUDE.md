@@ -10,6 +10,21 @@ Full specifications are in `PRD.md` (features and priorities) and `ARCHITECTURE.
 
 ---
 
+## Workflow de développement
+
+| Étape | Outil | Déclencheur |
+|---|---|---|
+| Explorer/clarifier | skill `openspec-explore` (`/opsx:explore`) | Avant toute proposition sur un sujet ambigu |
+| Proposer un change | skill `openspec-propose` (`/opsx:propose`) | Avant tout développement significatif |
+| Implémenter | skill `openspec-apply-change` (`/opsx:apply`) | Après validation de la spec |
+| Réviser un change en cours | skill `openspec-update-change` (`/opsx:update`) | Une décision nouvelle doit être intégrée aux artefacts déjà écrits (proposal/design/tasks) d'un change existant, sans toucher au code |
+| Revue de code | skill `/code-review` | Avant tout commit qui touche du comportement ou une surface sensible (logique métier, schéma de données, appel externe, auth/sécurité). Dispense possible uniquement pour typo/doc/formatage/renommage sans impact comportemental — dans le doute, faire la revue |
+| Revue sécurité | skill `security-review` | Uniquement quand le changement touche auth/secrets/accès/données sensibles — pas à chaque push. En complément, passe complète avant toute release |
+| Synchroniser les specs | skill `openspec-sync-specs` (`/opsx:sync`) | Dès qu'un delta spec existe, sans attendre l'archivage |
+| Archiver | skill `openspec-archive-change` (`/opsx:archive`) | Une fois le change conforme aux specs, en 5 temps : (1) `openspec validate --specs` ; (2) alignement PRD/ARCHITECTURE/specs/code ; (3) exécution réelle de la commande de test déclarée, pas seulement une case cochée dans `tasks.md` ; (4) test de suffisance des specs — sur les changes avec une vraie décision de conception, faire vérifier par un agent frais sans accès au code (ne lui donner que specs + PRD/ARCHITECTURE) qu'il pourrait en déduire une implémentation équivalente ; (5) message de confirmation explicite résumant la vérification, jamais un archivage silencieux |
+
+---
+
 ## Tech stack
 
 | Layer | Choice | Notes |
