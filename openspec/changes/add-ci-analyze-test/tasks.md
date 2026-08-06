@@ -6,7 +6,7 @@
 
 ## 2. Vérification
 
-- [ ] 2.1 Pousser et vérifier que le workflow `ci.yml` se déclenche et passe au vert — bloqué une première fois par `assets/secrets/` absent du checkout CI (dossier gitignored, warning `flutter analyze`) ; correctif préparé : `assets/secrets/.gitkeep` ajouté avec `git add -f` (le reste du dossier reste ignoré, aucun vrai secret tracké) — à confirmer après push
+- [x] 2.1 Pousser et vérifier que le workflow `ci.yml` se déclenche et passe au vert — confirmé : run https://github.com/alainbenard54-collab/cavea/actions/runs/31096937618 (commit 185b5b4) vert de bout en bout (pub get, analyze, test)
 - [x] 2.2 Vérifier que le workflow ne se déclenche pas sur un push vers une branche qui n'est ni `master` ni source d'une PR vers `master`
 - [x] 2.3 Confirmer que `release-windows.yml` n'est pas impacté (toujours déclenché uniquement sur tag `v*`)
 
