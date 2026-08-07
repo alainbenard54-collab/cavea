@@ -26,7 +26,7 @@ L'application SHALL permettre de modifier l'emplacement d'une bouteille sans la 
 - **WHEN** l'utilisateur confirme un emplacement ne respectant pas le format hiérarchique
 - **THEN** un message d'erreur s'affiche sous le champ, la sauvegarde est bloquée
 
-**Format emplacement** : `Niveau1` ou `Niveau1 > Niveau2 > …`. Chaque niveau : lettres (y compris accentuées), chiffres, espaces internes — doit commencer par un caractère alphanumérique. Séparateur obligatoire : ` > ` (espace-chevron-espace). Exemples valides : `Cave`, `Cave principale`, `Cave > Étagère 3`, `Cave > Rangée A > Position 2`.
+**Format emplacement** : `Niveau1` ou `Niveau1 > Niveau2 > …`. Chaque niveau : lettres (y compris accentuées), chiffres, espaces internes, underscore `_`, tiret `-` — doit commencer par un caractère alphanumérique. Séparateur obligatoire : ` > ` (espace-chevron-espace). Exemples valides : `Cave`, `Cave principale`, `Cave > Étagère 3`, `Cave > Rangée A > Position 2`, `Liebherr Vinothek > sortie_réfrigérateur ou habitat`.
 
 ---
 

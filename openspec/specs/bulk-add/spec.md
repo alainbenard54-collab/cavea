@@ -47,7 +47,7 @@ La section répartition SHALL permettre de définir des groupes `(quantité, emp
 - **THEN** l'indicateur est vert (`Assignées : X / X ✓`) et le bouton Confirmer est actif si le reste du formulaire est valide
 
 #### Scenario: Validation format emplacement
-- **WHEN** un emplacement saisi ne respecte pas le format hiérarchique (`Niveau1` ou `Niveau1 > Niveau2 > Niveau3`)
+- **WHEN** un emplacement saisi ne respecte pas le format hiérarchique (`Niveau1` ou `Niveau1 > Niveau2 > Niveau3` ; chaque niveau : lettres dont accentuées, chiffres, espaces internes, underscore `_`, tiret `-` — doit commencer par un caractère alphanumérique)
 - **THEN** un message d'erreur s'affiche sous le champ, la confirmation est bloquée
 
 #### Scenario: Autocomplétion emplacement
