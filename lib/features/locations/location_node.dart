@@ -2,6 +2,7 @@
 // Copyright 2026 Alain Benard
 
 import '../../data/daos/bouteille_dao.dart';
+import '../../shared/emplacement_validator.dart';
 
 class LocationNode {
   final String label;
@@ -67,9 +68,9 @@ List<LocationNode> buildTree(List<LocationLeaf> leaves) {
   final Map<String, _NodeBuilder> all = {};
 
   for (final leaf in leaves) {
-    final parts = leaf.emplacement.split(' > ');
+    final parts = leaf.emplacement.split(EmplacementValidator.separator);
     for (int depth = 1; depth <= parts.length; depth++) {
-      final path = parts.take(depth).join(' > ');
+      final path = parts.take(depth).join(EmplacementValidator.separator);
       all.putIfAbsent(path, () => _NodeBuilder(parts[depth - 1], path));
     }
     all[leaf.emplacement]!
@@ -80,9 +81,10 @@ List<LocationNode> buildTree(List<LocationLeaf> leaves) {
 
   // Câbler les enfants
   for (final entry in all.entries) {
-    final parts = entry.key.split(' > ');
+    final parts = entry.key.split(EmplacementValidator.separator);
     if (parts.length > 1) {
-      final parentPath = parts.take(parts.length - 1).join(' > ');
+      final parentPath =
+          parts.take(parts.length - 1).join(EmplacementValidator.separator);
       final parent = all[parentPath]!;
       if (!parent.children.any((c) => c.fullPath == entry.key)) {
         parent.children.add(entry.value);
@@ -91,7 +93,7 @@ List<LocationNode> buildTree(List<LocationLeaf> leaves) {
   }
 
   return all.entries
-      .where((e) => !e.key.contains(' > '))
+      .where((e) => !e.key.contains(EmplacementValidator.separator))
       .map((e) => e.value.build())
       .toList()
     ..sort((a, b) => a.label.compareTo(b.label));

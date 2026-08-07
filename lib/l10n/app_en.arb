@@ -177,6 +177,14 @@
       "count": { "type": "int" }
     }
   },
+  "sampleDataImportedWithErrors": "{count} sample bottles imported, {errors} row(s) skipped",
+  "@sampleDataImportedWithErrors": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "errors": { "type": "int" }
+    }
+  },
+  "sampleDataErrorDetailsTitle": "Skipped rows",
   "sampleDataError": "Could not load sample data: {error}",
   "@sampleDataError": {
     "placeholders": {
@@ -225,7 +233,7 @@
 
   "deplacerTitle": "Move",
   "deplacerEmplacementObligatoire": "Location required",
-  "deplacerFormatError": "Format: \"Level1\" or \"Level1 > Level2 > …\"\n(letters, digits, spaces; separator \" > \")",
+  "deplacerFormatError": "Format: \"Level1\" or \"Level1 > Level2 > …\"\n(letters, digits, spaces, _, -; separator \" > \")",
 
   "bulkSelectionCount": "{count, plural, =1{1 bottle selected} other{{count} bottles selected}}",
   "bulkReadOnly": "Read-only mode",
@@ -267,7 +275,7 @@
 
   "repartitionQte": "Qty",
   "repartitionSupprimer": "Delete",
-  "repartitionFormatError": "Format: \"Level1\" or \"Level1 > Level2\"\n(letters, digits, spaces; separator \" > \")",
+  "repartitionFormatError": "Format: \"Level1\" or \"Level1 > Level2\"\n(letters, digits, spaces, _, -; separator \" > \")",
 
   "fieldDomaine": "Domain",
   "fieldAppellation": "Appellation",

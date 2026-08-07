@@ -1022,6 +1022,18 @@ abstract class AppLocalizations {
   /// **'{count} bouteilles exemple importées'**
   String sampleDataImported(int count);
 
+  /// No description provided for @sampleDataImportedWithErrors.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} bouteilles exemple importées, {errors} ligne(s) ignorée(s)'**
+  String sampleDataImportedWithErrors(int count, int errors);
+
+  /// No description provided for @sampleDataErrorDetailsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lignes ignorées'**
+  String get sampleDataErrorDetailsTitle;
+
   /// No description provided for @sampleDataError.
   ///
   /// In fr, this message translates to:
@@ -1247,7 +1259,7 @@ abstract class AppLocalizations {
   /// No description provided for @deplacerFormatError.
   ///
   /// In fr, this message translates to:
-  /// **'Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces ; séparateur \" > \")'**
+  /// **'Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")'**
   String get deplacerFormatError;
 
   /// No description provided for @bulkSelectionCount.
@@ -1475,7 +1487,7 @@ abstract class AppLocalizations {
   /// No description provided for @repartitionFormatError.
   ///
   /// In fr, this message translates to:
-  /// **'Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces ; séparateur \" > \")'**
+  /// **'Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")'**
   String get repartitionFormatError;
 
   /// No description provided for @fieldDomaine.

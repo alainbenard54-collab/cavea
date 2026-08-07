@@ -12,6 +12,7 @@ import '../../data/providers.dart';
 import '../../l10n/l10n.dart';
 import '../../services/sync_service.dart';
 import '../bottle_actions/bottle_actions_sheet.dart';
+import '../import_csv/import_error_list.dart';
 import '../import_csv/import_service.dart';
 import '../import_csv/sample_data_service.dart';
 import 'selection_controller.dart';
@@ -529,9 +530,23 @@ class _EmptyStateState extends ConsumerState<_EmptyState> {
     try {
       final result = await service.importSampleData(lang);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.sampleDataImported(result.inserted))),
-        );
+        if (result.errors > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.sampleDataImportedWithErrors(result.inserted, result.errors),
+              ),
+              action: SnackBarAction(
+                label: l10n.importVoirDetail,
+                onPressed: () => _showSampleDataErrors(context, result.errorDetails),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.sampleDataImported(result.inserted))),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -542,6 +557,30 @@ class _EmptyStateState extends ConsumerState<_EmptyState> {
     } finally {
       if (mounted) setState(() => _importing = false);
     }
+  }
+
+  void _showSampleDataErrors(BuildContext context, List<String> errorDetails) {
+    if (!context.mounted) return;
+    final l10n = context.l10n;
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.sampleDataErrorDetailsTitle),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 300),
+            child: ImportErrorList(errorDetails: errorDetails),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.actionFermer),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

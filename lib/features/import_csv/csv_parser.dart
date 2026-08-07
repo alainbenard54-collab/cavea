@@ -4,6 +4,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/database.dart';
+import '../../shared/emplacement_validator.dart';
 
 const _uuid = Uuid();
 
@@ -16,6 +17,8 @@ class ParseError {
     required this.reason,
     required this.rawLine,
   });
+
+  String get displayMessage => 'Ligne $lineNumber — $reason : $rawLine';
 }
 
 class ParseResult {
@@ -128,6 +131,11 @@ List<String> _splitLine(String line, String separator) {
   final couleur = row['couleur'];
   if (couleur == null || couleur.isEmpty) return (null, 'couleur vide');
 
+  final emplacement = row['emplacement'] ?? '';
+  if (emplacement.isNotEmpty && !EmplacementValidator.isValid(emplacement)) {
+    return (null, 'emplacement invalide : "$emplacement"');
+  }
+
   final rawId = row['id']?.trim() ?? '';
   final id = rawId.isEmpty ? _uuid.v4() : rawId;
 
@@ -140,7 +148,7 @@ List<String> _splitLine(String line, String separator) {
       couleur: Value(couleur),
       cru: Value(_nullIfEmpty(row['cru'])),
       contenance: Value(row['contenance'] ?? ''),
-      emplacement: Value(row['emplacement'] ?? ''),
+      emplacement: Value(emplacement),
       dateEntree: Value(row['date_entree'] ?? ''),
       dateSortie: Value(_nullIfEmpty(row['date_sortie'])),
       prixAchat: Value(_parseReal(row['prix_achat'])),

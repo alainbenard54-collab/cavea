@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
 import '../../../l10n/l10n.dart';
+import '../../../shared/emplacement_validator.dart';
 
 class DeplacerForm extends ConsumerStatefulWidget {
   final Bouteille bouteille;
@@ -76,14 +77,11 @@ class _DeplacerFormState extends ConsumerState<DeplacerForm> {
     super.dispose();
   }
 
-  static final _levelRe = RegExp(r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*$');
-
   String? _validate(String value) {
     final l10n = context.l10n;
     final trimmed = value.trim();
     if (trimmed.isEmpty) return l10n.deplacerEmplacementObligatoire;
-    final levels = trimmed.split(' > ');
-    if (levels.any((l) => !_levelRe.hasMatch(l.trim()))) {
+    if (!EmplacementValidator.isValid(trimmed)) {
       return l10n.deplacerFormatError;
     }
     return null;

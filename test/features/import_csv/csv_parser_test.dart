@@ -134,6 +134,54 @@ void main() {
       expect(result.companions, isEmpty);
       expect(result.errors.length, 1);
     });
+
+    test('emplacement au format invalide → erreur nommant le champ emplacement', () {
+      final csv = 'domaine;appellation;millesime;couleur;emplacement\nTest;Bordeaux;2018;Rouge;Cave (haut)';
+      final result = parseCsv(csv);
+
+      expect(result.companions, isEmpty);
+      expect(result.errors.length, 1);
+      expect(result.errors.first.reason, contains('emplacement'));
+    });
+  });
+
+  // ── Emplacement ──────────────────────────────────────────────────────────
+
+  group('emplacement', () {
+    test('vide → accepté (aucun emplacement assigné)', () {
+      final csv = 'domaine;appellation;millesime;couleur;emplacement\nTest;Bordeaux;2018;Rouge;';
+      final result = parseCsv(csv);
+
+      expect(result.companions.length, 1);
+      expect(result.errors, isEmpty);
+      expect(result.companions.first.emplacement.value, '');
+    });
+
+    test('avec underscore → accepté', () {
+      final csv = 'domaine;appellation;millesime;couleur;emplacement\n'
+          'Test;Bordeaux;2018;Rouge;Liebherr Vinothek > sortie_réfrigérateur ou habitat';
+      final result = parseCsv(csv);
+
+      expect(result.companions.length, 1);
+      expect(result.errors, isEmpty);
+      expect(
+        result.companions.first.emplacement.value,
+        'Liebherr Vinothek > sortie_réfrigérateur ou habitat',
+      );
+    });
+
+    test('avec tiret → accepté', () {
+      final csv = 'domaine;appellation;millesime;couleur;emplacement\n'
+          'Test;Bordeaux;2018;Rouge;Cave-à-vin > Rangée-A';
+      final result = parseCsv(csv);
+
+      expect(result.companions.length, 1);
+      expect(result.errors, isEmpty);
+      expect(
+        result.companions.first.emplacement.value,
+        'Cave-à-vin > Rangée-A',
+      );
+    });
   });
 
   // ── updatedAt ────────────────────────────────────────────────────────────

@@ -82,7 +82,7 @@ Key fields: `id` (UUID), `domaine`, `appellation`, `millesime`, `couleur`, `cru`
 - `date_sortie` empty → bottle in stock
 - `date_sortie` set → bottle consumed / removed
 - Moving a bottle = update `emplacement` — it is **not** a removal
-- `emplacement` is a validated hierarchy: `Niveau1` or `Niveau1 > Niveau2 > Niveau3`. Each level: letters (including accented), digits, internal spaces; must start with alphanumeric. Separator: ` > ` (space-chevron-space). Validated on input in the Déplacer form.
+- `emplacement` is a validated hierarchy: `Niveau1` or `Niveau1 > Niveau2 > Niveau3`. Each level: letters (including accented), digits, internal spaces, underscore `_`, hyphen `-`; must start with alphanumeric. Separator: ` > ` (space-chevron-space). Validated via the shared `EmplacementValidator` (`lib/shared/emplacement_validator.dart`), used by the Déplacer form (single + batch), bottle edit, bulk-add, and CSV import.
 - Maturity computed at runtime: `millesime + garde_min/max` vs `DateTime.now().year`
 - Maturity levels: `tropJeune` (blue) / `optimal` (green) / `aBoireUrgent` (red) / `sansDonnee` (grey)
 - Within each maturity level, urgency sort = `age - gardeMax` descending (higher = more overdue)

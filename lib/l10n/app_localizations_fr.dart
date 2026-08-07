@@ -515,6 +515,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String sampleDataImportedWithErrors(int count, int errors) {
+    return '$count bouteilles exemple importées, $errors ligne(s) ignorée(s)';
+  }
+
+  @override
+  String get sampleDataErrorDetailsTitle => 'Lignes ignorées';
+
+  @override
   String sampleDataError(String error) {
     return 'Impossible de charger les données exemple : $error';
   }
@@ -670,7 +678,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deplacerFormatError =>
-      'Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces ; séparateur \" > \")';
+      'Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")';
 
   @override
   String bulkSelectionCount(int count) {
@@ -822,7 +830,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get repartitionFormatError =>
-      'Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces ; séparateur \" > \")';
+      'Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")';
 
   @override
   String get fieldDomaine => 'Domaine';

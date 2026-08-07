@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/l10n.dart';
+import '../../../shared/emplacement_validator.dart';
 import '../bulk_add_controller.dart';
 
 class RepartitionRow extends ConsumerStatefulWidget {
@@ -35,10 +36,6 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
   late final FocusNode _emplacementFocus;
   final _emplacementFieldKey = GlobalKey();
   String? _emplacementError;
-
-  static final _levelRe = RegExp(
-    r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*( > [a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*)*$',
-  );
 
   @override
   void initState() {
@@ -80,7 +77,7 @@ class _RepartitionRowState extends ConsumerState<RepartitionRow> {
 
   void _validateEmplacement() {
     final t = _emplacementCtrl.text.trim();
-    if (t.isNotEmpty && !_levelRe.hasMatch(t)) {
+    if (t.isNotEmpty && !EmplacementValidator.isValid(t)) {
       setState(() => _emplacementError = context.l10n.repartitionFormatError);
     } else {
       setState(() => _emplacementError = null);

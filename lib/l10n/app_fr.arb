@@ -192,6 +192,14 @@
       "count": { "type": "int" }
     }
   },
+  "sampleDataImportedWithErrors": "{count} bouteilles exemple importées, {errors} ligne(s) ignorée(s)",
+  "@sampleDataImportedWithErrors": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "errors": { "type": "int" }
+    }
+  },
+  "sampleDataErrorDetailsTitle": "Lignes ignorées",
   "sampleDataError": "Impossible de charger les données exemple : {error}",
   "@sampleDataError": {
     "placeholders": {
@@ -261,7 +269,7 @@
 
   "deplacerTitle": "Déplacer",
   "deplacerEmplacementObligatoire": "Emplacement obligatoire",
-  "deplacerFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces ; séparateur \" > \")",
+  "deplacerFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2 > …\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")",
 
   "bulkSelectionCount": "{count, plural, =1{1 bouteille sélectionnée} other{{count} bouteilles sélectionnées}}",
   "@bulkSelectionCount": {
@@ -324,7 +332,7 @@
 
   "repartitionQte": "Qté",
   "repartitionSupprimer": "Supprimer",
-  "repartitionFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces ; séparateur \" > \")",
+  "repartitionFormatError": "Format : \"Niveau1\" ou \"Niveau1 > Niveau2\"\n(lettres, chiffres, espaces, _, - ; séparateur \" > \")",
 
   "fieldDomaine": "Domaine",
   "fieldAppellation": "Appellation",

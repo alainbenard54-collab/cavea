@@ -3,6 +3,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config_service.dart';
+import '../../shared/emplacement_validator.dart';
 
 class RepartitionGroup {
   final int quantite;
@@ -68,15 +69,7 @@ class BulkAddState {
     return true;
   }
 
-  static final _levelRe = RegExp(
-    r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*( > [a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*)*$',
-  );
-
-  static bool _emplacementValide(String e) {
-    final t = e.trim();
-    if (t.isEmpty) return false;
-    return _levelRe.hasMatch(t);
-  }
+  static bool _emplacementValide(String e) => EmplacementValidator.isValid(e);
 
   BulkAddState copyWith({
     String? domaine,

@@ -13,6 +13,7 @@ import '../../core/locale_formatting.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../l10n/l10n.dart';
+import '../../shared/emplacement_validator.dart';
 
 class BottleEditScreen extends ConsumerStatefulWidget {
   final String id;
@@ -164,14 +165,11 @@ class _BottleEditScreenState extends ConsumerState<BottleEditScreen> {
     return result;
   }
 
-  static final _levelRe = RegExp(r'^[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ]*$');
-
   String? _validateEmplacement(String? value) {
     final l10n = context.l10n;
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return l10n.deplacerEmplacementObligatoire;
-    final levels = trimmed.split(' > ');
-    if (levels.any((l) => !_levelRe.hasMatch(l.trim()))) {
+    if (!EmplacementValidator.isValid(trimmed)) {
       return l10n.deplacerFormatError;
     }
     return null;

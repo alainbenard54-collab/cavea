@@ -9,6 +9,7 @@ import '../../data/providers.dart';
 import '../../l10n/l10n.dart';
 import '../stock/stock_controller.dart';
 import 'csv_parser.dart';
+import 'import_error_list.dart';
 import 'import_service.dart';
 
 // Widget intégrable sans Scaffold (utilisé depuis ImportExportScreen).
@@ -81,9 +82,8 @@ class _ImportCsvContentState extends ConsumerState<ImportCsvContent> {
       final parsed = parseCsv(content, separator: _separator, columnMap: columnMap);
       final dao = ref.read(bouteillesDaoProvider);
       final service = ImportService(dao);
-      final parseErrorDetails = parsed.errors
-          .map((e) => 'Ligne ${e.lineNumber} — ${e.reason} : ${e.rawLine}')
-          .toList();
+      final parseErrorDetails =
+          parsed.errors.map((e) => e.displayMessage).toList();
       final result = await service.run(
         parsed.companions,
         overwrite: _overwrite,
@@ -276,20 +276,9 @@ class _ResultCardState extends State<_ResultCard> {
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: SelectionArea(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.all(8),
-                      itemCount: widget.result.errorDetails.length,
-                      itemBuilder: (context, i) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          widget.result.errorDetails[i],
-                          style: const TextStyle(
-                              fontSize: 12, fontFamily: 'monospace'),
-                        ),
-                      ),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: ImportErrorList(errorDetails: widget.result.errorDetails),
                   ),
                 ),
               ],

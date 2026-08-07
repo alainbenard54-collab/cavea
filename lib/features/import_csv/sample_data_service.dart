@@ -38,6 +38,12 @@ class SampleDataService {
     // Les CSV exemple utilisent les noms de champs internes comme en-têtes —
     // pas besoin de columnMap.
     final parseResult = parseCsv(content);
-    return importService.run(parseResult.companions, overwrite: false);
+    final parseErrorDetails =
+        parseResult.errors.map((e) => e.displayMessage).toList();
+    return importService.run(
+      parseResult.companions,
+      overwrite: false,
+      parseErrorDetails: parseErrorDetails,
+    );
   }
 }
