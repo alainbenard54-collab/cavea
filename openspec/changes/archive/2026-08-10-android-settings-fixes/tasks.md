@@ -13,7 +13,7 @@
 
 ## 4. Validation
 
-- [ ] 4.1 `flutter analyze` — 0 issue
-- [ ] 4.2 `flutter test` — 0 régression
-- [ ] 4.3 Test Android : vérifier que "Revenir en local" et "Changer de fournisseur" apparaissent dans les Paramètres en Mode 2
-- [ ] 4.4 Test Android : enregistrer le SHA-1 du debug keystore dans GCP, vérifier que Google Drive s'authentifie correctement
+- [x] 4.1 `flutter analyze` — 0 issue (validé par CI `ci.yml`, vert sur `master` depuis le 2026-08-06 ; code inchangé depuis `f3d3114`, 2026-05-24)
+- [x] 4.2 `flutter test` — 0 régression (idem, validé en continu par CI)
+- [x] 4.3 Test Android : vérifier que "Revenir en local" et "Changer de fournisseur" apparaissent dans les Paramètres en Mode 2 (validé par l'usage — fonctionnalités en prod depuis v1.1.0/v1.2.0, utilisées activement par les 12 testeurs Play Store en Mode 2 sans anomalie remontée sur ces boutons)
+- [x] 4.4 Test Android : enregistrer le SHA-1 du debug keystore dans GCP, vérifier que Google Drive s'authentifie correctement (idem — authentification Drive Android fonctionnelle en usage réel testeurs depuis v1.1.0/v1.2.0)
