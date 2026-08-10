@@ -26,6 +26,7 @@ class StockTable extends StatelessWidget {
   final Set<String> selectedIds;
   final void Function(String id)? onToggleSelect;
   final void Function(String id)? onLongPressRow;
+  final bool showEmplacementColumn;
 
   const StockTable({
     super.key,
@@ -37,19 +38,21 @@ class StockTable extends StatelessWidget {
     this.selectedIds = const {},
     this.onToggleSelect,
     this.onLongPressRow,
+    this.showEmplacementColumn = true,
   });
 
   Widget _layout(List<Widget> cells, {bool withCheckbox = false}) {
+    var i = withCheckbox ? 1 : 0;
     return Row(
       children: [
         if (withCheckbox) SizedBox(width: _wCheckbox, child: cells[0]),
-        SizedBox(width: _wIcon, child: cells[withCheckbox ? 1 : 0]),
-        Expanded(flex: 3, child: cells[withCheckbox ? 2 : 1]),
-        Expanded(flex: 2, child: cells[withCheckbox ? 3 : 2]),
-        SizedBox(width: _wMillesime, child: cells[withCheckbox ? 4 : 3]),
-        Expanded(flex: 2, child: cells[withCheckbox ? 5 : 4]),
-        SizedBox(width: _wGarde, child: cells[withCheckbox ? 6 : 5]),
-        SizedBox(width: _wPrix, child: cells[withCheckbox ? 7 : 6]),
+        SizedBox(width: _wIcon, child: cells[i++]),
+        Expanded(flex: 3, child: cells[i++]),
+        Expanded(flex: 2, child: cells[i++]),
+        SizedBox(width: _wMillesime, child: cells[i++]),
+        if (showEmplacementColumn) Expanded(flex: 2, child: cells[i++]),
+        SizedBox(width: _wGarde, child: cells[i++]),
+        SizedBox(width: _wPrix, child: cells[i++]),
       ],
     );
   }
@@ -199,10 +202,11 @@ class StockTable extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
-        child: Text(b.emplacement, style: style, overflow: TextOverflow.ellipsis),
-      ),
+      if (showEmplacementColumn)
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
+          child: Text(b.emplacement, style: style, overflow: TextOverflow.ellipsis),
+        ),
       _gardeCell(context, b, vPad),
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
@@ -248,7 +252,8 @@ class StockTable extends StatelessWidget {
           _headerCell(context, l10n.tableHeaderDomaine, 'domaine', vPad),
           _headerCell(context, l10n.tableHeaderAppellation, 'appellation', vPad),
           _headerCell(context, l10n.tableHeaderMillesime, 'millesime', vPad, align: TextAlign.center),
-          _headerCell(context, l10n.tableHeaderEmplacement, 'emplacement', vPad),
+          if (showEmplacementColumn)
+            _headerCell(context, l10n.tableHeaderEmplacement, 'emplacement', vPad),
           _headerCell(context, l10n.tableHeaderGarde, 'gardeMin', vPad, align: TextAlign.center),
           _headerCell(context, l10n.tableHeaderPrix, 'prixAchat', vPad, align: TextAlign.right),
         ],

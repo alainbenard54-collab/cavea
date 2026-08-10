@@ -8,6 +8,8 @@ import '../../services/sync_service.dart';
 import '../bottle_actions/bottle_actions_sheet.dart';
 import '../stock/bouteille_list_tile.dart';
 import '../stock/selection_controller.dart';
+import '../stock/stock_controller.dart' show sortBouteilles;
+import '../stock/stock_table.dart';
 import '../stock/widgets/bulk_action_bar.dart';
 import '../stock/widgets/consommer_batch_sheet.dart' show showConsommerBatchSheet;
 import '../stock/widgets/deplacer_batch_sheet.dart' show showDeplacerBatchSheet;
@@ -236,14 +238,33 @@ class _DirectBottlesTile extends StatelessWidget {
 
 // ── Corps de la liste de bouteilles (inline, pas d'écran séparé) ─────────────
 
-class _BottleListBody extends ConsumerWidget {
+class _BottleListBody extends ConsumerStatefulWidget {
   final String emplacement;
 
   const _BottleListBody({required this.emplacement});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bottlesAsync = ref.watch(locationBottleListProvider(emplacement));
+  ConsumerState<_BottleListBody> createState() => _BottleListBodyState();
+}
+
+class _BottleListBodyState extends ConsumerState<_BottleListBody> {
+  String _sortColumn = 'domaine';
+  bool _sortAscending = true;
+
+  void _onSort(String column) {
+    setState(() {
+      if (_sortColumn == column) {
+        _sortAscending = !_sortAscending;
+      } else {
+        _sortColumn = column;
+        _sortAscending = true;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottlesAsync = ref.watch(locationBottleListProvider(widget.emplacement));
     final selection = ref.watch(selectionProvider);
     final isReadOnly = ref.watch(syncServiceProvider) is SyncReadOnly;
 
@@ -257,26 +278,50 @@ class _BottleListBody extends ConsumerWidget {
               if (bottles.isEmpty) {
                 return Center(child: Text(context.l10n.locationsEmpty));
               }
-              return ListView.separated(
-                itemCount: bottles.length,
-                separatorBuilder: (_, _) => const Divider(height: 1, indent: 16),
-                itemBuilder: (context, i) {
-                  final b = bottles[i];
-                  final isSelected = selection.selectedIds.contains(b.id);
-                  return BouteilleListTile(
-                    bouteille: b,
-                    showEmplacement: false,
-                    isSelectMode: selection.isSelectMode,
-                    isSelected: isSelected,
-                    onTap: selection.isSelectMode
-                        ? () =>
-                            ref.read(selectionProvider.notifier).toggleId(b.id)
-                        : () => showBottleActionsSheet(context, b),
-                    onLongPress: isReadOnly
-                        ? null
-                        : () => ref
-                            .read(selectionProvider.notifier)
-                            .enterSelectMode(b.id),
+              final sorted = sortBouteilles(bottles, _sortColumn, _sortAscending);
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 640) {
+                    return StockTable(
+                      bouteilles: sorted,
+                      sortColumn: _sortColumn,
+                      sortAscending: _sortAscending,
+                      onSort: _onSort,
+                      showEmplacementColumn: false,
+                      isSelectMode: selection.isSelectMode,
+                      selectedIds: selection.selectedIds,
+                      onToggleSelect: (id) =>
+                          ref.read(selectionProvider.notifier).toggleId(id),
+                      onLongPressRow: isReadOnly
+                          ? null
+                          : (id) => ref
+                              .read(selectionProvider.notifier)
+                              .enterSelectMode(id),
+                    );
+                  }
+                  return ListView.separated(
+                    itemCount: sorted.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1, indent: 16),
+                    itemBuilder: (context, i) {
+                      final b = sorted[i];
+                      final isSelected = selection.selectedIds.contains(b.id);
+                      return BouteilleListTile(
+                        bouteille: b,
+                        showEmplacement: false,
+                        isSelectMode: selection.isSelectMode,
+                        isSelected: isSelected,
+                        onTap: selection.isSelectMode
+                            ? () => ref
+                                .read(selectionProvider.notifier)
+                                .toggleId(b.id)
+                            : () => showBottleActionsSheet(context, b),
+                        onLongPress: isReadOnly
+                            ? null
+                            : () => ref
+                                .read(selectionProvider.notifier)
+                                .enterSelectMode(b.id),
+                      );
+                    },
                   );
                 },
               );

@@ -124,7 +124,7 @@ int _urgency(Bouteille b) => urgencyScore(
       gardeMax: b.gardeMax,
     );
 
-List<Bouteille> _sorted(List<Bouteille> list, String col, bool asc) {
+List<Bouteille> sortBouteilles(List<Bouteille> list, String col, bool asc) {
   final s = [...list];
 
   if (col == 'gardeMin') {
@@ -179,7 +179,7 @@ final stockProvider = StreamProvider.autoDispose<List<Bouteille>>((ref) {
         return filters.maturites.contains(level);
       }).toList();
     }
-    return _sorted(result, filters.sortColumn, filters.sortAscending);
+    return sortBouteilles(result, filters.sortColumn, filters.sortAscending);
   });
 });
 
