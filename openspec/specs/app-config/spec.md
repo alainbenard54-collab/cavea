@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Détection et persistance de la configuration de l'application au démarrage (mode de déploiement, chemin de la base, langue) et wizard de premier lancement.
+
+## Requirements
 
 ### Requirement: Lecture de la configuration au démarrage
 L'application SHALL détecter la configuration existante à chaque démarrage en consultant deux sources dans l'ordre : (1) fichier `.env` à côté de l'exécutable (Windows uniquement), (2) SharedPreferences. Si une configuration valide est trouvée, l'application SHALL l'utiliser directement sans afficher le wizard. En Mode 2, l'app SHALL appeler `syncOnStartup()` après chargement de la config.

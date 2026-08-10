@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Mode sélection multiple sur la vue Stock : entrée par appui long, bascule par tap, compteur et cases à cocher.
+
+## Requirements
 
 ### Requirement: Entrée en mode sélection par appui long
 L'application SHALL entrer en mode sélection multiple quand l'utilisateur effectue un appui long sur une ligne de la vue stock. La bouteille cible SHALL être automatiquement sélectionnée lors de l'entrée en mode sélection.

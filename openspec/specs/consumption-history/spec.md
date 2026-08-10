@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Onglet Historique listant les bouteilles consommées, avec recherche, détail et action de réhabilitation en cas d'erreur.
+
+## Requirements
 
 ### Requirement: Onglet Historique dans la navigation principale
 L'application SHALL afficher un onglet "Historique" dans la navigation principale (`Icons.history`, index 3), accessible depuis le `_DesktopRail` (Windows) et la `_MobileBar` (Android). L'onglet est toujours accessible, y compris en mode SyncReadOnly. `_writeOnlyIndices = {1, 4}` (Ajouter=1, Import CSV=4). Import CSV passe à l'index 4, Paramètres à l'index 5.

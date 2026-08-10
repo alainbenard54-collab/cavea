@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Export CSV du stock ou de toute la cave, avec choix du scope et du séparateur, adapté à Windows (FilePicker) et Android (FilePicker + partage).
+
+## Requirements
 
 ### Requirement: Accès depuis la navigation principale
 L'onglet "Données" (index 4, icône `Icons.import_export`) SHALL être accessible en SyncReadOnly. Il n'est PAS dans `_writeOnlyIndices`. En SyncReadOnly, la section Import est désactivée (message cadenas orange + formulaire masqué) ; la section Export reste active.

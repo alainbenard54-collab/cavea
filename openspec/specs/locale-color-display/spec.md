@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Traduction à l'affichage des libellés de couleur de vin selon la locale active, sans jamais modifier les valeurs stockées en base.
+
+## Requirements
 
 ### Requirement: Mapping statique des libellés couleurs builtin
 `ConfigService` SHALL exposer une méthode statique `displayCouleur(String dbKey, Locale locale)` retournant le libellé traduit d'une couleur builtin. Le mapping SHALL couvrir les 7 couleurs builtin :

@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Installateur Windows autonome (Inno Setup) produisant un exécutable incluant l'application et les credentials OAuth.
+
+## Requirements
 
 ### Requirement: Script Inno Setup produisant un installateur Windows autonome
 Le projet SHALL contenir un script Inno Setup à `windows/packaging/cavea.iss` produisant un fichier `Cavea-{version}-windows-setup.exe` incluant l'intégralité du dossier `build\windows\x64\runner\Release\` ainsi que les fichiers credentials OAuth (`google_desktop_secrets.json`, `dropbox_desktop_secrets.json`) avec le flag `skipifsourcedoesntexist`.

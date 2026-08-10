@@ -1,7 +1,7 @@
 ## Purpose
 Tests unitaires et d'intégration couvrant toutes les couches logiques non-UI de la V1 : DAO (méthodes manquantes), parsing/import/export CSV, contrôleurs Riverpod, arbre d'emplacements, formatage localisé.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Tests DAO — méthodes batch et streams manquants
 Les méthodes `deplacerBouteilles`, `consommerBouteilles`, `rehabiliterBouteille`, `watchHistorique`, `watchBouteillesParEmplacement`, `watchLocationStats`, `getBouteilleById`, `updateBouteille`, `getAllDistinct*` et `getDistinctDomaines/Fournisseurs` SHALL être couvertes par des tests d'intégration drift in-memory.

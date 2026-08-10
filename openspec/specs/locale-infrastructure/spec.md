@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Infrastructure d'internationalisation de l'application : génération ARB, fichiers de traduction fr/en et configuration de `MaterialApp`.
+
+## Requirements
 
 ### Requirement: Infrastructure ARB avec génération de code
 L'application SHALL utiliser `flutter_localizations` et `intl` pour l'internationalisation. Un fichier `lib/l10n/l10n.yaml` SHALL configurer la génération de code avec `app_fr.arb` comme template, classe générée `AppLocalizations`, `nullable-getter: false`. Un barrel `lib/l10n/l10n.dart` SHALL exporter `AppLocalizations` et exposer une extension `BuildContext.l10n` pour un accès court (`context.l10n.clé`).

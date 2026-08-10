@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Bouton "Quitter" sur Android en mode écriture (Mode 2) : sauvegarde de la base, libération du verrou et fermeture propre du process.
+
+## Requirements
 
 ### Requirement: Bouton Quitter en mode écriture Android
 En mode écriture sur Android (Mode 2), l'application SHALL afficher un bouton "Quitter" (`exit_to_app`) dans la zone sync de `_MobileBar`. Ce bouton SHALL d'abord demander confirmation, puis uploader `cave.db` sur Drive, libérer le lock et fermer le process Android. Il SHALL être visible uniquement quand `!isReadOnly && isAndroid && syncService.isActive`.

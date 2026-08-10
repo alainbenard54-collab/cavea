@@ -1,3 +1,8 @@
+## Purpose
+Filtres de la vue Stock : couleur en multi-sélection, maturité par chips colorés, et panneau de filtres avancés repliable (appellation, millésime).
+
+## Requirements
+
 ### Requirement: Filtre couleur multi-sélect
 L'application SHALL permettre de sélectionner simultanément plusieurs couleurs de vin via des FilterChips. Aucune sélection = toutes les couleurs affichées. Les valeurs SHALL être déduites des données en base.
 

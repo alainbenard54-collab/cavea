@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Couverture de tests d'intégration du `BouteilleDao` : lecture filtrée, insertion, déplacement, consommation et valeurs distinctes.
+
+## Requirements
 
 ### Requirement: watchStock n'émet que les bouteilles en stock
 `BouteilleDao.watchStock()` SHALL émettre uniquement les bouteilles dont `date_sortie` est null ou vide, excluant les bouteilles consommées.

@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Sélecteur de langue FR/EN affiché dès la première étape du wizard de premier démarrage.
+
+## Requirements
 
 ### Requirement: Sélecteur de langue sur l'écran de premier démarrage
 L'écran de premier démarrage SHALL afficher un `SegmentedButton` FR/EN en haut de la première étape (choix du mode), avant le titre de bienvenue.

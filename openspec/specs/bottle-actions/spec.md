@@ -1,3 +1,8 @@
+## Purpose
+BottomSheet d'actions rapides accessible en tapant sur une bouteille dans le stock ou un emplacement : consommer, déplacer, consulter ou modifier la fiche.
+
+## Requirements
+
 ### Requirement: BottomSheet d'actions rapides
 L'application SHALL afficher un BottomSheet modal lors d'un clic sur une ligne de la vue stock. Ce BottomSheet SHALL proposer les actions dans l'ordre suivant : Consommer, Consulter la fiche, Déplacer, Modifier la fiche, Annuler.
 

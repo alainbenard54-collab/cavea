@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Couverture de tests unitaires du calcul de maturité : `computeMaturity`, `urgencyScore` et `maturitySortOrder`.
+
+## Requirements
 
 ### Requirement: computeMaturity retourne sansDonnee quand les données de garde sont absentes ou nulles
 La fonction `computeMaturity` SHALL retourner `MaturityLevel.sansDonnee` quand `gardeMin` ou `gardeMax` est null, égal à 0, ou quand `millesime` est ≤ 0.

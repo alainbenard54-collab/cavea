@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Indicateurs visuels dans l'AppBar reflétant le mode de stockage actif et l'état du verrou en Mode 2.
+
+## Requirements
 
 ### Requirement: Icône de mode de stockage dans l'AppBar
 L'application SHALL afficher en permanence une icône dans l'AppBar indiquant le mode de stockage actif, avec un tooltip lisible.

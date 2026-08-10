@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Dialog d'information affiché au premier passage en mode écriture sur Android, expliquant l'usage du bouton Quitter.
+
+## Requirements
 
 ### Requirement: Dialog d'information au premier passage en mode écriture Android
 Au premier passage en SyncIdle sur Android (Mode 2), l'application SHALL afficher un dialog informant l'utilisateur qu'il doit utiliser le bouton "Quitter" pour sauvegarder ses modifications et libérer le verrou avant de fermer l'app.

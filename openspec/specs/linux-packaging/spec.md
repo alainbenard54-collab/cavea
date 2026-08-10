@@ -1,3 +1,8 @@
+## Purpose
+Packaging de l'application pour Linux : scripts produisant un AppImage et un paquet .deb autonomes, incluant les credentials OAuth.
+
+## Requirements
+
 ### Requirement: Script de build AppImage
 Un script `scripts/build_linux.sh` SHALL produire un AppImage auto-contenu à partir du build Flutter Linux Release. L'AppImage SHALL inclure l'exécutable, les bibliothèques Flutter, les données (icône, `.desktop`), et les fichiers credentials OAuth s'ils sont présents à la racine du projet.
 

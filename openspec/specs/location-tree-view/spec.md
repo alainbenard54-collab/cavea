@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Écran de navigation par emplacement : arbre hiérarchique, fil d'ariane, statistiques agrégées, et liste de bouteilles par nœud (table ou tuiles selon la largeur).
+
+## Requirements
 
 ### Requirement: Onglet Emplacements dans la navigation principale
 L'application SHALL afficher un onglet "Emplacements" (`Icons.shelves`, index 2) dans la navigation principale, accessible depuis le `NavigationRail` (Windows) et la `_MobileBar` (Android). L'onglet est toujours accessible, y compris en mode SyncReadOnly. `_writeOnlyIndices = {1, 3}` (Ajouter=1, Import CSV=3).

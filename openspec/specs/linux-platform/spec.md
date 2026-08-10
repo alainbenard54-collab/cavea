@@ -1,3 +1,8 @@
+## Purpose
+Support de la plateforme Linux desktop : Mode 1 et Mode 2 pleinement fonctionnels, avec stockage sécurisé des tokens via libsecret.
+
+## Requirements
+
 ### Requirement: Mode 1 fonctionnel sur Linux
 L'app SHALL démarrer en Mode 1 sur Linux : accès direct `dart:io` à `cave.db`, file picker dossier via `file_picker`, layout desktop (`_DesktopRail`), cycle de vie identique à Windows (`didRequestAppExit` intercepte la fermeture propre).
 

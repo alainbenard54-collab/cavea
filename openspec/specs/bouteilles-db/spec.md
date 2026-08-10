@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Couche de persistance : table drift `bouteilles`, DAO `BouteilleDao` et providers Riverpod exposant l'accès à la base locale.
+
+## Requirements
 
 ### Requirement: Table bouteilles drift
 L'application SHALL définir une table drift `bouteilles` avec tous les champs du modèle de données (voir ARCHITECTURE.md). La table SHALL utiliser `id` (TEXT UUID) comme clé primaire. Tous les champs nullable du modèle SHALL être déclarés nullable dans drift.

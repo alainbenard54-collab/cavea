@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Documentation utilisateur bilingue organisée en 13 scénarios pas-à-pas, servie via GitHub Pages.
+
+## Requirements
 
 ### Requirement: Index de la documentation utilisateur
 Le repo SHALL contenir trois fichiers d'index dans `docs/` :

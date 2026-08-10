@@ -1,3 +1,6 @@
+## Purpose
+Garantie de compatibilité de l'application avec la dernière version stable du SDK Flutter et de ses dépendances.
+
 ## Requirements
 
 ### Requirement: Version Flutter minimale garantie

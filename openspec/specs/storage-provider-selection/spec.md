@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Sélection et changement du fournisseur cloud (Google Drive ou Dropbox) pour le Mode 2, avec un comportement de synchronisation identique quel que soit le fournisseur.
+
+## Requirements
 
 ### Requirement: Sélection du fournisseur dans le wizard Mode 2
 Le wizard de premier lancement SHALL proposer une étape de sélection du fournisseur cloud (Google Drive / Dropbox) quand l'utilisateur choisit le mode "Partagé (Mode 2)". Cette étape SHALL s'afficher avant l'étape d'authentification. Le fournisseur sélectionné SHALL déterminer le flow d'authentification suivant.

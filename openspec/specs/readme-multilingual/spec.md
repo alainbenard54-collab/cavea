@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+README bilingue du dépôt (anglais à la racine, français en miroir), point d'entrée standard pour les visiteurs GitHub.
+
+## Requirements
 
 ### Requirement: README anglais à la racine
 Le repo SHALL contenir un `README.md` en anglais à sa racine, servant de point d'entrée standard GitHub.

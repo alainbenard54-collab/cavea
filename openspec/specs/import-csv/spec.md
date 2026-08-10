@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Import de bouteilles depuis un fichier CSV : sélection du fichier, parsing/validation ligne à ligne, gestion des doublons par UUID et rapport de résultat.
+
+## Requirements
 
 ### Requirement: Sélection du fichier CSV via file picker
 L'utilisateur SHALL pouvoir choisir son fichier CSV via un file picker natif (pas de chemin codé en dur). Le fichier doit être au format UTF-8, avec une ligne d'en-tête correspondant aux colonnes du modèle `bouteilles`. Le séparateur SHALL être sélectionnable dans l'interface via un `SegmentedButton` : `;` (défaut), `,`, `Tabulation`. Le séparateur choisi est transmis au parseur avant l'import.

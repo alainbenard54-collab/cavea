@@ -1,3 +1,8 @@
+## Purpose
+Écran de fiche bouteille en lecture seule (`BottleDetailScreen`), affichant toutes les informations d'une bouteille ainsi que sa maturité calculée.
+
+## Requirements
+
 ### Requirement: Écran fiche bouteille lecture seule
 L'application SHALL fournir un écran `BottleDetailScreen` accessible via la route `/bottle/:id` affichant toutes les informations d'une bouteille en mode lecture seule. Aucun champ ne SHALL être modifiable depuis cet écran.
 

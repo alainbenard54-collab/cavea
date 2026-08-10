@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Actions en lot (Déplacer, Consommer) applicables à une sélection multiple de bouteilles, exécutées de façon atomique.
+
+## Requirements
 
 ### Requirement: Barre d'actions contextuelle en mode sélection
 L'application SHALL afficher une barre d'actions contextuelle fixée en bas de l'écran quand le mode sélection est actif. Cette barre SHALL proposer les actions Déplacer, Consommer et Annuler. En mode lecture seule (SyncReadOnly), les actions Déplacer et Consommer SHALL être désactivées.

@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Synchronisation automatique au démarrage et à la fermeture en Mode 2 : acquisition/libération du verrou, upload/download de la base, et récupération après crash.
+
+## Requirements
 
 ### Requirement: Sync automatique au démarrage en Mode 2
 En Mode 2, l'application SHALL appeler `syncOnStartup()` au démarrage, après chargement de la config et avant d'afficher l'écran principal. L'UI SHALL rester bloquée (état `SyncStarting`) pendant toute la durée de l'opération.

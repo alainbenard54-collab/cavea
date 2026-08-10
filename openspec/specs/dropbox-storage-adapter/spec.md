@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Adaptateur de stockage Dropbox (`DropboxStorageAdapter`) : authentification OAuth PKCE, transfert de la base et gestion du verrou distant.
+
+## Requirements
 
 ### Requirement: Authentification Dropbox — Desktop (Windows)
 `DropboxStorageAdapter` SHALL authentifier l'utilisateur sur Windows via OAuth 2.0 PKCE. L'app SHALL ouvrir le browser avec l'URL d'autorisation Dropbox (App Key + code_challenge), écouter sur un `HttpServer` localhost pour capturer le code, l'échanger contre un access_token + refresh_token, et stocker le refresh_token dans `flutter_secure_storage` sous la clé `dropbox_refresh_token`. Les credentials desktop (App Key, App Secret) SHALL être lus depuis `dropbox_desktop_secrets.json` à côté de l'exécutable.

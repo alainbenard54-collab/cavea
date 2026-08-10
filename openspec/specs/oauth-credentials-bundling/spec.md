@@ -1,3 +1,8 @@
+## Purpose
+Inclusion des credentials OAuth dans chaque package de distribution, pour que le Mode 2 soit utilisable sans configuration manuelle post-installation.
+
+## Requirements
+
 ### Requirement: Credentials OAuth bundlés dans tout package de distribution
 Les credentials OAuth de l'application (`google_desktop_secrets.json`, `dropbox_desktop_secrets.json` sur desktop ; `assets/secrets/dropbox_desktop_secrets.json` sur Android) SHALL être inclus dans chaque package de distribution. Un utilisateur ayant installé Cavea SHALL pouvoir activer le Mode 2 sans aucune manipulation post-install.
 

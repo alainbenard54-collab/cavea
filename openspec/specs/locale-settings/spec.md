@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Sélection et persistance de la langue de l'application dans les Paramètres, avec adaptation des formats de date et de nombre à la locale active.
+
+## Requirements
 
 ### Requirement: Sélecteur de langue dans l'écran Paramètres
 L'écran Paramètres SHALL afficher une section "Langue" avec un `DropdownButton` ou `SegmentedButton` proposant trois options : **Automatique** (détection locale OS), **Français**, **English**. La valeur par défaut SHALL être "Automatique". La préférence SHALL être persistée dans `ConfigService` (clé SharedPreferences `locale_preference`, valeur : `null` = Automatique, `"fr"`, `"en"`). Le changement SHALL prendre effet immédiatement, sans redémarrage.
