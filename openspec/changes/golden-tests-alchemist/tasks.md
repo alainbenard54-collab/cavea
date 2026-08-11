@@ -27,8 +27,8 @@
 
 ## 5. Golden test — Formulaire bulk-add
 
-- [ ] 5.1 (PC) Écrire le golden test pour `BulkAddScreen` (`lib/features/bulk_add/bulk_add_screen.dart`) dans son état initial (avant saisie)
-- [ ] 5.2 (PC) Générer la référence initiale et la committer sous `test/golden/bulk_add/`
+- [x] 5.1 (PC) Écrire le golden test pour `BulkAddScreen` (`lib/features/bulk_add/bulk_add_screen.dart`) dans son état initial (avant saisie). `initState()` interroge le DAO réel (suggestions d'autocomplétion) — nécessite un override `appDatabaseProvider` avec `AppDatabase.memory()` (même pattern que la suite de tests DAO du projet), décision utilisateur explicite
+- [x] 5.2 (PC) Générer la référence initiale et la committer sous `test/golden/bulk_add/`
 
 ## 6. Vérification et documentation
 
