@@ -34,7 +34,13 @@ jobs:
         run: flutter pub get
 
       - name: Build Windows release
-        run: flutter build windows --release
+        # URLs publiques (GitHub Pages), pas de secret — nécessaires pour que
+        # le bouton "Importer les données exemple" apparaisse (voir
+        # SampleDataService.isConfigured dans CLAUDE.md).
+        run: >
+          flutter build windows --release
+          --dart-define=SAMPLE_DATA_URL_FR=https://cavea.abapps.fr/sample/cavea_sample_fr.csv
+          --dart-define=SAMPLE_DATA_URL_EN=https://cavea.abapps.fr/sample/cavea_sample_en.csv
 
       - name: Build installer (Inno Setup)
         run: iscc windows\packaging\cavea.iss

@@ -305,16 +305,20 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 
 ## Bump de version — règle obligatoire
 
-À chaque changement de version, **4 fichiers doivent être mis à jour simultanément** :
+À chaque changement de version, **6 fichiers doivent être mis à jour simultanément** :
 
 | Fichier | Champ |
 |---|---|
 | `pubspec.yaml` | `version: X.Y.Z+N` |
 | `windows/packaging/cavea.iss` | `#define MyAppVersion "X.Y.Z"` |
-| `installer/cavea.iss` | `#define MyAppVersion "X.Y.Z"` |
 | `scripts/build_linux.sh` | `VERSION="X.Y.Z"` |
+| `lib/l10n/app_fr.arb` | `"aboutVersion": "Version X.Y.Z"` |
+| `lib/l10n/app_en.arb` | `"aboutVersion": "Version X.Y.Z"` |
+| `lib/features/settings/settings_screen.dart` | `applicationVersion: 'X.Y.Z'` (passé à `showLicensePage`) |
 
-Le `versionCode` (`+N`) est incrémenté à chaque build uploadé sur le Play Store. Les 3 autres fichiers n'utilisent que `X.Y.Z`.
+Le `versionCode` (`+N`) est incrémenté à chaque build uploadé sur le Play Store. Les autres fichiers n'utilisent que `X.Y.Z`. Les fichiers `lib/l10n/app_localizations_fr.dart`/`_en.dart` sont générés automatiquement depuis les `.arb` (`generate: true` dans `pubspec.yaml`) — ne jamais les éditer à la main, ils se régénèrent au prochain `flutter pub get`/build.
+
+Le dossier `installer/` (script Inno Setup legacy, distinct de `windows/packaging/cavea.iss`) a été supprimé — c'était un doublon non maintenu, non utilisé par la CI ni par la procédure de build de référence.
 
 ---
 

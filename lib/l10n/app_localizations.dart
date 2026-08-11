@@ -875,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutVersion.
   ///
   /// In fr, this message translates to:
-  /// **'Version 1.2.0'**
+  /// **'Version 1.3.0'**
   String get aboutVersion;
 
   /// No description provided for @aboutCopyright.
