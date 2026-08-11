@@ -31,6 +31,9 @@ windows/packaging/output/
 .DS_Store
 Thumbs.db
 
+# Artefacts de diff générés par un golden test en échec (Alchemist)
+test/golden/**/failures/
+
 .local/
 
 # Fichiers exemple et préparation des données exportées et scripts python de préparation

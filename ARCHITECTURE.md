@@ -574,6 +574,39 @@ flutter build linux --release
 
 ---
 
+## Golden tests — non-régression visuelle (V1 ✅)
+
+Détecte les régressions visuelles majeures (couleur, disparition d'élément, désalignement) sur un sous-ensemble d'écrans, via le package [Alchemist](https://pub.dev/packages/alchemist). Complète la suite de tests unitaires/DAO, qui ne couvre que les couches non-UI.
+
+**Périmètre couvert** : Stock (table desktop + liste mobile), Emplacements (vue racine de l'arbre), Fiche bouteille (en stock + consommée) + BottomSheet d'actions (mode normal), Formulaire bulk-add (état initial).
+
+**Structure** :
+```
+test/golden/
+  flutter_test_config.dart   # AlchemistConfig partagé (voir ci-dessous)
+  golden_harness.dart        # wrapForGolden() : MaterialApp + ProviderScope + thème/locale réels
+  <écran>/
+    <écran>_golden_test.dart
+    <écran>_golden_fixtures.dart   # données statiques déterministes
+    <nom>.png                       # référence versionnée
+```
+
+**Référence unique Windows** : les golden tests ne sont générés et comparés que sous Windows natif (poste de développement), avec une tolérance de diff de 0% (exact). Le rendu des polices diffère entre OS (DirectWrite vs FreeType) — une seule référence par OS évite ce bruit. **Ce câblage n'est pas encore branché en CI** (`ci.yml` tourne sur `ubuntu-latest`) : un futur change devra soit régénérer les références sous Linux, soit assouplir la tolérance côté CI, soit restreindre le golden check à une exécution locale.
+
+**Commandes** :
+```powershell
+flutter test test/golden/                    # vérifier (comparaison stricte)
+flutter test test/golden/ --update-goldens   # régénérer volontairement après un changement visuel intentionnel
+```
+
+**Limitations structurelles rencontrées** (à connaître avant d'ajouter un écran) :
+- `IntrinsicColumnWidth` (comportement par défaut de `GoldenTestGroup`) ne sait pas calculer une largeur intrinsèque pour un widget scrollable (`ListView`/`RenderViewport`) — toujours fournir `columnWidthBuilder: (_) => const FixedColumnWidth(<largeur>)` dès qu'un écran se termine par une liste.
+- Alchemist ne borne pas la hauteur par défaut (`GoldenTestScenario.constraints` doit fixer `maxWidth` **et** `maxHeight`), sous peine de casser tout `Scaffold`/`MaterialApp` imbriqué.
+- Un widget privé (`_MaClasse`) ne peut pas être construit directement depuis un fichier de test externe (barrière de bibliothèque Dart) — pour un `BottomSheet` ou une vue interne accessible uniquement via une fonction publique (ex. `showBottleActionsSheet`), utiliser le paramètre `whilePerforming` de `goldenTest` pour simuler l'interaction qui l'ouvre.
+- Un écran dont `initState()` interroge le DAO réel (ex. `BulkAddScreen`) nécessite un override `appDatabaseProvider` avec `AppDatabase.memory()` (même pattern que la suite de tests DAO) plutôt qu'un override de provider de données statique.
+
+---
+
 ## Prérequis Android — Mode 2 (OAuth)
 
 ### Google Drive sur Android — google_sign_in v7 + client Web application

@@ -32,7 +32,7 @@
 
 ## 6. Vérification et documentation
 
-- [ ] 6.1 (PC) Exécuter `flutter test` (suite complète) et confirmer que les 4 groupes de golden tests passent, sans régression sur les tests existants
-- [ ] 6.2 (PC) Introduire volontairement une régression visuelle (ex. changer une couleur de maturité) sur un écran couvert, confirmer que le golden test correspondant échoue avec un diff exploitable, puis annuler le changement
-- [ ] 6.3 (PC) Documenter dans `ARCHITECTURE.md` la commande de régénération (`flutter test --update-goldens` sous Windows) et la structure `test/golden/<écran>/`
-- [ ] 6.4 (PC) `flutter analyze` → 0 issue
+- [x] 6.1 (PC) Exécuter `flutter test` (suite complète) et confirmer que les 4 groupes de golden tests passent, sans régression sur les tests existants (155/155)
+- [x] 6.2 (PC) Introduire volontairement une régression visuelle (ex. changer une couleur de maturité) sur un écran couvert, confirmer que le golden test correspondant échoue avec un diff exploitable, puis annuler le changement
+- [x] 6.3 (PC) Documenter dans `ARCHITECTURE.md` la commande de régénération (`flutter test --update-goldens` sous Windows) et la structure `test/golden/<écran>/`
+- [x] 6.4 (PC) `flutter analyze` → 0 issue
