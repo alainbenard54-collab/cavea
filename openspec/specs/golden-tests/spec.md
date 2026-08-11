@@ -2,7 +2,7 @@
 
 Détecter les régressions visuelles majeures (disparition d'élément, changement de couleur significatif, désalignement de layout) sur un sous-ensemble représentatif d'écrans, via des golden tests Flutter comparant le rendu réel à une référence versionnée dans le dépôt.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Golden tests sur le premier jeu d'écrans représentatifs
 Le système SHALL fournir des golden tests pour les écrans Stock (table + liste), Emplacements (arbre), Fiche bouteille + BottomSheet actions, et Formulaire bulk-add, chacun rendu avec des données Riverpod statiques déterministes et la locale `fr`.

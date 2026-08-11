@@ -298,7 +298,8 @@ Le verrou n'est **jamais libéré sur les événements de cycle de vie Android**
 - ✅ **Support Dropbox** : `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard et Settings, `storageMode = 'dropbox'`
 - ✅ **Support Linux** : Mode 1 (dart:io direct) + Mode 2 (OAuth loopback Drive + Dropbox, libsecret). Scaffold `linux/` généré via `flutter create --platforms=linux .` + `libsecret-1-dev` dans CMakeLists. Packaging : `./scripts/build_linux.sh [appimage|deb|all]`.
 - ✅ **Tests unitaires et d'intégration** : couverture complète des couches logiques non-UI. 8 fichiers de test, 121+ cas. Périmètre : `bouteille_dao` (méthodes batch, streams, distinct), `csv_parser`, `import_service`, `csv_export_service`, `bulk_add_controller`, `location_node`, `stock_controller` (inclut locale_formatting), `maturity_service`. Helpers : `test/helpers/fake_app_localizations.dart`. Icône app générée via `flutter_launcher_icons` + Pillow : `assets/icons/cave_simple_fullbg.png` (bordeaux sans coins blancs), multi-size ICO Windows (16/32/48/64/128/256 px).
-- **Mise à jour Flutter** vers la version stable courante
+- ✅ **Golden tests (non-régression visuelle)** : package [Alchemist](https://pub.dev/packages/alchemist), référence unique Windows (tolérance 0%), premier jeu sur Stock (table + liste), Emplacements (vue racine), Fiche bouteille + BottomSheet actions, Formulaire bulk-add. Structure `test/golden/<écran>/` (harnais partagé `golden_harness.dart`), régénération via `flutter test --update-goldens`. Câblage CI (`ci.yml`) volontairement hors périmètre — voir ARCHITECTURE.md.
+- ✅ **Mise à jour Flutter** vers la version stable courante — Flutter 3.44.9, Dart 3.12.2
 
 ---
 
