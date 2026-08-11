@@ -635,5 +635,5 @@ cp dropbox_desktop_secrets.json assets/secrets/dropbox_desktop_secrets.json
 | 2 | ~~Support Dropbox~~ | ✅ Résolu — `DropboxStorageAdapter` (PKCE OAuth, Windows + Android), sélecteur fournisseur dans wizard + Settings (dropbox) |
 | 3 | ~~Format d'export CSV (même format que l'import, ou autre ?)~~ | ✅ Résolu — Export CSV UTF-8+BOM, même structure que l'import, round-trip fidèle ; en-têtes localisés FR/EN (export-csv + fix import) |
 | 4 | Stratégie de conflit si `cave.db` modifié sur deux appareils sans lock (erreur humaine) | V1 — pour l'instant : dernier upload écrase tout |
-| 5 | ~~Mise à jour Flutter vers version stable courante~~ | ✅ Résolu — Flutter 3.44.0, Dart 3.12.0 (flutter-update 2026-05-24) |
+| 5 | ~~Mise à jour Flutter vers version stable courante~~ | ✅ Résolu — Flutter 3.44.9, Dart 3.12.2 (flutter-update-3-44-9 2026-08-11) |
 | 6 | ~~Support Linux~~ | ✅ Résolu — Mode 1 + Mode 2, packaging AppImage/.deb (`scripts/build_linux.sh`) |
