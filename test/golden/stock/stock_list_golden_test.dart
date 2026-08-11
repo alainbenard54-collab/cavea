@@ -6,9 +6,13 @@
 // recherche ni filtres) — décision actée dans golden-tests-alchemist,
 // cohérente avec BouteilleListTile qui n'a aucune dépendance Riverpod.
 
+@Tags(['golden'])
+library;
+
 import 'package:alchemist/alchemist.dart';
 import 'package:cavea/features/stock/bouteille_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../golden_harness.dart';
 import 'stock_golden_fixtures.dart';

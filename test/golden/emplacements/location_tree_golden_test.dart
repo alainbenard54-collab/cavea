@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Alain Benard
 
+@Tags(['golden'])
+library;
+
 import 'package:alchemist/alchemist.dart';
 import 'package:cavea/features/locations/location_provider.dart';
 import 'package:cavea/features/locations/location_tree_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../golden_harness.dart';
 import 'emplacements_golden_fixtures.dart';

@@ -7,6 +7,9 @@
 // déclenche un showModalBottomSheet. On simule donc un tap sur un bouton
 // déclencheur via `whilePerforming` pour ouvrir le sheet avant la capture.
 
+@Tags(['golden'])
+library;
+
 import 'package:alchemist/alchemist.dart';
 import 'package:cavea/features/bottle_actions/bottle_actions_sheet.dart';
 import 'package:flutter/foundation.dart';

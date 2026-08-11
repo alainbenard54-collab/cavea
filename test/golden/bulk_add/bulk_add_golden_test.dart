@@ -7,6 +7,9 @@
 // pas de vraies données ni de fichier persisté. Décision actée dans
 // golden-tests-alchemist.
 
+@Tags(['golden'])
+library;
+
 import 'package:alchemist/alchemist.dart';
 import 'package:cavea/data/database.dart';
 import 'package:cavea/data/providers.dart';
