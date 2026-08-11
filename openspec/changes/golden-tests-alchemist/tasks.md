@@ -20,10 +20,10 @@
 
 ## 4. Golden test — Fiche bouteille + BottomSheet actions
 
-- [ ] 4.1 (PC) Construire une bouteille de test fixe en stock, et une variante consommée (pour couvrir la section Consommation de la fiche)
-- [ ] 4.2 (PC) Écrire le golden test pour `BottleDetailScreen` (`lib/features/bottle_detail/bottle_detail_screen.dart`) — bouteille en stock, puis consommée
-- [ ] 4.3 (PC) Écrire le golden test pour `BottleActionsSheet` (`lib/features/bottle_actions/bottle_actions_sheet.dart`, mode normal)
-- [ ] 4.4 (PC) Générer les références initiales et les committer sous `test/golden/bottle_detail/`
+- [x] 4.1 (PC) Construire une bouteille de test fixe en stock, et une variante consommée (pour couvrir la section Consommation de la fiche)
+- [x] 4.2 (PC) Écrire le golden test pour `BottleDetailScreen` (`lib/features/bottle_detail/bottle_detail_screen.dart`) — bouteille en stock, puis consommée
+- [x] 4.3 (PC) Écrire le golden test pour `BottleActionsSheet` (`lib/features/bottle_actions/bottle_actions_sheet.dart`, mode normal). Le contenu réel (`_BottleActionsSheet`) est une classe privée : test via `whilePerforming` (tap sur un bouton déclencheur qui appelle `showBottleActionsSheet`) plutôt qu'une construction directe
+- [x] 4.4 (PC) Générer les références initiales et les committer sous `test/golden/bottle_detail/`
 
 ## 5. Golden test — Formulaire bulk-add
 
