@@ -14,9 +14,9 @@
 
 ## 3. Golden test — Emplacements
 
-- [ ] 3.1 (PC) Construire un jeu de données d'arbre d'emplacements représentatif (mix nœuds + bouteilles directes, ≥2 niveaux de hiérarchie)
-- [ ] 3.2 (PC) Écrire le golden test pour `LocationTreeScreen` (`lib/features/locations/location_tree_screen.dart`, vue table ≥640px et vue liste <640px)
-- [ ] 3.3 (PC) Générer les références initiales et les committer sous `test/golden/emplacements/`
+- [x] 3.1 (PC) Construire un jeu de données d'arbre d'emplacements représentatif (≥2 niveaux de hiérarchie, mix nœud à sous-emplacements + nœud feuille)
+- [x] 3.2 (PC) Écrire le golden test pour `LocationTreeScreen` (`lib/features/locations/location_tree_screen.dart`, vue racine — override `locationLeavesProvider`). Recadrage en cours d'implémentation : la bascule table/liste ≥640px vit dans `_BottleListBody`, une classe privée réutilisant `StockTable`/`BouteilleListTile` déjà couverts par les golden Stock — redondant, donc hors périmètre (décision utilisateur explicite)
+- [x] 3.3 (PC) Générer les références initiales et les committer sous `test/golden/emplacements/`
 
 ## 4. Golden test — Fiche bouteille + BottomSheet actions
 
