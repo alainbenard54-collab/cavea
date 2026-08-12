@@ -437,7 +437,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutButton => 'About';
 
   @override
-  String get aboutVersion => 'Version 1.3.0';
+  String get aboutVersion => 'Version 1.3.1';
 
   @override
   String get aboutCopyright => '© 2026 Alain Benard\nApache 2.0 Licence';
