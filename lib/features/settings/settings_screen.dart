@@ -116,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
                         showLicensePage(
                           context: context,
                           applicationName: 'Cavea',
-                          applicationVersion: '1.3.0',
+                          applicationVersion: '1.3.1',
                           applicationLegalese: '© 2026 Alain Benard',
                         );
                       },

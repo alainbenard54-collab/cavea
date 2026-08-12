@@ -9,7 +9,7 @@
 ;   windows\packaging\output\Cavea-{version}-windows-setup.exe
 
 #define MyAppName      "Cavea"
-#define MyAppVersion   "1.3.0"
+#define MyAppVersion   "1.3.1"
 #define MyAppPublisher "Alain Benard"
 #define MyAppURL       "https://github.com/alainbenard54-collab/cavea"
 #define MyAppExeName   "cavea.exe"
