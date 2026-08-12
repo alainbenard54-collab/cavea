@@ -21,12 +21,12 @@
 
 ## 5. Vérification build multi-plateforme
 
-- [ ] 5.1 PC : `flutter build windows --release --dart-define-from-file=dart-defines.json` → succès
-- [ ] 5.2 PC : lancer l'app buildée, vérifier le démarrage et l'accès au stock (fumée rapide, pas de test exhaustif)
-- [ ] 5.3 Android : `flutter build apk --split-per-abi --release --dart-define-from-file=dart-defines.json` → succès
-- [ ] 5.4 Linux (VM Ubuntu) : `git pull` + `flutter build linux --release` → succès
+- [x] 5.1 PC : build Windows sur Flutter 3.44.9 → succès (via `release-windows.yml`, tags v1.3.0/v1.3.1)
+- [x] 5.2 PC : app installée et testée manuellement (démarrage, stock, mode partagé) sur v1.3.0 et v1.3.1
+- [x] 5.3 Android : `flutter build apk --split-per-abi` sur Flutter 3.44.9 → succès (build v1.3.1, 3 APK générés)
+- [x] 5.4 Linux (VM Ubuntu) : Flutter VM aligné en 3.44.9 (`git checkout 3.44.9`), `flutter build linux --release` + `build_linux.sh deb` → succès (v1.3.0 et v1.3.1, testé fonctionnel)
 
 ## 6. Vérification CI
 
-- [ ] 6.1 Committer et pousser sur `master`, vérifier que `ci.yml` passe (flutter analyze + test sur `ubuntu-latest`)
-- [ ] 6.2 Surveiller si un tag `v*` déclenche `release-windows.yml` avant la prochaine vraie release — sinon, noter que ce workflow reste non vérifié en conditions réelles jusqu'à la publication v1.3.0 (cf. gap `--dart-define-from-file` déjà identifié séparément)
+- [x] 6.1 `ci.yml` vert sur `master` avec Flutter 3.44.9 (confirmé à plusieurs reprises pendant le cycle v1.3.0/v1.3.1)
+- [x] 6.2 `release-windows.yml` déclenché par tag `v*` et vérifié en conditions réelles à 4 reprises (v1.3.0-rc1, v1.3.0, v1.3.1-rc1, v1.3.1) — le gap `--dart-define-from-file` mentionné avait déjà été corrigé séparément avant ce cycle
