@@ -42,6 +42,24 @@ jobs:
           --dart-define=SAMPLE_DATA_URL_FR=https://cavea.abapps.fr/sample/cavea_sample_fr.csv
           --dart-define=SAMPLE_DATA_URL_EN=https://cavea.abapps.fr/sample/cavea_sample_en.csv
 
+      - name: Write OAuth credentials
+        # Fichiers gitignorés, absents du checkout CI — sans cette étape, cavea.iss
+        # les copie silencieusement en "skipifsourcedoesntexist" et l'installateur
+        # publié n'a jamais le mode partagé (Drive/Dropbox) fonctionnel.
+        # N'écrit rien si le secret n'est pas configuré (garde skipifsourcedoesntexist
+        # utile en filet de sécurité plutôt que de bundler un fichier vide/invalide).
+        shell: pwsh
+        env:
+          GOOGLE_DESKTOP_SECRETS_JSON: ${{ secrets.GOOGLE_DESKTOP_SECRETS_JSON }}
+          DROPBOX_DESKTOP_SECRETS_JSON: ${{ secrets.DROPBOX_DESKTOP_SECRETS_JSON }}
+        run: |
+          if ($env:GOOGLE_DESKTOP_SECRETS_JSON) {
+            Set-Content -Path google_desktop_secrets.json -Value $env:GOOGLE_DESKTOP_SECRETS_JSON -NoNewline
+          }
+          if ($env:DROPBOX_DESKTOP_SECRETS_JSON) {
+            Set-Content -Path dropbox_desktop_secrets.json -Value $env:DROPBOX_DESKTOP_SECRETS_JSON -NoNewline
+          }
+
       - name: Build installer (Inno Setup)
         run: iscc windows\packaging\cavea.iss
 
